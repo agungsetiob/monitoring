@@ -74,9 +74,7 @@ const getTimeDiff = (from) => {
     <div class="text-center mb-6">
       <div class="bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl p-4 inline-block">
         <h1 class="text-2xl md:text-4xl font-extrabold mb-4 text-white">
-          Pasien IGD RSUD dr. H. Andi Abdurrahman Noor <div v-for="patient in patients">
-  {{ patient.STATUS_TBAK }} (type: {{ typeof patient.STATUS_TBAK }})
-</div>
+          Pasien IGD RSUD dr. H. Andi Abdurrahman Noor
         </h1>
       </div>
     </div>
