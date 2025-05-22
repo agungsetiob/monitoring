@@ -121,6 +121,8 @@ class PatientMonitoringController extends Controller
         return array_map(function ($item) {
             $item->NAMA = $this->formatNama($item->NAMA);
             $item->NORM = $this->formatNorm($item->NORM);
+            $item->STATUS_TBAK = (int) $item->STATUS_TBAK;
+            $item->STATUS_SBAR = (int) $item->STATUS_SBAR;
             return $item;
         }, $results);
     }
