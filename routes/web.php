@@ -7,7 +7,7 @@ Route::get('/', function () {
     return inertia('Landing');
 })->name('landing-page');
 
-Route::get('/pasien-igd', [PatientMonitoringController::class, 'index'])
+Route::get('/e418d78f33c3716d01a492eec5ba33dc', [PatientMonitoringController::class, 'index'])
 ->name('pasien-igd.index');
 Route::get('/api/patient-igd', [PatientMonitoringController::class, 'getPatients'])
 ->name('api.patient-igd');

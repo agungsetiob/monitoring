@@ -1,14 +1,26 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
-const isLoading = ref(false);
-document.addEventListener('inertia:start', () => {
-  isLoading.value = true;
-});
+  import { Head, Link } from '@inertiajs/vue3'
+  import { ref } from 'vue'
+  import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+
+  const isLoading = ref(false)
+
+  document.addEventListener('inertia:start', () => {
+    isLoading.value = true
+  })
 </script>
 
 <template>
-  <Head title="RSUD dr. H. Abdurrahman Noor" />
+  <Head>
+    <title>RSUD dr. H. Abdurrahman Noor</title>
+    <link
+      rel="preload"
+      as="fetch"
+      href="https://lottie.host/900941dc-0e87-4674-88ee-a1c075d5b75e/pLV90vilua.lottie"
+      type="application/octet-stream"
+      crossorigin="anonymous"
+    />
+  </Head>
 
   <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-green-100 p-4">
     <div class="text-center mb-12">
@@ -25,7 +37,7 @@ document.addEventListener('inertia:start', () => {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
-      <Link :href="route('pasien-igd.index')"
+      <Link :href="route('landing-page')" @click.prevent
         class="group flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-2 border-b-4 border-blue-500 hover:border-blue-700 cursor-pointer">
         <div class="text-6xl text-blue-600 group-hover:text-blue-800 transition-colors duration-300 mb-4">
           <font-awesome-icon icon="bed-pulse" class="h-24 w-24" />
@@ -52,10 +64,7 @@ document.addEventListener('inertia:start', () => {
       </Link>
     </div>
   </div>
-  <div v-if="isLoading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70">
-    <svg class="animate-spin h-20 w-20 text-green-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
+  <div v-if="isLoading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+    <DotLottieVue autoplay loop src="https://lottie.host/900941dc-0e87-4674-88ee-a1c075d5b75e/pLV90vilua.lottie" />
   </div>
 </template>
