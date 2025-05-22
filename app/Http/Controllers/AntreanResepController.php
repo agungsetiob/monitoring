@@ -234,6 +234,8 @@ class AntreanResepController extends Controller
         return array_map(function ($item) {
             $item->NAMA = $this->formatNama($item->NAMA);
             $item->NORM = $this->formatNorm($item->NORM);
+            $item->CITO = (int) $item->CITO;
+             $item->JENIS_KELAMIN = (int) $item->JENIS_KELAMIN;
             return $item;
         }, $results);
     }
