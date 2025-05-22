@@ -123,6 +123,7 @@ class PatientMonitoringController extends Controller
             $item->NORM = $this->formatNorm($item->NORM);
             $item->STATUS_TBAK = (int) $item->STATUS_TBAK;
             $item->STATUS_SBAR = (int) $item->STATUS_SBAR;
+            $item->JENIS_KELAMIN = (int) $item->JENIS_KELAMIN;
             return $item;
         }, $results);
     }
