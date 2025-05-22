@@ -1,0 +1,46 @@
+{
+  "resources/js/Pages/AntreanFarmasi/Index.vue": {
+    "file": "assets/Index-CJeQz6i2.js",
+    "name": "Index",
+    "src": "resources/js/Pages/AntreanFarmasi/Index.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "css": [
+      "assets/Index-UmbJDcDf.css"
+    ]
+  },
+  "resources/js/Pages/Landing.vue": {
+    "file": "assets/Landing-C2DtijSq.js",
+    "name": "Landing",
+    "src": "resources/js/Pages/Landing.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/Pages/PasienIgd/Index.vue": {
+    "file": "assets/Index-BxNT6aCS.js",
+    "name": "Index",
+    "src": "resources/js/Pages/PasienIgd/Index.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-mhy9E05i.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/Pages/AntreanFarmasi/Index.vue",
+      "resources/js/Pages/Landing.vue",
+      "resources/js/Pages/PasienIgd/Index.vue"
+    ],
+    "css": [
+      "assets/app-Bvf2GkP7.css"
+    ]
+  }
+}

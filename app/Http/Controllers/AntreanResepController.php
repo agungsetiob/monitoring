@@ -235,7 +235,8 @@ class AntreanResepController extends Controller
             $item->NAMA = $this->formatNama($item->NAMA);
             $item->NORM = $this->formatNorm($item->NORM);
             $item->CITO = (int) $item->CITO;
-             $item->JENIS_KELAMIN = (int) $item->JENIS_KELAMIN;
+            $item->RACIKAN = (int) $item->RACIKAN;
+            $item->JENIS_KELAMIN = (int) $item->JENIS_KELAMIN;
             return $item;
         }, $results);
     }
