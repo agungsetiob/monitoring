@@ -46,7 +46,7 @@
           Monitoring Pasien IGD
         </h2>
         <p class="text-lg text-gray-600 text-center">
-          Lihat daftar pasien yang sedang ditangani di Unit Gawat Darurat.
+          Daftar pasien yang sedang ditangani di IGD. <span class="font-semibold text-red-500">(Khusus petugas IGD)</span>
         </p>
       </Link>
 
