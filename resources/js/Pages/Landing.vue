@@ -15,7 +15,7 @@ import { Head, Link } from '@inertiajs/vue3';
         RSUD dr. H. Andi Abdurrahman Noor
       </p>
       <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-        Sistem Informasi Monitoring Pasien & Antrean Farmasi IGD
+        Monitoring Pasien IGD & Antrean Farmasi
       </p>
     </div>
 
