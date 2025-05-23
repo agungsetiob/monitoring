@@ -45,10 +45,10 @@ const getTbakPillColor = (masuk, tanggal_tbak) => {
   const tbakTime = dayjs(tanggal_tbak);
   const diffHours = tbakTime.diff(masukTime, 'hour', true);
 
-  if (diffHours < 1) return 'bg-blue-200 text-blue-700';
-  if (diffHours >= 1 && diffHours < 3) return 'bg-green-200 text-green-700';
-  if (diffHours >= 3 && diffHours < 6) return 'bg-yellow-200 text-yellow-700';
-  if (diffHours >= 6 && diffHours < 7) return 'bg-red-200 text-red-700';
+  if (diffHours < 1) return 'bg-blue-200 text-blue-800';
+  if (diffHours >= 1 && diffHours < 3) return 'bg-green-200 text-green-800';
+  if (diffHours >= 3 && diffHours < 6) return 'bg-yellow-200 text-yellow-800';
+  if (diffHours >= 6 && diffHours < 7) return 'bg-red-200 text-red-800';
   return 'bg-gray-400 text-gray-800'; // 7+ hours
 };
 
@@ -68,11 +68,11 @@ const getTimeDiff = (from) => {
 
 const getTriagePillColor = (status) => {
   switch (status) {
-    case 'P1': return 'bg-red-200 text-red-700';
-    case 'P2': return 'bg-red-200 text-red-700';
-    case 'P3': return 'bg-yellow-200 text-yellow-700';
-    case 'P4': return 'bg-green-200 text-green-700';
-    case 'P5': return 'bg-green-200 text-green-700';
+    case 'P1': return 'bg-red-200 text-red-800';
+    case 'P2': return 'bg-red-200 text-red-800';
+    case 'P3': return 'bg-yellow-200 text-yellow-800';
+    case 'P4': return 'bg-green-200 text-green-800';
+    case 'P5': return 'bg-green-200 text-green-800';
     case 'DOA': return 'bg-gray-400 text-gray-800';
     default: return 'bg-gray-400 text-gray-800';
   }
@@ -84,19 +84,19 @@ const getTriagePillColor = (status) => {
   <Head title="Pasien IGD" />
 
   <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 p-4 md:p-4">
-    <div class="text-center mb-6">
+    <div class="text-center mb-4">
       <div class="bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl p-4 inline-block">
-        <h1 class="text-2xl md:text-4xl font-extrabold mb-4 text-white">
+        <h1 class="text-2xl md:text-4xl font-extrabold mb-2 text-white">
           Pasien IGD RSUD dr. H. Andi Abdurrahman Noor
         </h1>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-4 mb-4">
       <div v-for="patient in patients" :key="patient.KUNJUNGAN_ID" :class="getPatientCardClasses(patient.MASUK)"
-        class="relative p-4 rounded-lg border-l-8 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col justify-between">
+        class="relative p-3 rounded-lg border-l-8 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col justify-between">
         <!-- Patient Info -->
-        <div class="flex justify-between items-start mb-4">
+        <div class="flex justify-between items-start mb-2">
           <h2 class="text-xl font-bold leading-tight pr-4 flex items-center">
             {{ patient.NAMA }} <font-awesome-icon :icon="patient.JENIS_KELAMIN === 1 ? 'mars' : 'venus'"
               :class="patient.JENIS_KELAMIN === 1 ? 'text-blue-300' : 'text-pink-400'" class="ml-1" />
@@ -107,8 +107,8 @@ const getTriagePillColor = (status) => {
         </div>
 
         <!-- Status Indicators -->
-        <div class="flex flex-col gap-2 mb-3">
-          <div class="flex justify-between items-center">
+        <div class="flex flex-col gap-2 mb-2">
+          <div class="flex justify-between items-center space-x-1">
             <span class="text-lg mr-1 font-semibold">🏥 {{ patient.RUANGAN }}</span>
             <span v-if="patient.STATUS_TBAK === 1" :class="getTbakPillColor(patient.MASUK, patient.TANGGAL_TBAK)"
               class="text-sm font-semibold px-2 py-1 rounded-full">
