@@ -26,9 +26,7 @@
         "@fortawesome/free-solid-svg-icons": "^6.7.2",
         "@fortawesome/vue-fontawesome": "^3.0.8",
         "@inertiajs/inertia": "^0.11.1",
-        "@lottiefiles/dotlottie-vue": "^0.6.3",
         "chart.js": "^4.4.9",
-        "dayjs": "^1.11.13",
-        "lottie-web": "^5.13.0"
+        "dayjs": "^1.11.13"
     }
 }

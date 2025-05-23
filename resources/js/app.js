@@ -1,20 +1,15 @@
 import '../css/app.css';
 import './bootstrap';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
-
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
-import { far } from '@fortawesome/free-regular-svg-icons';
-import { fab } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, faFaceSadCry, faPills } from '@fortawesome/free-solid-svg-icons';
 
-library.add(fas, far, fab);
+library.add(faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, faFaceSadCry, faPills);
 
 
 dayjs.extend(relativeTime);

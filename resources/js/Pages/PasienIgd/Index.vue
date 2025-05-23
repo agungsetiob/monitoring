@@ -70,7 +70,7 @@ const getTimeDiff = (from) => {
 <template>
   <Head title="Pasien IGD" />
 
-  <div class="min-h-screen bg-pattern p-4 md:p-4">
+  <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 p-4 md:p-4">
     <div class="text-center mb-6">
       <div class="bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl p-4 inline-block">
         <h1 class="text-2xl md:text-4xl font-extrabold mb-4 text-white">
@@ -79,17 +79,17 @@ const getTimeDiff = (from) => {
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6 px-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6">
       <div
         v-for="patient in patients"
         :key="patient.KUNJUNGAN_ID"
         :class="getPatientCardClasses(patient.MASUK)"
-        class="relative p-6 rounded-lg border-l-8 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col justify-between"
+        class="relative p-4 rounded-lg border-l-8 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col justify-between"
       >
         <!-- Patient Info -->
         <div class="flex justify-between items-start mb-4">
           <h2 class="text-xl font-bold leading-tight pr-4 flex items-center">
-            {{ patient.NAMA }} <font-awesome-icon :icon="patient.JENIS_KELAMIN === 1 ? 'mars' : 'venus'" :class="patient.JENIS_KELAMIN === 1 ? 'text-blue-500' : 'text-pink-400'" class="ml-1"/>
+            {{ patient.NAMA }} <font-awesome-icon :icon="patient.JENIS_KELAMIN === 1 ? 'mars' : 'venus'" :class="patient.JENIS_KELAMIN === 1 ? 'text-blue-300' : 'text-pink-400'" class="ml-1"/>
           </h2>
           <span class="text-lg font-semibold">
             {{ patient.NORM }}

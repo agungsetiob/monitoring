@@ -1,24 +1,28 @@
 <script setup>
-  import { Head, Link } from '@inertiajs/vue3'
-  import { ref } from 'vue'
-  import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+import { Head, Link } from '@inertiajs/vue3'
+import { ref } from 'vue'
 
-  const isLoading = ref(false)
+const isLoading = ref(false)
 
-  document.addEventListener('inertia:start', () => {
-    isLoading.value = true
-  })
+document.addEventListener('inertia:start', () => {
+  isLoading.value = true
+})
+
+document.addEventListener('inertia:finish', () => {
+  isLoading.value = false
+})
 </script>
 
 <template>
   <Head>
     <title>RSUD dr. H. Abdurrahman Noor</title>
-    <link
-      rel="preload"
-      as="fetch"
-      href="https://lottie.host/900941dc-0e87-4674-88ee-a1c075d5b75e/pLV90vilua.lottie"
-      type="application/octet-stream"
-      crossorigin="anonymous"
+    <video
+      src="/img/loading.webm"
+      autoplay
+      loop
+      muted
+      playsinline
+      preload="auto"
     />
   </Head>
 
@@ -64,7 +68,10 @@
       </Link>
     </div>
   </div>
-  <div v-if="isLoading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
-    <DotLottieVue autoplay loop src="https://lottie.host/900941dc-0e87-4674-88ee-a1c075d5b75e/pLV90vilua.lottie" />
+
+  <div
+    v-if="isLoading"
+    class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+    <video src="/img/loading.webm" autoplay loop muted playsinline/>
   </div>
 </template>
