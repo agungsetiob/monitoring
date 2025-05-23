@@ -106,18 +106,15 @@ const getTimeDiff = (from) => {
             </span>
           </div>
           
-          <!-- Siap Ranap DPJP Indicator -->
-          <div v-if="patient.DPJP_RANAP" class="flex items-center bg-purple-100 text-purple-800 rounded-full p-1">
-            <span class="text-sm font-semibold">Siap Ranap DPJP: {{ patient.DPJP_RANAP }}</span>
+          <div v-if="patient.DPJP_RANAP" class="flex items-center justify-center bg-purple-100 text-purple-800 rounded-full p-1">
+            <span class="text-sm font-semibold text-center">Siap Ranap DPJP: {{ patient.DPJP_RANAP }}</span>
           </div>
-          
-          <!-- No. Referensi if available -->
-          <div v-if="patient.NOMOR_REFERENSI" class="flex items-center bg-blue-100 text-blue-800 rounded-full p-1">
+
+          <div v-if="patient.NOMOR_REFERENSI" class="flex items-center justify-center bg-blue-100 text-blue-800 rounded-full p-1">
             <span class="text-sm font-semibold">No. Ref: {{ patient.NOMOR_REFERENSI }}</span>
           </div>
         </div>
 
-        <!-- Timestamps -->
         <div class="flex justify-between items-end text-sm">
           <div class="flex items-center">
             <span class="mr-1">⏰</span>
