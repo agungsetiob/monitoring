@@ -38,7 +38,7 @@ defineProps({
         </span>
         <span 
           v-if="item.CITO === 1" 
-          class="px-2 py-1 text-xs rounded-full bg-red-300 text-black-800"
+          class="px-2 py-1 text-xs rounded-full bg-red-600 text-white font-semibold"
         >
           Cito
         </span>
