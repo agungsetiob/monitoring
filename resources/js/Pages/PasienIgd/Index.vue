@@ -21,7 +21,7 @@ const fetchPatients = async () => {
 
 onMounted(() => {
   fetchPatients();
-  setInterval(fetchPatients, 29000);
+  setInterval(fetchPatients, 19000);
 });
 
 const getPatientCardClasses = (masuk) => {
