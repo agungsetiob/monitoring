@@ -65,9 +65,22 @@ const getTimeDiff = (from) => {
 
   return result + ' lalu';
 };
+
+const getTriagePillColor = (status) => {
+  switch (status) {
+    case 'P1': return 'bg-red-200 text-red-700';
+    case 'P2': return 'bg-red-200 text-red-700';
+    case 'P3': return 'bg-yellow-200 text-yellow-700';
+    case 'P4': return 'bg-green-200 text-green-700';
+    case 'P5': return 'bg-green-200 text-green-700';
+    case 'DOA': return 'bg-gray-400 text-gray-800';
+    default: return 'bg-gray-400 text-gray-800';
+  }
+};
 </script>
 
 <template>
+
   <Head title="Pasien IGD" />
 
   <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 p-4 md:p-4">
@@ -80,16 +93,13 @@ const getTimeDiff = (from) => {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6">
-      <div
-        v-for="patient in patients"
-        :key="patient.KUNJUNGAN_ID"
-        :class="getPatientCardClasses(patient.MASUK)"
-        class="relative p-4 rounded-lg border-l-8 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col justify-between"
-      >
+      <div v-for="patient in patients" :key="patient.KUNJUNGAN_ID" :class="getPatientCardClasses(patient.MASUK)"
+        class="relative p-4 rounded-lg border-l-8 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col justify-between">
         <!-- Patient Info -->
         <div class="flex justify-between items-start mb-4">
           <h2 class="text-xl font-bold leading-tight pr-4 flex items-center">
-            {{ patient.NAMA }} <font-awesome-icon :icon="patient.JENIS_KELAMIN === 1 ? 'mars' : 'venus'" :class="patient.JENIS_KELAMIN === 1 ? 'text-blue-300' : 'text-pink-400'" class="ml-1"/>
+            {{ patient.NAMA }} <font-awesome-icon :icon="patient.JENIS_KELAMIN === 1 ? 'mars' : 'venus'"
+              :class="patient.JENIS_KELAMIN === 1 ? 'text-blue-300' : 'text-pink-400'" class="ml-1" />
           </h2>
           <span class="text-lg font-semibold">
             {{ patient.NORM }}
@@ -101,16 +111,25 @@ const getTimeDiff = (from) => {
           <div class="flex justify-between items-center">
             <span class="text-lg mr-1 font-semibold">🏥 {{ patient.RUANGAN }}</span>
             <span v-if="patient.STATUS_TBAK === 1" :class="getTbakPillColor(patient.MASUK, patient.TANGGAL_TBAK)"
-                  class="text-sm font-semibold px-2 py-1 rounded-full">
+              class="text-sm font-semibold px-2 py-1 rounded-full">
               Sudah Konsul
             </span>
+            <span v-if="patient.TRIAGE_STATUS !== 'unclassified'"
+              :class="['text-sm font-bold px-3 py-1 rounded-full', getTriagePillColor(patient.TRIAGE_STATUS)]">
+              Triage: {{ patient.TRIAGE_STATUS }}
+            </span>
+            <span v-else class="text-sm font-semibold px-3 py-1 rounded-full bg-gray-200 text-gray-700">
+              Belum Triage
+            </span>
           </div>
-          
-          <div v-if="patient.DPJP_RANAP" class="flex items-center justify-center bg-purple-100 text-purple-800 rounded-full p-1">
+
+          <div v-if="patient.DPJP_RANAP"
+            class="flex items-center justify-center bg-purple-100 text-purple-800 rounded-full p-1">
             <span class="text-sm font-semibold text-center">Siap Ranap DPJP: {{ patient.DPJP_RANAP }}</span>
           </div>
 
-          <div v-if="patient.NOMOR_REFERENSI" class="flex items-center justify-center bg-blue-100 text-blue-800 rounded-full p-1">
+          <div v-if="patient.NOMOR_REFERENSI"
+            class="flex items-center justify-center bg-blue-100 text-blue-800 rounded-full p-1">
             <span class="text-sm font-semibold">No. Ref: {{ patient.NOMOR_REFERENSI }}</span>
           </div>
         </div>
