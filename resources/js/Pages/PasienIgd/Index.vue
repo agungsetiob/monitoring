@@ -83,7 +83,7 @@ const getTriagePillColor = (status) => {
 
   <Head title="Pasien IGD" />
 
-  <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 p-4 md:p-4">
+  <div class="min-h-screen bg-pattern p-4 md:p-4">
     <div class="text-center mb-4">
       <div class="bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl p-4 inline-block">
         <h1 class="text-2xl md:text-4xl font-extrabold mb-2 text-white">
