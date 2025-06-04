@@ -15,7 +15,7 @@ class AntreanResepController extends Controller
     ];
 
     /**
-     * Display the initial Inertia view.
+     * Display the initial view.
      */
     public function index(Request $request)
     {
@@ -30,7 +30,7 @@ class AntreanResepController extends Controller
     }
 
     /**
-     * JSON API: Return the antrian data.
+     * JSON API: Return the antrean data.
      */
     public function getAntrean(Request $request)
     {
@@ -42,7 +42,7 @@ class AntreanResepController extends Controller
     }
 
     /**
-     * Helper method to get the antrian data.
+     * Helper method to get the antrean data.
      */
     private function getAntreanData($idDepo)
     {

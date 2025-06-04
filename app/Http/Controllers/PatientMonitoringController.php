@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 
 class PatientMonitoringController extends Controller
 {
-    private $igd = 101010101; // IGD unit ID
+    private $igd = 101010101;
 
     /**
-     * Display the initial Inertia view.
+     * Display the initial view.
      */
     public function index()
     {
