@@ -169,7 +169,7 @@ const formatLos = (minutes) => {
           </table>
         </div>
         <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200">
-          <h2 class="text-xl font-bold mb-4 text-gray-700">🏥 Rata-rata LOS (Menit)</h2>
+          <h2 class="text-xl font-bold mb-4 text-gray-700">🏥 Rata-rata LOS</h2>
           <table class="w-full table-auto border-collapse border border-gray-300 rounded-lg overflow-hidden">
             <thead class="bg-gray-100">
               <tr>

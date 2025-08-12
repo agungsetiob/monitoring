@@ -1,5 +1,5 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ref, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -82,13 +82,25 @@ const getTriagePillColor = (status) => {
 <template>
 
   <Head title="Pasien IGD" />
-
   <div class="min-h-screen bg-pattern p-4 md:p-4">
     <div class="text-center mb-4">
-      <div class="bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl p-4 inline-block">
-        <h1 class="text-2xl md:text-4xl font-extrabold mb-2 text-white">
+      <div
+        class="bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl px-6 py-4 w-full flex flex-col md:flex-row md:items-center md:justify-between text-white">
+        <!-- Judul -->
+        <h1 class="text-2xl md:text-4xl font-extrabold mb-2 md:mb-0">
           Pasien IGD RSUD dr. H. Andi Abdurrahman Noor
         </h1>
+
+        <!-- Tombol Kembali -->
+        <button @click="router.visit('/')"
+          class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"></path>
+            <path d="M12 19l-7-7 7-7"></path>
+          </svg>
+          Kembali
+        </button>
       </div>
     </div>
 
