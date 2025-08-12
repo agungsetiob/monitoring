@@ -65,7 +65,6 @@
                                 class="mr-2 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" />
                             Ingat saya
                         </label>
-                        <a href="#" class="text-sm text-indigo-600 hover:text-indigo-500">Lupa password?</a>
                     </div>
 
                     <button type="submit" :disabled="form.processing"
