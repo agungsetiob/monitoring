@@ -6,26 +6,22 @@
 
     <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 flex items-center justify-center p-4 sm:p-8">
         <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-            <!-- Left Section (New Illustration) -->
             <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-indigo-300 to-blue-100 overflow-hidden">
                 <div class="w-full h-full flex items-center justify-center relative">
                     <img src="/img/bupati.webp" alt="Foto Bupati" class="w-full h-full object-cover object-center" />
                 </div>
             </div>
-            <!-- Right Section (Login Form) -->
             <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 space-y-6">
                 <div class="flex justify-center gap-4 items-center mb-6">
                     <img src="/img/sigap-obatin.png" alt="Logo Sigap Obatin" class="h-12 sm:h-14 object-contain" />
                     <img src="/img/logo.png" alt="Ilustrasi Beraksi" class="h-12 sm:h-14 object-contain" />
                 </div>
 
-                <!-- Heading Login -->
                 <div class="text-center">
                     <h1 class="text-xl font-semibold">Sistem Informasi Gawat Darurat Pasien dan Obat Terintegrasi
                         Nasional</h1>
                 </div>
 
-                <!-- Form Login -->
                 <form @submit.prevent="submit" class="space-y-5">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2" for="email">Email</label>
