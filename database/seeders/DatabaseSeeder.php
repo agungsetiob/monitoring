@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use Database\Seeders\UserSeeder;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,11 +15,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SkpdSeeder::class,
             UserSeeder::class,
-            KegiatanSeeder::class,
-            SubKegiatanSeeder::class,
-            //NotaDinasSeeder::class,
         ]);
     }
 }

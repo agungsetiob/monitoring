@@ -12,7 +12,7 @@ const patients = ref([]);
 
 const fetchPatients = async () => {
   try {
-    const response = await axios.get('/api/patient-igd');
+    const response = await axios.get('/api/patient-igd', { withCredentials: true });
     patients.value = response.data.data;
   } catch (error) {
     console.error("Gagal mengambil data pasien:", error);

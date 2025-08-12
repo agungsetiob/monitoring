@@ -74,7 +74,7 @@ class PatientMonitoringController extends Controller
 
     private function getIgdPatients($unitId)
     {
-        $results = DB::select("
+        $results = DB::connection('simgos')->select("
             SELECT  
                 k.NOPEN, 
                 k.MASUK, 
@@ -122,7 +122,7 @@ class PatientMonitoringController extends Controller
                     pri.DESKRIPSI, pri.DOKTER, pri.DIBUAT_TANGGAL, pg.GELAR_DEPAN, pg.NAMA, pg.GELAR_BELAKANG,
                     t.RESUSITASI, t.EMERGENCY, t.URGENT, t.LESS_URGENT, t.NON_URGENT, t.DOA, t.KRITERIA, t.HANDOVER
             ORDER BY k.MASUK DESC
-            LIMIT 10
+            LIMIT 20
         ", [$unitId]);
 
         return $this->formatResults($results);

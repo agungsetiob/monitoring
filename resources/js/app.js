@@ -11,9 +11,15 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-import { faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, faFaceSadCry, faPills } from '@fortawesome/free-solid-svg-icons';
+import { faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, 
+    faFaceSadCry, faPills, faChartBar,
+    faChevronLeft, faChevronRight
 
-library.add(faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, faFaceSadCry, faPills);
+ } from '@fortawesome/free-solid-svg-icons';
+
+library.add(faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, 
+    faFaceSadCry, faPills, faChartBar,
+    faChevronLeft, faChevronRight);
 
 
 dayjs.extend(relativeTime);

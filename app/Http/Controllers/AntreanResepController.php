@@ -92,7 +92,7 @@ class AntreanResepController extends Controller
 
     private function getBelumDiterima($idDepo)
     {
-        $results = DB::select("
+        $results = DB::connection('simgos')->select("
             SELECT 
                 k.NOPEN, 
                 DATE_FORMAT(or2.TANGGAL, '%d-%m-%Y %H:%i:%s') AS TANGGAL,
@@ -121,7 +121,7 @@ class AntreanResepController extends Controller
 
     private function getDilayani($idDepo)
     {
-        $results = DB::select("
+        $results = DB::connection('simgos')->select("
             SELECT 
                 k.NOPEN, 
                 DATE_FORMAT(k.MASUK, '%d-%m-%Y %H:%i:%s') AS TANGGAL,
@@ -153,7 +153,7 @@ class AntreanResepController extends Controller
 
     private function getSelesai($idDepo)
     {
-        $results = DB::select("
+        $results = DB::connection('simgos')->select("
             SELECT 
                 k.NOPEN, 
                 DATE_FORMAT(k.MASUK, '%d-%m-%Y %H:%i:%s') AS TANGGAL,
@@ -192,7 +192,7 @@ class AntreanResepController extends Controller
 
     private function getFinal($idDepo)
     {
-        $results = DB::select("
+        $results = DB::connection('simgos')->select("
             SELECT 
                 k.NOPEN, 
                 DATE_FORMAT(k.KELUAR, '%d-%m-%Y %H:%i:%s') AS TANGGAL,
