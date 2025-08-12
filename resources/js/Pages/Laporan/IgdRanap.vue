@@ -2,145 +2,117 @@
 import { Head, router } from '@inertiajs/vue3';
 import { ref, onMounted, watch } from 'vue';
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-dayjs.extend(duration);
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
 import DateFilter from '@/Components/DateFilter.vue';
+import Chart from 'chart.js/auto';
 
 const props = defineProps({
+    patients: Object,
+    summary: Object,
     start_date: String,
-    end_date: String
+    end_date: String,
+    per_page: Number
 });
 
 const startDate = ref(props.start_date);
 const endDate = ref(props.end_date);
-const averageLos = ref(0);
-const categories = ref({});
-const patients = ref([]);
-const currentPage = ref(1);
-const lastPage = ref(1);
-const perPage = ref(20);
-const totalPatients = ref(0);
+const currentPage = ref(props.patients.current_page);
+const lastPage = ref(props.patients.last_page);
+const perPage = ref(props.per_page ?? 20);
+const totalPatients = ref(props.patients.total);
+const patients = ref(props.patients.data);
 const isLoading = ref(false);
 
-const loadReport = async () => {
-    isLoading.value = true;
-    try {
-        const res = await fetch(`/laporan-los/data?start_date=${startDate.value}&end_date=${endDate.value}&page=${currentPage.value}&per_page=${perPage.value}`);
-        const data = await res.json();
-        if (data.success) {
-            patients.value = data.patients;
-            averageLos.value = data.average_los;
-            categories.value = data.categories;
-            currentPage.value = data.pagination.page;
-            perPage.value = data.pagination.per_page;
-            lastPage.value = data.pagination.last_page;
-            totalPatients.value = data.pagination.total;
-        }
-    } catch (err) {
-        console.error('Gagal load data:', err);
-    } finally {
-        isLoading.value = false;
-    }
-};
+const perHariChart = ref(null);
+const perDokterChart = ref(null);
 
-const goToPage = (p) => {
-    if (p < 1 || p > lastPage.value) return;
-    currentPage.value = p;
-    loadReport();
-};
-
-onMounted(loadReport);
-
-const formatLos = (minutes) => {
-    const dur = dayjs.duration(minutes, 'minutes');
-    return `${dur.hours()} jam ${dur.minutes()} menit`;
+const goToPage = (page) => {
+    if (page < 1 || page > lastPage.value) return;
+    router.get(route('laporan.igd-ranap'), {
+        start_date: startDate.value,
+        end_date: endDate.value,
+        page,
+        per_page: perPage.value
+    }, { preserveScroll: true });
 };
 
 const handleFilter = (dates) => {
-    router.get(route('laporan.los'), dates);
+    router.get(route('laporan.igd-ranap'), {
+        ...dates,
+        per_page: perPage.value
+    });
 };
 
-const chartRef = ref(null);
-let chartInstance = null;
-
-const chartColors = {
-    '<1h': '#3B82F6',   // biru
-    '1-3h': '#10B981',  // hijau
-    '3-6h': '#FACC15',  // kuning
-    '6-7h': '#EF4444',  // merah
-    '>7h': '#111827'    // hitam
-};
-
-const renderChart = () => {
-    if (!chartRef.value || !categories.value) return;
-
-    const labels = Object.keys(categories.value);
-    const dataValues = Object.values(categories.value);
-    const colors = labels.map(label => chartColors[label] ?? '#9CA3AF'); // fallback abu-abu
-
-    if (chartInstance) chartInstance.destroy();
-
-    chartInstance = new Chart(chartRef.value, {
+onMounted(() => {
+    // Chart jumlah pasien per hari
+    const ctxHari = document.getElementById('chart-per-hari').getContext('2d');
+    perHariChart.value = new Chart(ctxHari, {
         type: 'bar',
         data: {
-            labels,
+            labels: props.summary.per_hari.map(row => dayjs(row.tanggal).format('DD/MM/YYYY')),
             datasets: [{
                 label: 'Jumlah Pasien',
-                data: dataValues,
-                backgroundColor: colors,
-                borderColor: colors,
-                borderWidth: 1,
-                borderRadius: 5
+                data: props.summary.per_hari.map(row => row.total),
+                backgroundColor: '#36A2EB', // solid blue khas Chart.js
+                borderColor: '#36A2EB',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // non-aktifkan aspect ratio
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Chart jumlah pasien per dokter (horizontal bar chart)
+    const ctxDokter = document.getElementById('chart-per-dokter').getContext('2d');
+    perDokterChart.value = new Chart(ctxDokter, {
+        type: 'bar',
+        data: {
+            labels: props.summary.per_dokter.map(row => row.dokter),
+            datasets: [{
+                label: 'Jumlah Pasien',
+                data: props.summary.per_dokter.map(row => row.total),
+                backgroundColor: '#FF6384', // solid pink khas Chart.js
+                borderColor: '#FF6384',
+                borderWidth: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            indexAxis: 'y', // jadikan horizontal
             plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Distribusi Pasien per Kategori LOS',
-                    font: { size: 18 }
-                }
+                legend: { display: false }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1 }
-                }
+                x: { beginAtZero: true }
             }
         }
     });
-};
-watch(categories, renderChart);
-
+});
 document.addEventListener('inertia:start', () => {
     isLoading.value = true;
 });
 document.addEventListener('inertia:finish', () => {
     isLoading.value = false;
 });
-function getLosCategoryClass(minutes) {
-    if (minutes < 60) return 'bg-blue-100 text-blue-600';
-    if (minutes < 180) return 'bg-emerald-100 text-emerald-600';
-    if (minutes < 360) return 'bg-yellow-100 text-yellow-600';
-    if (minutes < 420) return 'bg-red-100 text-red-600';
-    return 'bg-gray-200 text-gray-700';
-}
 </script>
 
 <template>
 
-    <Head title="Laporan LOS IGD" />
+    <Head title="Lanjut Rawat Inap" />
 
     <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 px-8 py-10 flex flex-col items-center">
         <div class="w-full max-w-8xl bg-white rounded-2xl shadow-xl p-8 space-y-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <h1 class="text-3xl font-extrabold text-gray-800 flex items-center gap-3">
-                    🏥 Laporan LOS IGD
+                    🏥 Laporan IGD → Rawat Inap
                 </h1>
                 <button @click="router.visit('/laporan')"
                     class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition duration-300 ease-in-out transform hover:scale-105">
@@ -152,46 +124,43 @@ function getLosCategoryClass(minutes) {
                     Kembali
                 </button>
             </div>
-            <DateFilter :initial-start-date="props.start_date" :initial-end-date="props.end_date"
-                @filter="handleFilter" />
-            <div class="bg-white p-6 rounded-xl shadow-md h-[500px] border border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">📈 Grafik LOS</h2>
-                <canvas ref="chartRef" class="w-full max-w-8xl mx-auto"></canvas>
+
+            <DateFilter :initial-start-date="startDate" :initial-end-date="endDate" @filter="handleFilter" />
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 h-[500px]">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">📅 Lanjut Rawat Inap</h2>
+                <canvas id="chart-per-hari"></canvas>
             </div>
-            <div class="bg-blue-50 p-6 rounded-xl shadow-inner">
-                <h2 class="text-xl font-bold text-blue-700 mb-4">📊 Rangkuman</h2>
-                <p class="text-lg text-gray-800"><strong>Rata-rata LOS:</strong> {{ averageLos }} jam</p>
-                <ul class="list-disc pl-5 mt-2 text-gray-700">
-                    <li v-for="(val, key) in categories" :key="key">{{ key }}: {{ val }} pasien</li>
-                </ul>
+
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 h-[500px]">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">👨‍⚕️ Pasien per Dokter</h2>
+                <canvas id="chart-per-dokter"></canvas>
             </div>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-300 rounded-lg overflow-hidden">
                     <thead class="bg-blue-600 text-white">
                         <tr>
                             <th class="px-4 py-2 text-left">No</th>
                             <th class="px-4 py-2 text-left">NORM</th>
+                            <th class="px-4 py-2 text-left">NO KUNJUNGAN</th>
                             <th class="px-4 py-2 text-left">Nama</th>
                             <th class="px-4 py-2 text-left">Masuk</th>
-                            <th class="px-4 py-2 text-left">Keluar</th>
-                            <th class="px-4 py-2 text-left">LOS</th>
+                            <th class="px-4 py-2 text-left">DPJP Ranap</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(p, i) in patients" :key="i" class="border-t"
-                            :class="getLosCategoryClass(p.LOS_MINUTES)">
+                        <tr v-for="(p, i) in patients" :key="i" class="border-t">
                             <td class="px-4 py-2">{{ (currentPage - 1) * perPage + i + 1 }}</td>
                             <td class="px-4 py-2">{{ p.NORM }}</td>
+                            <td class="px-4 py-2">{{ p.KUNJUNGAN }}</td>
                             <td class="px-4 py-2">{{ p.NAMA }}</td>
                             <td class="px-4 py-2">{{ dayjs(p.MASUK).format('DD/MM/YYYY HH:mm') }}</td>
-                            <td class="px-4 py-2">{{ dayjs(p.KELUAR).format('DD/MM/YYYY HH:mm') }}</td>
-                            <td class="px-4 py-2 font-semibold">
-                                {{ formatLos(p.LOS_MINUTES) }}
-                            </td>
+                            <td class="px-4 py-2">{{ p.DPJP_RANAP }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
             <div class="flex justify-between items-center mt-6">
                 <div class="flex items-center gap-4">
                     <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
@@ -214,6 +183,7 @@ function getLosCategoryClass(minutes) {
             </div>
         </div>
     </div>
+
     <div v-if="isLoading" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
         <video src="/img/loading.webm" autoplay loop muted playsinline />
     </div>

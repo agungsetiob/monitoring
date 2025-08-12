@@ -27,7 +27,7 @@
         <ReportCard title="Rekap Triage" :link="route('laporan.triage')" />
         <ReportCard title="LOS IGD" :link="route('laporan.los')" />
         <ReportCard title="Lanjut Rawat Inap" label="(Upcoming)" labelColor="text-red-600"
-          :link="route('laporan.index')" />
+          :link="route('laporan.igd-ranap')" />
         <ReportCard title="Kepadatan IGD" label="(Upcoming)" labelColor="text-red-600"
           :link="route('laporan.index')" />
       </div>

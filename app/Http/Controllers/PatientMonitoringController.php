@@ -39,14 +39,14 @@ class PatientMonitoringController extends Controller
             return [
                 'success' => true,
                 'message' => 'Data pasien berhasil diambil',
-                'data'    => $data,
-                'unit'    => $igd,
+                'data' => $data,
+                'unit' => $igd,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Gagal mengambil data pasien',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -140,11 +140,11 @@ class PatientMonitoringController extends Controller
 
             // Format triage JSON fields
             $triageFields = [
-                'RESUSITASI', 
-                'EMERGENCY', 
-                'URGENT', 
-                'LESS_URGENT', 
-                'NON_URGENT', 
+                'RESUSITASI',
+                'EMERGENCY',
+                'URGENT',
+                'LESS_URGENT',
+                'NON_URGENT',
                 'DOA'
             ];
 
@@ -165,12 +165,106 @@ class PatientMonitoringController extends Controller
 
     private function determineTriageStatus($item)
     {
-        if ($item->RESUSITASI) return 'P1';
-        if ($item->EMERGENCY) return 'P2';
-        if ($item->URGENT) return 'P3';
-        if ($item->LESS_URGENT) return 'P4';
-        if ($item->NON_URGENT) return 'P5';
-        if ($item->DOA) return 'DOA';
+        if ($item->RESUSITASI)
+            return 'P1';
+        if ($item->EMERGENCY)
+            return 'P2';
+        if ($item->URGENT)
+            return 'P3';
+        if ($item->LESS_URGENT)
+            return 'P4';
+        if ($item->NON_URGENT)
+            return 'P5';
+        if ($item->DOA)
+            return 'DOA';
         return 'unclassified';
+    }
+
+    private function getIgdToRanapPatients($unitId, $startDate, $endDate, $perPage = 20)
+    {
+        return DB::connection('simgos')->table('pendaftaran.kunjungan as k')
+            ->select(
+                'p.NORM',
+                'p2.NAMA',
+                'k.MASUK',
+                'pri.KUNJUNGAN',
+                DB::raw("CONCAT_WS(' ', pg.GELAR_DEPAN, pg.NAMA, pg.GELAR_BELAKANG) AS DPJP_RANAP")
+            )
+            ->leftJoin('pendaftaran.pendaftaran as p', 'p.NOMOR', '=', 'k.NOPEN')
+            ->leftJoin('master.pasien as p2', 'p.NORM', '=', 'p2.NORM')
+            ->leftJoin('medicalrecord.perencanaan_rawat_inap as pri', 'pri.KUNJUNGAN', '=', 'k.NOMOR')
+            ->leftJoin('master.dokter as d', 'd.ID', '=', 'pri.DOKTER')
+            ->leftJoin('master.pegawai as pg', 'pg.NIP', '=', 'd.NIP')
+            ->where('k.RUANGAN', $unitId)
+            ->where('k.STATUS', 2)
+            ->whereNotNull('pri.KUNJUNGAN')
+            ->whereBetween(DB::raw('DATE(k.MASUK)'), [$startDate, $endDate])
+            ->orderByDesc('k.MASUK')
+            ->paginate($perPage);
+    }
+
+    private function getIgdRanapSummary($unitId, $startDate, $endDate)
+    {
+        $summary = DB::connection('simgos')->select("
+        SELECT DATE(k.MASUK) AS tanggal, COUNT(*) AS total
+        FROM pendaftaran.kunjungan k
+        LEFT JOIN medicalrecord.perencanaan_rawat_inap pri ON pri.KUNJUNGAN = k.NOMOR
+        WHERE k.RUANGAN = ?
+        AND k.STATUS = 2
+        AND pri.KUNJUNGAN IS NOT NULL
+        AND DATE(k.MASUK) BETWEEN ? AND ?
+        GROUP BY DATE(k.MASUK)
+        ORDER BY tanggal ASC
+    ", [$unitId, $startDate, $endDate]);
+
+        $byDoctor = DB::connection('simgos')->select("
+        SELECT 
+            CONCAT_WS(' ', pg.GELAR_DEPAN, pg.NAMA, pg.GELAR_BELAKANG) AS dokter,
+            COUNT(*) AS total
+        FROM pendaftaran.kunjungan k
+        LEFT JOIN medicalrecord.perencanaan_rawat_inap pri ON pri.KUNJUNGAN = k.NOMOR
+        LEFT JOIN master.dokter d ON d.ID = pri.DOKTER
+        LEFT JOIN master.pegawai pg ON pg.NIP = d.NIP
+        WHERE k.RUANGAN = ?
+        AND k.STATUS = 2
+        AND pri.KUNJUNGAN IS NOT NULL
+        AND DATE(k.MASUK) BETWEEN ? AND ?
+        GROUP BY dokter
+        ORDER BY total DESC
+    ", [$unitId, $startDate, $endDate]);
+
+        return [
+            'per_hari' => $summary,
+            'per_dokter' => $byDoctor
+        ];
+    }
+    public function laporanIgdRanap(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $perPage = $request->input('per_page', 20);
+
+        $data = $this->getIgdToRanapPatients($this->igd, $startDate, $endDate, $perPage);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data pasien IGD lanjut rawat inap',
+            'data' => $data
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+    public function laporanIgdRanapView(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', now()->toDateString());
+        $perPage = $request->input('per_page', 20);
+
+        return inertia('Laporan/IgdRanap', [
+            'patients' => $this->getIgdToRanapPatients($this->igd, $startDate, $endDate, $perPage),
+            'summary' => $this->getIgdRanapSummary($this->igd, $startDate, $endDate),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'per_page' => (int) $perPage
+        ]);
     }
 }

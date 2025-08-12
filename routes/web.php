@@ -21,9 +21,10 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 Route::middleware(['web', 'auth', 'throttle:60,1', 'role.igd'])->group(function () {
     Route::get('/e418d78f33c3716d01a492eec5ba33dc', [PatientMonitoringController::class, 'index'])
         ->name('pasien-igd.index');
-
     Route::get('/api/patient-igd', [PatientMonitoringController::class, 'getPatients'])
         ->name('api.patient-igd');
+    Route::get('/laporan-igd-ranap', [PatientMonitoringController::class, 'laporanIgdRanapView'])->name('laporan.igd-ranap');
+    Route::get('/laporan-igd-ranap/data', [PatientMonitoringController::class, 'laporanIgdRanap'])->name('laporan.ranap.data');
 
     Route::get('laporan', fn() => Inertia::render('Laporan/Index'))->name('laporan.index');
     Route::get('laporan/triage', [TriageReportController::class, 'index'])->name('laporan.triage');
