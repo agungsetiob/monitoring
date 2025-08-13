@@ -8,7 +8,8 @@
         <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
             <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-indigo-300 to-blue-100 overflow-hidden">
                 <div class="w-full h-full flex items-center justify-center relative">
-                    <img src="/img/bupati.webp" alt="Foto Bupati" class="w-full h-full object-cover object-center" />
+                    <img src="/img/bupati.webp" alt="Foto Bupati"
+                        class="w-full h-full md:h-auto md:object-contain object-cover object-center" />
                 </div>
             </div>
             <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 space-y-6">

@@ -14,7 +14,7 @@ import FeatureCard from '@/Components/FeatureCard.vue';
       icon="bed-pulse"
       color="blue"
     >
-      Daftar pasien yang sedang ditangani di IGD.
+      Monitor pasien yang sedang ditangani di IGD.
       <span class="font-semibold text-red-500">(Khusus petugas IGD)</span>
     </FeatureCard>
 
