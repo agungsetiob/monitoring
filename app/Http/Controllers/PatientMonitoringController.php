@@ -313,13 +313,23 @@ class PatientMonitoringController extends Controller
                 'jumlah' => $found->jumlah ?? 0
             ];
         });
+        $totalPasien = $jamLengkap->sum('jumlah');
+
+        $jamTersibuk = $jamLengkap->sortByDesc('jumlah')->first();
+        $jamTersibukFormatted = str_pad($jamTersibuk['jam'], 2, '0', STR_PAD_LEFT) . ':00';
+
+        $jumlahTersibuk = $jamTersibuk['jumlah'];
 
         return Inertia::render('Laporan/KepadatanIgd', [
             'start_date' => $start,
             'end_date' => $end,
             'data_per_jam' => $jamLengkap,
-            'data_per_shift' => $shiftLengkap
+            'data_per_shift' => $shiftLengkap,
+            'summary' => [
+                'total_pasien' => $totalPasien,
+                'jam_tersibuk' => $jamTersibukFormatted,
+                'jumlah_tersibuk' => $jumlahTersibuk
+            ]
         ]);
     }
-
 }
