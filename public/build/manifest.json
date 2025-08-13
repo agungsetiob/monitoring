@@ -1,27 +1,27 @@
 {
-  "_auto-BMOhHuod.js": {
-    "file": "assets/auto-BMOhHuod.js",
+  "_auto-DySHNDMb.js": {
+    "file": "assets/auto-DySHNDMb.js",
     "name": "auto",
     "imports": [
-      "_chart-9p96gS8f.js"
+      "_chart-CexCPVIl.js"
     ]
   },
-  "_chart-9p96gS8f.js": {
-    "file": "assets/chart-9p96gS8f.js",
+  "_chart-CexCPVIl.js": {
+    "file": "assets/chart-CexCPVIl.js",
     "name": "chart",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_duration-DlT2XQkV.js": {
-    "file": "assets/duration-DlT2XQkV.js",
+  "_duration-DiP5yAcK.js": {
+    "file": "assets/duration-DiP5yAcK.js",
     "name": "duration",
     "imports": [
       "resources/js/app.js"
     ]
   },
   "resources/js/Pages/AntreanFarmasi/Index.vue": {
-    "file": "assets/Index-DrUoNtFJ.js",
+    "file": "assets/Index-DJRIh7mL.js",
     "name": "Index",
     "src": "resources/js/Pages/AntreanFarmasi/Index.vue",
     "isDynamicEntry": true,
@@ -33,7 +33,7 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-NmDAbbLU.js",
+    "file": "assets/Login-CrbCcaO8.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -45,7 +45,7 @@
     ]
   },
   "resources/js/Pages/Blog/Index.vue": {
-    "file": "assets/Index-Dnaz_PMC.js",
+    "file": "assets/Index-s8BBEyDu.js",
     "name": "Index",
     "src": "resources/js/Pages/Blog/Index.vue",
     "isDynamicEntry": true,
@@ -54,7 +54,7 @@
     ]
   },
   "resources/js/Pages/Landing.vue": {
-    "file": "assets/Landing-CSvKwxuy.js",
+    "file": "assets/Landing-DfA61CJz.js",
     "name": "Landing",
     "src": "resources/js/Pages/Landing.vue",
     "isDynamicEntry": true,
@@ -63,18 +63,18 @@
     ]
   },
   "resources/js/Pages/Laporan/IgdRanap.vue": {
-    "file": "assets/IgdRanap-Ck2VRvIW.js",
+    "file": "assets/IgdRanap-C-ZOeuZv.js",
     "name": "IgdRanap",
     "src": "resources/js/Pages/Laporan/IgdRanap.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_chart-9p96gS8f.js",
-      "_auto-BMOhHuod.js"
+      "_chart-CexCPVIl.js",
+      "_auto-DySHNDMb.js"
     ]
   },
   "resources/js/Pages/Laporan/Index.vue": {
-    "file": "assets/Index-CI4yIOJ5.js",
+    "file": "assets/Index-C5GSnGRY.js",
     "name": "Index",
     "src": "resources/js/Pages/Laporan/Index.vue",
     "isDynamicEntry": true,
@@ -84,29 +84,29 @@
     ]
   },
   "resources/js/Pages/Laporan/KepadatanIgd.vue": {
-    "file": "assets/KepadatanIgd-BZEyVnBN.js",
+    "file": "assets/KepadatanIgd-CDrtlJo-.js",
     "name": "KepadatanIgd",
     "src": "resources/js/Pages/Laporan/KepadatanIgd.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_auto-BMOhHuod.js",
-      "_chart-9p96gS8f.js"
+      "_auto-DySHNDMb.js",
+      "_chart-CexCPVIl.js"
     ]
   },
   "resources/js/Pages/Laporan/Los.vue": {
-    "file": "assets/Los-CxT1WG6h.js",
+    "file": "assets/Los-B88Xuvsz.js",
     "name": "Los",
     "src": "resources/js/Pages/Laporan/Los.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_duration-DlT2XQkV.js",
-      "_chart-9p96gS8f.js"
+      "_duration-DiP5yAcK.js",
+      "_chart-CexCPVIl.js"
     ]
   },
   "resources/js/Pages/Laporan/Partials/ReportCard.vue": {
-    "file": "assets/ReportCard-Bq88dyto.js",
+    "file": "assets/ReportCard-Bw4bfKUW.js",
     "name": "ReportCard",
     "src": "resources/js/Pages/Laporan/Partials/ReportCard.vue",
     "isDynamicEntry": true,
@@ -115,19 +115,19 @@
     ]
   },
   "resources/js/Pages/Laporan/Triage.vue": {
-    "file": "assets/Triage-DZV7UMLm.js",
+    "file": "assets/Triage-LgZp_avt.js",
     "name": "Triage",
     "src": "resources/js/Pages/Laporan/Triage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_auto-BMOhHuod.js",
-      "_duration-DlT2XQkV.js",
-      "_chart-9p96gS8f.js"
+      "_auto-DySHNDMb.js",
+      "_duration-DiP5yAcK.js",
+      "_chart-CexCPVIl.js"
     ]
   },
   "resources/js/Pages/PasienIgd/Index.vue": {
-    "file": "assets/Index-CAO1Pvlh.js",
+    "file": "assets/Index-3xspzWZ8.js",
     "name": "Index",
     "src": "resources/js/Pages/PasienIgd/Index.vue",
     "isDynamicEntry": true,
@@ -136,7 +136,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CUCPwtCF.js",
+    "file": "assets/app-BvDpTwuS.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
