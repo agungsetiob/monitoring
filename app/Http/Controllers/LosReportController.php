@@ -11,7 +11,7 @@ class LosReportController extends Controller
 
     public function index(Request $request)
     {
-        $start_date = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $start_date = $request->input('start_date', now()->toDateString());
         $end_date = $request->input('end_date', now()->toDateString());
 
         return inertia('Laporan/Los', [
@@ -22,7 +22,7 @@ class LosReportController extends Controller
 
     public function getLosReport(Request $request)
     {
-        $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $startDate = $request->input('start_date', now()->toDateString());
         $endDate   = $request->input('end_date', now()->toDateString());
 
         $page = max((int) $request->input('page', 1), 1);

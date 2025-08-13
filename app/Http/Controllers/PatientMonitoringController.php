@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class PatientMonitoringController extends Controller
 {
@@ -255,7 +256,7 @@ class PatientMonitoringController extends Controller
 
     public function laporanIgdRanapView(Request $request)
     {
-        $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $startDate = $request->input('start_date', now()->toDateString());
         $endDate = $request->input('end_date', now()->toDateString());
         $perPage = $request->input('per_page', 20);
 
@@ -267,4 +268,58 @@ class PatientMonitoringController extends Controller
             'per_page' => (int) $perPage
         ]);
     }
+    public function kepadatanIgd(Request $request)
+    {
+        $start = $request->start_date ?? now()->toDateString();
+        $end = $request->end_date ?? now()->toDateString();
+
+        // Per jam
+        $data = DB::connection('simgos')->table('pendaftaran.kunjungan')
+            ->selectRaw("EXTRACT(HOUR FROM MASUK) as jam, COUNT(*) as jumlah")
+            ->where('RUANGAN', $this->igd)
+            ->whereBetween(DB::raw('DATE(MASUK)'), [$start, $end])
+            ->groupBy('jam')
+            ->orderBy('jam')
+            ->get();
+
+        $jamLengkap = collect(range(0, 23))->map(function ($j) use ($data) {
+            $found = $data->firstWhere('jam', $j);
+            return [
+                'jam' => $j,
+                'jumlah' => $found->jumlah ?? 0
+            ];
+        });
+
+        // Per shift
+        $shiftData = DB::connection('simgos')->table('pendaftaran.kunjungan')
+            ->selectRaw("
+            CASE 
+                WHEN EXTRACT(HOUR FROM MASUK) >= 8 AND EXTRACT(HOUR FROM MASUK) < 14 THEN 'Pagi'
+                WHEN EXTRACT(HOUR FROM MASUK) >= 14 AND EXTRACT(HOUR FROM MASUK) < 20 THEN 'Siang'
+                ELSE 'Malam'
+            END AS shift,
+            COUNT(*) as jumlah
+        ")
+            ->where('RUANGAN', $this->igd)
+            ->whereBetween(DB::raw('DATE(MASUK)'), [$start, $end])
+            ->groupBy('shift')
+            ->orderByRaw("FIELD(shift, 'Pagi', 'Siang', 'Malam')")
+            ->get();
+
+        $shiftLengkap = collect(['Pagi', 'Siang', 'Malam'])->map(function ($s) use ($shiftData) {
+            $found = $shiftData->firstWhere('shift', $s);
+            return [
+                'shift' => $s,
+                'jumlah' => $found->jumlah ?? 0
+            ];
+        });
+
+        return Inertia::render('Laporan/KepadatanIgd', [
+            'start_date' => $start,
+            'end_date' => $end,
+            'data_per_jam' => $jamLengkap,
+            'data_per_shift' => $shiftLengkap
+        ]);
+    }
+
 }

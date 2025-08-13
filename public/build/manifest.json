@@ -1,27 +1,27 @@
 {
-  "_auto-B7skPUCU.js": {
-    "file": "assets/auto-B7skPUCU.js",
+  "_auto-BMOhHuod.js": {
+    "file": "assets/auto-BMOhHuod.js",
     "name": "auto",
     "imports": [
-      "_chart-Dlpe4nVB.js"
+      "_chart-9p96gS8f.js"
     ]
   },
-  "_chart-Dlpe4nVB.js": {
-    "file": "assets/chart-Dlpe4nVB.js",
+  "_chart-9p96gS8f.js": {
+    "file": "assets/chart-9p96gS8f.js",
     "name": "chart",
     "imports": [
       "resources/js/app.js"
     ]
   },
-  "_duration-B37jmHtM.js": {
-    "file": "assets/duration-B37jmHtM.js",
+  "_duration-DlT2XQkV.js": {
+    "file": "assets/duration-DlT2XQkV.js",
     "name": "duration",
     "imports": [
       "resources/js/app.js"
     ]
   },
   "resources/js/Pages/AntreanFarmasi/Index.vue": {
-    "file": "assets/Index-C2pAP3aR.js",
+    "file": "assets/Index-DrUoNtFJ.js",
     "name": "Index",
     "src": "resources/js/Pages/AntreanFarmasi/Index.vue",
     "isDynamicEntry": true,
@@ -33,7 +33,7 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-DJmCILQE.js",
+    "file": "assets/Login-NmDAbbLU.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -45,7 +45,7 @@
     ]
   },
   "resources/js/Pages/Blog/Index.vue": {
-    "file": "assets/Index-De-2m5lj.js",
+    "file": "assets/Index-Dnaz_PMC.js",
     "name": "Index",
     "src": "resources/js/Pages/Blog/Index.vue",
     "isDynamicEntry": true,
@@ -54,7 +54,7 @@
     ]
   },
   "resources/js/Pages/Landing.vue": {
-    "file": "assets/Landing-BWCabf8H.js",
+    "file": "assets/Landing-CSvKwxuy.js",
     "name": "Landing",
     "src": "resources/js/Pages/Landing.vue",
     "isDynamicEntry": true,
@@ -63,18 +63,18 @@
     ]
   },
   "resources/js/Pages/Laporan/IgdRanap.vue": {
-    "file": "assets/IgdRanap-DH3qbjHY.js",
+    "file": "assets/IgdRanap-Ck2VRvIW.js",
     "name": "IgdRanap",
     "src": "resources/js/Pages/Laporan/IgdRanap.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_chart-Dlpe4nVB.js",
-      "_auto-B7skPUCU.js"
+      "_chart-9p96gS8f.js",
+      "_auto-BMOhHuod.js"
     ]
   },
   "resources/js/Pages/Laporan/Index.vue": {
-    "file": "assets/Index-CVQoAOUc.js",
+    "file": "assets/Index-CI4yIOJ5.js",
     "name": "Index",
     "src": "resources/js/Pages/Laporan/Index.vue",
     "isDynamicEntry": true,
@@ -83,19 +83,30 @@
       "resources/js/Pages/Laporan/Partials/ReportCard.vue"
     ]
   },
+  "resources/js/Pages/Laporan/KepadatanIgd.vue": {
+    "file": "assets/KepadatanIgd-BZEyVnBN.js",
+    "name": "KepadatanIgd",
+    "src": "resources/js/Pages/Laporan/KepadatanIgd.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_auto-BMOhHuod.js",
+      "_chart-9p96gS8f.js"
+    ]
+  },
   "resources/js/Pages/Laporan/Los.vue": {
-    "file": "assets/Los-IfOqDAyF.js",
+    "file": "assets/Los-CxT1WG6h.js",
     "name": "Los",
     "src": "resources/js/Pages/Laporan/Los.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_duration-B37jmHtM.js",
-      "_chart-Dlpe4nVB.js"
+      "_duration-DlT2XQkV.js",
+      "_chart-9p96gS8f.js"
     ]
   },
   "resources/js/Pages/Laporan/Partials/ReportCard.vue": {
-    "file": "assets/ReportCard-zWcAe_xV.js",
+    "file": "assets/ReportCard-Bq88dyto.js",
     "name": "ReportCard",
     "src": "resources/js/Pages/Laporan/Partials/ReportCard.vue",
     "isDynamicEntry": true,
@@ -104,19 +115,19 @@
     ]
   },
   "resources/js/Pages/Laporan/Triage.vue": {
-    "file": "assets/Triage-CtD1la_g.js",
+    "file": "assets/Triage-DZV7UMLm.js",
     "name": "Triage",
     "src": "resources/js/Pages/Laporan/Triage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_auto-B7skPUCU.js",
-      "_duration-B37jmHtM.js",
-      "_chart-Dlpe4nVB.js"
+      "_auto-BMOhHuod.js",
+      "_duration-DlT2XQkV.js",
+      "_chart-9p96gS8f.js"
     ]
   },
   "resources/js/Pages/PasienIgd/Index.vue": {
-    "file": "assets/Index-snN1lNI1.js",
+    "file": "assets/Index-CAO1Pvlh.js",
     "name": "Index",
     "src": "resources/js/Pages/PasienIgd/Index.vue",
     "isDynamicEntry": true,
@@ -125,7 +136,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-G0XMPDCN.js",
+    "file": "assets/app-CUCPwtCF.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -136,13 +147,14 @@
       "resources/js/Pages/Landing.vue",
       "resources/js/Pages/Laporan/IgdRanap.vue",
       "resources/js/Pages/Laporan/Index.vue",
+      "resources/js/Pages/Laporan/KepadatanIgd.vue",
       "resources/js/Pages/Laporan/Los.vue",
       "resources/js/Pages/Laporan/Partials/ReportCard.vue",
       "resources/js/Pages/Laporan/Triage.vue",
       "resources/js/Pages/PasienIgd/Index.vue"
     ],
     "css": [
-      "assets/app-VZ2dMCWo.css"
+      "assets/app-C_rdC6ia.css"
     ]
   }
 }

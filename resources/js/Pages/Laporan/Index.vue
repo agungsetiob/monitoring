@@ -26,10 +26,8 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <ReportCard title="Rekap Triage" :link="route('laporan.triage')" />
         <ReportCard title="LOS IGD" :link="route('laporan.los')" />
-        <ReportCard title="Lanjut Rawat Inap" labelColor="text-red-600"
-          :link="route('laporan.igd-ranap')" />
-        <ReportCard title="Kepadatan IGD" label="(Upcoming)" labelColor="text-red-600"
-          :link="route('laporan.index')" />
+        <ReportCard title="Lanjut Rawat Inap" labelColor="text-red-600" :link="route('laporan.igd-ranap')" />
+        <ReportCard title="Kepadatan IGD" labelColor="text-red-600" :link="route('laporan.kepadatan-igd')" />
       </div>
     </div>
   </div>

@@ -11,7 +11,7 @@ class TriageReportController extends Controller
 
     public function index(Request $request)
     {
-        $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+        $startDate = $request->input('start_date', now()->toDateString());
         $endDate = $request->input('end_date', now()->toDateString());
 
         return inertia('Laporan/Triage', [
@@ -102,27 +102,28 @@ class TriageReportController extends Controller
     private function getAverageLos($startDate, $endDate, $unitId)
     {
         return DB::connection('simgos')->select("
-        SELECT kategori, ROUND(AVG(TIMESTAMPDIFF(MINUTE, data.MASUK, data.KELUAR)), 2) AS avg_los_minutes
-        FROM (
-            SELECT
-                k.MASUK, k.KELUAR,
-                CASE
-                    WHEN JSON_EXTRACT(t.RESUSITASI, '$.CHECKED') IN (true, 1, '1') THEN 'P1'
-                    WHEN JSON_EXTRACT(t.EMERGENCY, '$.CHECKED')   IN (true, 1, '1') THEN 'P2'
-                    WHEN JSON_EXTRACT(t.URGENT, '$.CHECKED')      IN (true, 1, '1') THEN 'P3'
-                    WHEN JSON_EXTRACT(t.LESS_URGENT, '$.CHECKED') IN (true, 1, '1') THEN 'P4'
-                    WHEN JSON_EXTRACT(t.NON_URGENT, '$.CHECKED')  IN (true, 1, '1') THEN 'P5'
-                    WHEN JSON_EXTRACT(t.DOA, '$.CHECKED')         IN (true, 1, '1') THEN 'DOA'
-                END as kategori
-            FROM pendaftaran.kunjungan k
-            LEFT JOIN medicalrecord.triage t ON t.KUNJUNGAN = k.NOMOR
-            WHERE k.RUANGAN = ?
-              AND k.STATUS = 2
-              AND k.KELUAR IS NOT NULL
-              AND DATE(k.MASUK) BETWEEN ? AND ?
-        ) as data
-        WHERE kategori IS NOT NULL
-        GROUP BY kategori
+    SELECT kategori, ROUND(AVG(TIMESTAMPDIFF(MINUTE, data.MASUK, data.KELUAR)), 2) AS avg_los_minutes
+    FROM (
+        SELECT
+            k.MASUK, k.KELUAR,
+            CASE
+                WHEN JSON_EXTRACT(t.RESUSITASI, '$.CHECKED') IN (true, 1, '1') THEN 'P1'
+                WHEN JSON_EXTRACT(t.EMERGENCY, '$.CHECKED')   IN (true, 1, '1') THEN 'P2'
+                WHEN JSON_EXTRACT(t.URGENT, '$.CHECKED')      IN (true, 1, '1') THEN 'P3'
+                WHEN JSON_EXTRACT(t.LESS_URGENT, '$.CHECKED') IN (true, 1, '1') THEN 'P4'
+                WHEN JSON_EXTRACT(t.NON_URGENT, '$.CHECKED')  IN (true, 1, '1') THEN 'P5'
+                WHEN JSON_EXTRACT(t.DOA, '$.CHECKED')         IN (true, 1, '1') THEN 'DOA'
+            END as kategori
+        FROM pendaftaran.kunjungan k
+        LEFT JOIN medicalrecord.triage t ON t.KUNJUNGAN = k.NOMOR
+        WHERE k.RUANGAN = ?
+          AND k.STATUS = 2
+          AND k.KELUAR IS NOT NULL
+          AND DATE(k.MASUK) BETWEEN ? AND ?
+    ) as data
+    WHERE kategori IS NOT NULL
+    GROUP BY kategori
+    ORDER BY FIELD(kategori, 'P1', 'P2', 'P3', 'P4', 'P5', 'DOA')
     ", [$unitId, $startDate, $endDate]);
     }
 

@@ -25,6 +25,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role.igd'])->group(function 
         ->name('api.patient-igd');
     Route::get('/laporan-igd-ranap', [PatientMonitoringController::class, 'laporanIgdRanapView'])->name('laporan.igd-ranap');
     Route::get('/laporan-igd-ranap/data', [PatientMonitoringController::class, 'laporanIgdRanap'])->name('laporan.ranap.data');
+    Route::get('/laporan/kepadatan-igd', [PatientMonitoringController::class, 'kepadatanIgd'])->name('laporan.kepadatan-igd');
 
     Route::get('laporan', fn() => Inertia::render('Laporan/Index'))->name('laporan.index');
     Route::get('laporan/triage', [TriageReportController::class, 'index'])->name('laporan.triage');
