@@ -8,7 +8,8 @@ const props = defineProps({
     start_date: String,
     end_date: String,
     data_per_jam: Array,
-    data_per_shift: Array
+    data_per_shift: Array,
+    summary: Object
 });
 
 const chartRefJam = ref(null);
