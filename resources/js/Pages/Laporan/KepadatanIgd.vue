@@ -138,19 +138,18 @@ document.addEventListener('inertia:finish', () => {
                     <p class="text-sm text-gray-600">Jam Tersibuk</p>
                     <p class="text-2xl font-bold text-orange-800">
                         {{
-                            props.data_per_jam.reduce((max, d) => d.jumlah > max.jumlah ? d : max,
-                                props.data_per_jam[0]).jam
-                                .toString()
-                                .padStart(2, '0')
+                            (props.data_per_jam.length
+                                ? props.data_per_jam.reduce((max, d) => d.jumlah > max.jumlah ? d : max,
+                                    props.data_per_jam[0]).jam
+                                : '--'
+                            ).toString().padStart(2, '0')
                         }}:00
                     </p>
                 </div>
                 <div class="bg-red-100 p-4 rounded-xl text-center">
                     <p class="text-sm text-gray-600">Pasien Tersibuk per Jam</p>
                     <p class="text-2xl font-bold text-red-800">
-                        {{
-                            props.data_per_jam.reduce((max, d) => d.jumlah > max ? d.jumlah : max, 0)
-                        }}
+                        {{Math.max(...props.data_per_jam.map(d => d.jumlah))}}
                     </p>
                 </div>
             </div>
