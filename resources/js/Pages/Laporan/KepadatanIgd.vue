@@ -168,7 +168,7 @@ document.addEventListener('inertia:finish', () => {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="w-4 h-4 rounded bg-orange-500"></span>
-                        6–11 pasien (sedang)
+                        6-11 pasien (sedang)
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="w-4 h-4 rounded bg-green-600"></span>
