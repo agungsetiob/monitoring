@@ -7,6 +7,7 @@ dayjs.extend(duration);
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 import DateFilter from '@/Components/DateFilter.vue';
+import LosChart from './Partials/LosChart.vue';
 
 const props = defineProps({
     start_date: String,
@@ -62,61 +63,6 @@ const handleFilter = (dates) => {
     router.get(route('laporan.los'), dates);
 };
 
-const chartRef = ref(null);
-let chartInstance = null;
-
-const chartColors = {
-    '<1h': '#3B82F6',   // biru
-    '1-3h': '#10B981',  // hijau
-    '3-6h': '#FACC15',  // kuning
-    '6-8h': '#EF4444',  // merah
-    '>8h': '#111827'    // hitam
-};
-
-const renderChart = () => {
-    if (!chartRef.value || !categories.value) return;
-
-    const labels = Object.keys(categories.value);
-    const dataValues = Object.values(categories.value);
-    const colors = labels.map(label => chartColors[label] ?? '#9CA3AF'); // fallback abu-abu
-
-    if (chartInstance) chartInstance.destroy();
-
-    chartInstance = new Chart(chartRef.value, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Jumlah Pasien',
-                data: dataValues,
-                backgroundColor: colors,
-                borderColor: colors,
-                borderWidth: 1,
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: 'Distribusi Pasien per Kategori LOS',
-                    font: { size: 18 }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1 }
-                }
-            }
-        }
-    });
-};
-watch(categories, renderChart);
-
 document.addEventListener('inertia:start', () => {
     isLoading.value = true;
 });
@@ -130,6 +76,7 @@ function getLosCategoryClass(minutes) {
     if (minutes < 420) return 'bg-red-100 text-red-600';
     return 'bg-gray-200 text-gray-700';
 }
+
 </script>
 
 <template>
@@ -154,10 +101,8 @@ function getLosCategoryClass(minutes) {
             </div>
             <DateFilter :initial-start-date="props.start_date" :initial-end-date="props.end_date"
                 @filter="handleFilter" />
-            <div class="bg-white p-6 rounded-xl shadow-md h-[500px] border border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">📈 Grafik LOS</h2>
-                <canvas ref="chartRef" class="w-full max-w-8xl mx-auto"></canvas>
-            </div>
+            <LosChart :categories="categories" :start-date="props.start_date" :end-date="props.end_date" />
+
             <div class="bg-blue-50 p-6 rounded-xl shadow-inner">
                 <h2 class="text-xl font-bold text-blue-700 mb-4">📊 Rangkuman</h2>
                 <p class="text-lg text-gray-800"><strong>Rata-rata LOS:</strong> {{ averageLos }} jam</p>

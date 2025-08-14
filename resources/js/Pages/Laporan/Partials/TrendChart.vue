@@ -35,6 +35,12 @@ const renderChart = () => {
 
 onMounted(() => requestIdleCallback(renderChart));
 watch(() => props.data, renderChart, { deep: true });
+const exportChartAsImage = () => {
+  if (!chartInstance) return;
+  return chartInstance.toBase64Image();
+};
+
+defineExpose({ exportChartAsImage });
 </script>
 
 <template>

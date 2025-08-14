@@ -4,6 +4,8 @@ import { ref, onMounted, watch } from 'vue';
 import dayjs from 'dayjs';
 import DateFilter from '@/Components/DateFilter.vue';
 import Chart from 'chart.js/auto';
+import PerDoctorChart from './Partials/PerDoctorChart.vue';
+import IgdToRanapChart from './Partials/IgdToRanapChart.vue';
 
 const props = defineProps({
     patients: Object,
@@ -22,9 +24,6 @@ const totalPatients = ref(props.patients.total);
 const patients = ref(props.patients.data);
 const isLoading = ref(false);
 
-const perHariChart = ref(null);
-const perDokterChart = ref(null);
-
 const goToPage = (page) => {
     if (page < 1 || page > lastPage.value) return;
     router.get(route('laporan.igd-ranap'), {
@@ -42,60 +41,6 @@ const handleFilter = (dates) => {
     });
 };
 
-onMounted(() => {
-    // Chart jumlah pasien per hari
-    const ctxHari = document.getElementById('chart-per-hari').getContext('2d');
-    perHariChart.value = new Chart(ctxHari, {
-        type: 'bar',
-        data: {
-            labels: props.summary.per_hari.map(row => dayjs(row.tanggal).format('DD/MM/YYYY')),
-            datasets: [{
-                label: 'Jumlah Pasien',
-                data: props.summary.per_hari.map(row => row.total),
-                backgroundColor: '#36A2EB', // solid blue khas Chart.js
-                borderColor: '#36A2EB',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false, // non-aktifkan aspect ratio
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-
-    // Chart jumlah pasien per dokter (horizontal bar chart)
-    const ctxDokter = document.getElementById('chart-per-dokter').getContext('2d');
-    perDokterChart.value = new Chart(ctxDokter, {
-        type: 'bar',
-        data: {
-            labels: props.summary.per_dokter.map(row => row.dokter),
-            datasets: [{
-                label: 'Jumlah Pasien',
-                data: props.summary.per_dokter.map(row => row.total),
-                backgroundColor: '#FF6384', // solid pink khas Chart.js
-                borderColor: '#FF6384',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y', // jadikan horizontal
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                x: { beginAtZero: true }
-            }
-        }
-    });
-});
 document.addEventListener('inertia:start', () => {
     isLoading.value = true;
 });
@@ -126,15 +71,8 @@ document.addEventListener('inertia:finish', () => {
             </div>
 
             <DateFilter :initial-start-date="startDate" :initial-end-date="endDate" @filter="handleFilter" />
-            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 h-[500px]">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">📅 Lanjut Rawat Inap</h2>
-                <canvas id="chart-per-hari"></canvas>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200 h-[500px]">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">👨‍⚕️ Pasien per Dokter</h2>
-                <canvas id="chart-per-dokter"></canvas>
-            </div>
+            <IgdToRanapChart :data="props.summary.per_hari" />
+            <PerDoctorChart :data="props.summary.per_dokter" />
 
             <div class="overflow-x-auto">
                 <table class="min-w-full border border-gray-300 rounded-lg overflow-hidden">

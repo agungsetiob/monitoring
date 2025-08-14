@@ -1,6 +1,6 @@
 {
-  "_DateFilter-DLh730Re.js": {
-    "file": "assets/DateFilter-DLh730Re.js",
+  "_DateFilter-Dy_6JLgk.js": {
+    "file": "assets/DateFilter-Dy_6JLgk.js",
     "name": "DateFilter",
     "imports": [
       "resources/js/app.js"
@@ -17,15 +17,15 @@
     "file": "assets/chart-BOVB5OMx.js",
     "name": "chart"
   },
-  "_duration-DaRtGe9t.js": {
-    "file": "assets/duration-DaRtGe9t.js",
+  "_duration-DP8QzzGu.js": {
+    "file": "assets/duration-DP8QzzGu.js",
     "name": "duration",
     "imports": [
       "resources/js/app.js"
     ]
   },
   "resources/js/Pages/AntreanFarmasi/Index.vue": {
-    "file": "assets/Index-CZvXUkTx.js",
+    "file": "assets/Index-wFvXLfAi.js",
     "name": "Index",
     "src": "resources/js/Pages/AntreanFarmasi/Index.vue",
     "isDynamicEntry": true,
@@ -37,7 +37,7 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-CzKp8tOL.js",
+    "file": "assets/Login-DLZnff_F.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -49,7 +49,7 @@
     ]
   },
   "resources/js/Pages/Blog/Index.vue": {
-    "file": "assets/Index-CGC6SrQY.js",
+    "file": "assets/Index-Do9dMcvB.js",
     "name": "Index",
     "src": "resources/js/Pages/Blog/Index.vue",
     "isDynamicEntry": true,
@@ -58,7 +58,7 @@
     ]
   },
   "resources/js/Pages/Landing.vue": {
-    "file": "assets/Landing-DVojcLTq.js",
+    "file": "assets/Landing-D0Koqr10.js",
     "name": "Landing",
     "src": "resources/js/Pages/Landing.vue",
     "isDynamicEntry": true,
@@ -67,19 +67,21 @@
     ]
   },
   "resources/js/Pages/Laporan/IgdRanap.vue": {
-    "file": "assets/IgdRanap-CZqFstUZ.js",
+    "file": "assets/IgdRanap-Y35mOXu4.js",
     "name": "IgdRanap",
     "src": "resources/js/Pages/Laporan/IgdRanap.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_DateFilter-DLh730Re.js",
+      "_DateFilter-Dy_6JLgk.js",
       "_auto-0DX8mfB2.js",
+      "resources/js/Pages/Laporan/Partials/PerDoctorChart.vue",
+      "resources/js/Pages/Laporan/Partials/IgdToRanapChart.vue",
       "_chart-BOVB5OMx.js"
     ]
   },
   "resources/js/Pages/Laporan/Index.vue": {
-    "file": "assets/Index-TNSID9oQ.js",
+    "file": "assets/Index-DPgwCxno.js",
     "name": "Index",
     "src": "resources/js/Pages/Laporan/Index.vue",
     "isDynamicEntry": true,
@@ -89,31 +91,88 @@
     ]
   },
   "resources/js/Pages/Laporan/KepadatanIgd.vue": {
-    "file": "assets/KepadatanIgd-CjTMrP3n.js",
+    "file": "assets/KepadatanIgd-CNSQqh9N.js",
     "name": "KepadatanIgd",
     "src": "resources/js/Pages/Laporan/KepadatanIgd.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
+      "_DateFilter-Dy_6JLgk.js",
+      "resources/js/Pages/Laporan/Partials/PatientPerHourChart.vue",
+      "resources/js/Pages/Laporan/Partials/PatientPerShiftChart.vue",
       "_auto-0DX8mfB2.js",
-      "_DateFilter-DLh730Re.js",
       "_chart-BOVB5OMx.js"
     ]
   },
   "resources/js/Pages/Laporan/Los.vue": {
-    "file": "assets/Los-BqfEZSYr.js",
+    "file": "assets/Los-Clq104Ns.js",
     "name": "Los",
     "src": "resources/js/Pages/Laporan/Los.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_duration-DaRtGe9t.js",
+      "_duration-DP8QzzGu.js",
       "_chart-BOVB5OMx.js",
-      "_DateFilter-DLh730Re.js"
+      "_DateFilter-Dy_6JLgk.js",
+      "resources/js/Pages/Laporan/Partials/LosChart.vue"
+    ]
+  },
+  "resources/js/Pages/Laporan/Partials/IgdToRanapChart.vue": {
+    "file": "assets/IgdToRanapChart-DGHO0-0x.js",
+    "name": "IgdToRanapChart",
+    "src": "resources/js/Pages/Laporan/Partials/IgdToRanapChart.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-0DX8mfB2.js",
+      "resources/js/app.js",
+      "_chart-BOVB5OMx.js"
+    ]
+  },
+  "resources/js/Pages/Laporan/Partials/LosChart.vue": {
+    "file": "assets/LosChart-gTC4Kk71.js",
+    "name": "LosChart",
+    "src": "resources/js/Pages/Laporan/Partials/LosChart.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_chart-BOVB5OMx.js",
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/Pages/Laporan/Partials/PatientPerHourChart.vue": {
+    "file": "assets/PatientPerHourChart-Dc2QYs--.js",
+    "name": "PatientPerHourChart",
+    "src": "resources/js/Pages/Laporan/Partials/PatientPerHourChart.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-0DX8mfB2.js",
+      "resources/js/app.js",
+      "_chart-BOVB5OMx.js"
+    ]
+  },
+  "resources/js/Pages/Laporan/Partials/PatientPerShiftChart.vue": {
+    "file": "assets/PatientPerShiftChart-Cz8D5mrl.js",
+    "name": "PatientPerShiftChart",
+    "src": "resources/js/Pages/Laporan/Partials/PatientPerShiftChart.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-0DX8mfB2.js",
+      "_chart-BOVB5OMx.js",
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/Pages/Laporan/Partials/PerDoctorChart.vue": {
+    "file": "assets/PerDoctorChart-N9gyG5qx.js",
+    "name": "PerDoctorChart",
+    "src": "resources/js/Pages/Laporan/Partials/PerDoctorChart.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_auto-0DX8mfB2.js",
+      "resources/js/app.js",
+      "_chart-BOVB5OMx.js"
     ]
   },
   "resources/js/Pages/Laporan/Partials/ReportCard.vue": {
-    "file": "assets/ReportCard-BAje5fJN.js",
+    "file": "assets/ReportCard-C-9i95X2.js",
     "name": "ReportCard",
     "src": "resources/js/Pages/Laporan/Partials/ReportCard.vue",
     "isDynamicEntry": true,
@@ -122,7 +181,7 @@
     ]
   },
   "resources/js/Pages/Laporan/Partials/TrendChart.vue": {
-    "file": "assets/TrendChart-1r_QKXCU.js",
+    "file": "assets/TrendChart-DnrflsuJ.js",
     "name": "TrendChart",
     "src": "resources/js/Pages/Laporan/Partials/TrendChart.vue",
     "isDynamicEntry": true,
@@ -133,7 +192,7 @@
     ]
   },
   "resources/js/Pages/Laporan/Partials/TriageChart.vue": {
-    "file": "assets/TriageChart-D-rK7_eF.js",
+    "file": "assets/TriageChart-CO6Rq7Wp.js",
     "name": "TriageChart",
     "src": "resources/js/Pages/Laporan/Partials/TriageChart.vue",
     "isDynamicEntry": true,
@@ -144,14 +203,14 @@
     ]
   },
   "resources/js/Pages/Laporan/Triage.vue": {
-    "file": "assets/Triage-DuiIRnDI.js",
+    "file": "assets/Triage-C_LuRdtj.js",
     "name": "Triage",
     "src": "resources/js/Pages/Laporan/Triage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.js",
-      "_duration-DaRtGe9t.js",
-      "_DateFilter-DLh730Re.js",
+      "_duration-DP8QzzGu.js",
+      "_DateFilter-Dy_6JLgk.js",
       "resources/js/Pages/Laporan/Partials/TriageChart.vue",
       "resources/js/Pages/Laporan/Partials/TrendChart.vue",
       "_auto-0DX8mfB2.js",
@@ -159,7 +218,7 @@
     ]
   },
   "resources/js/Pages/PasienIgd/Index.vue": {
-    "file": "assets/Index-Ce9PLwt-.js",
+    "file": "assets/Index-_tjUHiVA.js",
     "name": "Index",
     "src": "resources/js/Pages/PasienIgd/Index.vue",
     "isDynamicEntry": true,
@@ -168,7 +227,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-Dsvk9uMI.js",
+    "file": "assets/app-II-ucqCz.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -181,6 +240,11 @@
       "resources/js/Pages/Laporan/Index.vue",
       "resources/js/Pages/Laporan/KepadatanIgd.vue",
       "resources/js/Pages/Laporan/Los.vue",
+      "resources/js/Pages/Laporan/Partials/IgdToRanapChart.vue",
+      "resources/js/Pages/Laporan/Partials/LosChart.vue",
+      "resources/js/Pages/Laporan/Partials/PatientPerHourChart.vue",
+      "resources/js/Pages/Laporan/Partials/PatientPerShiftChart.vue",
+      "resources/js/Pages/Laporan/Partials/PerDoctorChart.vue",
       "resources/js/Pages/Laporan/Partials/ReportCard.vue",
       "resources/js/Pages/Laporan/Partials/TrendChart.vue",
       "resources/js/Pages/Laporan/Partials/TriageChart.vue",
@@ -188,7 +252,7 @@
       "resources/js/Pages/PasienIgd/Index.vue"
     ],
     "css": [
-      "assets/app-C_rdC6ia.css"
+      "assets/app-5IObE6LO.css"
     ]
   }
 }

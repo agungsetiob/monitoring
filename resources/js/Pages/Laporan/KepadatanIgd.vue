@@ -1,8 +1,9 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
 import { ref, onMounted } from 'vue';
-import Chart from 'chart.js/auto';
 import DateFilter from '@/Components/DateFilter.vue';
+import PatientPerHourChart from './Partials/PatientPerHourChart.vue';
+import PatientPerShiftChart from './Partials/PatientPerShiftChart.vue';
 
 const props = defineProps({
     start_date: String,
@@ -14,86 +15,10 @@ const props = defineProps({
 
 const chartRefJam = ref(null);
 const chartRefShift = ref(null);
-let chartJamInstance = null;
-let chartShiftInstance = null;
 
 const handleFilter = (dates) => {
     router.get(route('laporan.kepadatan-igd'), dates);
 };
-
-onMounted(() => {
-    // Chart Per Jam
-    if (chartJamInstance) chartJamInstance.destroy();
-    const ctxJam = chartRefJam.value.getContext('2d');
-    const labelsJam = props.data_per_jam.map(d => String(d.jam).padStart(2, '0') + ':00');
-    const valuesJam = props.data_per_jam.map(d => d.jumlah);
-
-    chartJamInstance = new Chart(ctxJam, {
-        type: 'bar',
-        data: {
-            labels: labelsJam,
-            datasets: [{
-                label: 'Jumlah Pasien Masuk',
-                data: valuesJam,
-                backgroundColor: valuesJam.map(v => {
-                    if (v > 11) return '#dc2626'; // merah
-                    if (v > 5) return '#f97316';  // oranye
-                    return '#16a34a';             // hijau
-                }),
-                borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.parsed.y} pasien`
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Jumlah Pasien' }
-                },
-                x: {
-                    title: { display: true, text: 'Jam Masuk' }
-                }
-            }
-        }
-    });
-
-    // Chart Per Shift
-    if (chartShiftInstance) chartShiftInstance.destroy();
-    const ctxShift = chartRefShift.value.getContext('2d');
-    const labelsShift = props.data_per_shift.map(d => d.shift);
-    const valuesShift = props.data_per_shift.map(d => d.jumlah);
-
-    chartShiftInstance = new Chart(ctxShift, {
-        type: 'pie',
-        data: {
-            labels: labelsShift,
-            datasets: [{
-                data: valuesShift,
-                backgroundColor: ['#3b82f6', '#f59e0b', '#10b981'] // biru, oranye, hijau
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: ctx => `${ctx.label}: ${ctx.parsed} pasien`
-                    }
-                }
-            }
-        }
-    });
-});
 
 const isLoading = ref(false);
 document.addEventListener('inertia:start', () => {
@@ -108,7 +33,7 @@ document.addEventListener('inertia:finish', () => {
 
     <Head title="Laporan Kepadatan IGD" />
 
-    <div class="min-h-screen bg-gradient-to-br from-green-100 to-blue-100 px-8 py-10 flex flex-col items-center">
+    <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 px-8 py-10 flex flex-col items-center">
         <div class="w-full max-w-8xl bg-white rounded-2xl shadow-xl p-8 space-y-8">
             <!-- Header -->
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -148,35 +73,8 @@ document.addEventListener('inertia:finish', () => {
                     </p>
                 </div>
             </div>
-            <!-- Chart Per Jam -->
-            <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200">
-                <h2 class="text-xl font-bold mb-4 text-gray-700">📈 Grafik Pasien per Jam</h2>
-                <div class="relative h-[400px]">
-                    <canvas ref="chartRefJam"></canvas>
-                </div>
-                <!-- Legend -->
-                <div class="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
-                    <div class="flex items-center gap-2">
-                        <span class="w-4 h-4 rounded bg-red-600"></span>
-                        ≥ 12 pasien (padat)
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-4 h-4 rounded bg-orange-500"></span>
-                        6-11 pasien (sedang)
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-4 h-4 rounded bg-green-600"></span>
-                        ≤ 5 pasien (longgar)
-                    </div>
-                </div>
-            </div>
-            <!-- Chart Per Shift -->
-            <div class="bg-white p-6 md:p-8 rounded-xl shadow-md border border-gray-200">
-                <h2 class="text-xl font-bold mb-4 text-gray-700">🕒 Kepadatan Pasien per Shift</h2>
-                <div class="relative h-[300px]">
-                    <canvas ref="chartRefShift"></canvas>
-                </div>
-            </div>
+            <PatientPerHourChart :data="props.data_per_jam" />
+            <PatientPerShiftChart :data="props.data_per_shift" />
         </div>
     </div>
     <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-80">
