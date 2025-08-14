@@ -142,7 +142,7 @@ document.addEventListener('inertia:finish', () => {
                     </p>
                 </div>
                 <div class="bg-red-100 p-4 rounded-xl text-center">
-                    <p class="text-sm text-gray-600">Pasien Tersibuk per Jam</p>
+                    <p class="text-sm text-gray-600">Pasien Jam Tersibuk</p>
                     <p class="text-2xl font-bold text-red-800">
                         {{ props.summary.jumlah_tersibuk }}
                     </p>

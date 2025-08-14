@@ -48,7 +48,7 @@ const getTbakPillColor = (masuk, tanggal_tbak) => {
   if (diffHours < 1) return 'bg-blue-200 text-blue-800';
   if (diffHours >= 1 && diffHours < 3) return 'bg-green-200 text-green-800';
   if (diffHours >= 3 && diffHours < 6) return 'bg-yellow-200 text-yellow-800';
-  if (diffHours >= 6 && diffHours < 7) return 'bg-red-200 text-red-800';
+  if (diffHours >= 6 && diffHours < 8) return 'bg-red-200 text-red-800';
   return 'bg-gray-400 text-gray-800'; // 7+ hours
 };
 

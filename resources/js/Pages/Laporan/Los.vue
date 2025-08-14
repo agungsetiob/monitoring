@@ -69,8 +69,8 @@ const chartColors = {
     '<1h': '#3B82F6',   // biru
     '1-3h': '#10B981',  // hijau
     '3-6h': '#FACC15',  // kuning
-    '6-7h': '#EF4444',  // merah
-    '>7h': '#111827'    // hitam
+    '6-8h': '#EF4444',  // merah
+    '>8h': '#111827'    // hitam
 };
 
 const renderChart = () => {

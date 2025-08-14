@@ -35,8 +35,8 @@ class LosReportController extends Controller
                 SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) < 60 THEN 1 ELSE 0 END) AS cat_lt1,
                 SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) >= 60 AND TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) < 180 THEN 1 ELSE 0 END) AS cat_1_3,
                 SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) >= 180 AND TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) < 360 THEN 1 ELSE 0 END) AS cat_3_6,
-                SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) >= 360 AND TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) < 420 THEN 1 ELSE 0 END) AS cat_6_7,
-                SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) >= 420 THEN 1 ELSE 0 END) AS cat_gt7
+                SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) >= 360 AND TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) < 480 THEN 1 ELSE 0 END) AS cat_6_8,
+                SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, k.MASUK, k.KELUAR) >= 480 THEN 1 ELSE 0 END) AS cat_gt8
             FROM pendaftaran.kunjungan k
             WHERE k.RUANGAN = ?
               AND k.STATUS <> 1
@@ -53,8 +53,8 @@ class LosReportController extends Controller
             '<1h'  => $agg ? (int) $agg->cat_lt1  : 0,
             '1-3h' => $agg ? (int) $agg->cat_1_3  : 0,
             '3-6h' => $agg ? (int) $agg->cat_3_6  : 0,
-            '6-7h' => $agg ? (int) $agg->cat_6_7  : 0,
-            '>7h'  => $agg ? (int) $agg->cat_gt7  : 0,
+            '6-8h' => $agg ? (int) $agg->cat_6_8  : 0,
+            '>8h'  => $agg ? (int) $agg->cat_gt8  : 0,
         ];
 
         $lastPage = $total > 0 ? (int) ceil($total / $perPage) : 1;

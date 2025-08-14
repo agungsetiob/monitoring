@@ -29,6 +29,9 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role.igd'])->group(function 
 
     Route::get('laporan', fn() => Inertia::render('Laporan/Index'))->name('laporan.index');
     Route::get('laporan/triage', [TriageReportController::class, 'index'])->name('laporan.triage');
+    Route::get('/laporan/triage/summary', [TriageReportController::class, 'getSummary'])->name('laporan.triage.summary');
+    Route::get('/laporan/triage/daily-trend', [TriageReportController::class, 'getDailyTrendData'])->name('laporan.triage.daily-trend');
+    Route::get('/laporan/triage/average-los', [TriageReportController::class, 'getAverageLosData'])->name('laporan.triage.average-los');
 
     Route::get('/laporan-los', [LosReportController::class, 'index'])->name('laporan.los');
     Route::get('/laporan-los/data', [LosReportController::class, 'getLosReport'])->name('laporan.los.data');

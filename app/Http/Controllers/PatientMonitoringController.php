@@ -119,9 +119,9 @@ class PatientMonitoringController extends Controller
             WHERE k.RUANGAN = ?
             AND k.STATUS = 1
             GROUP BY k.NOPEN, k.MASUK, p.NORM, p2.NAMA, p2.JENIS_KELAMIN, r.DESKRIPSI, k.NOMOR,
-                    pri.JENIS_RUANG_PERAWATAN, pri.JENIS_PERAWATAN, pri.TANGGAL, pri.INDIKASI,
-                    pri.DESKRIPSI, pri.DOKTER, pri.DIBUAT_TANGGAL, pg.GELAR_DEPAN, pg.NAMA, pg.GELAR_BELAKANG,
-                    t.RESUSITASI, t.EMERGENCY, t.URGENT, t.LESS_URGENT, t.NON_URGENT, t.DOA, t.KRITERIA, t.HANDOVER
+                pri.JENIS_RUANG_PERAWATAN, pri.JENIS_PERAWATAN, pri.TANGGAL, pri.INDIKASI,
+                pri.DESKRIPSI, pri.DOKTER, pri.DIBUAT_TANGGAL, pg.GELAR_DEPAN, pg.NAMA, pg.GELAR_BELAKANG,
+                t.RESUSITASI, t.EMERGENCY, t.URGENT, t.LESS_URGENT, t.NON_URGENT, t.DOA, t.KRITERIA, t.HANDOVER
             ORDER BY k.MASUK DESC
             LIMIT 20
         ", [$unitId]);
