@@ -78,7 +78,7 @@ document.addEventListener('inertia:finish', () => {
 function getLosCategoryClass(minutes) {
     if (minutes < 60) return 'bg-blue-100 text-blue-600';
     if (minutes < 180) return 'bg-emerald-100 text-emerald-600';
-    if (minutes < 420) return 'bg-yellow-100 text-yellow-600';
+    if (minutes < 360) return 'bg-yellow-100 text-yellow-600';
     if (minutes < 480) return 'bg-red-100 text-red-600';
     return 'bg-gray-200 text-gray-700';
 }
