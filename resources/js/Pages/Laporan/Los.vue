@@ -24,9 +24,14 @@ const lastPage = ref(1);
 const perPage = ref(20);
 const totalPatients = ref(0);
 const isLoading = ref(false);
+const loadingStates = ref({
+    chart: false
+});
 
 const loadReport = async () => {
     isLoading.value = true;
+    loadingStates.value.chart = true;
+
     try {
         const res = await fetch(`/laporan-los/data?start_date=${startDate.value}&end_date=${endDate.value}&page=${currentPage.value}&per_page=${perPage.value}`);
         const data = await res.json();
@@ -43,6 +48,7 @@ const loadReport = async () => {
         console.error('Gagal load data:', err);
     } finally {
         isLoading.value = false;
+        loadingStates.value.chart = false;
     }
 };
 
@@ -76,7 +82,6 @@ function getLosCategoryClass(minutes) {
     if (minutes < 480) return 'bg-red-100 text-red-600';
     return 'bg-gray-200 text-gray-700';
 }
-
 </script>
 
 <template>
@@ -101,16 +106,17 @@ function getLosCategoryClass(minutes) {
             </div>
             <DateFilter :initial-start-date="props.start_date" :initial-end-date="props.end_date"
                 @filter="handleFilter" />
-            <LosChart :categories="categories" :start-date="props.start_date" :end-date="props.end_date" />
+            <LosChart :categories="categories" :start-date="props.start_date" :end-date="props.end_date"
+                :loading-state="loadingStates.chart" />
 
-            <div class="bg-blue-50 p-6 rounded-xl shadow-inner">
+            <div class="bg-blue-50 p-6 rounded-xl shadow-inner relative">
                 <h2 class="text-xl font-bold text-blue-700 mb-4">📊 Rangkuman</h2>
                 <p class="text-lg text-gray-800"><strong>Rata-rata LOS:</strong> {{ averageLos }} jam</p>
                 <ul class="list-disc pl-5 mt-2 text-gray-700">
                     <li v-for="(val, key) in categories" :key="key">{{ key }}: {{ val }} pasien</li>
                 </ul>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto relative">
                 <table class="min-w-full border border-gray-300 rounded-lg overflow-hidden">
                     <thead class="bg-blue-600 text-white">
                         <tr>
