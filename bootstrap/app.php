@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'role.igd' => \App\Http\Middleware\RoleIgd::class,
+            //'role.igd' => \App\Http\Middleware\RoleIgd::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

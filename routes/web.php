@@ -18,7 +18,7 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::middleware(['web', 'auth', 'throttle:60,1', 'role.igd'])->group(function () {
+Route::middleware(['web', 'auth', 'throttle:60,1', 'role:igd,admin'])->group(function () {
     Route::get('/e418d78f33c3716d01a492eec5ba33dc', [PatientMonitoringController::class, 'index'])
         ->name('pasien-igd.index');
     Route::get('/api/patient-igd', [PatientMonitoringController::class, 'getPatients'])
