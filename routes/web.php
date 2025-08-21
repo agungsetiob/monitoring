@@ -39,6 +39,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:igd,admin'])->group(fun
     
     // Rencana Kontrol Routes
     Route::get('/rencana-kontrol', [RencanaKontrolController::class, 'index'])->name('rencana-kontrol.index');
+    Route::get('/rencana-kontrol/update', [RencanaKontrolController::class, 'showUpdateForm'])->name('rencana-kontrol.show-update');
     Route::post('/rencana-kontrol/cari-data', [RencanaKontrolController::class, 'cariData'])->name('rencana-kontrol.cari-data');
     Route::post('/rencana-kontrol/update', [RencanaKontrolController::class, 'updateRencanaKontrol'])->name('rencana-kontrol.update');
     Route::get('/rencana-kontrol/poli-list', [RencanaKontrolController::class, 'getPoliList'])->name('rencana-kontrol.poli-list');

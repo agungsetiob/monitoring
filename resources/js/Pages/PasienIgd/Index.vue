@@ -82,19 +82,19 @@ const getTriagePillColor = (status) => {
 <template>
 
   <Head title="Pasien IGD" />
-  <div class="min-h-screen bg-pattern p-4 md:p-4">
-    <div class="text-center mb-4">
+  <div class="p-4 min-h-screen bg-pattern md:p-4">
+    <div class="mb-4 text-center">
       <div
-        class="bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl px-6 py-4 w-full flex flex-col md:flex-row md:items-center md:justify-between text-white">
+        class="flex flex-col px-6 py-4 w-full text-white bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl md:flex-row md:items-center md:justify-between">
         <!-- Judul -->
-        <h1 class="text-2xl md:text-4xl font-extrabold mb-2 md:mb-0">
+        <h1 class="mb-2 text-2xl font-extrabold md:text-4xl md:mb-0">
           Pasien IGD RSUD dr. H. Andi Abdurrahman Noor
         </h1>
 
         <!-- Tombol Kembali -->
         <button @click="router.visit('/')"
-          class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          class="inline-flex gap-2 items-center px-5 py-2 font-semibold text-white bg-indigo-600 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:bg-indigo-700 hover:scale-105">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M19 12H5"></path>
             <path d="M12 19l-7-7 7-7"></path>
@@ -104,12 +104,12 @@ const getTriagePillColor = (status) => {
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-4 mb-4">
+    <div class="grid grid-cols-1 gap-4 mb-4 md:grid-cols-4 md:gap-4">
       <div v-for="patient in patients" :key="patient.KUNJUNGAN_ID" :class="getPatientCardClasses(patient.MASUK)"
-        class="relative p-3 rounded-lg border-l-8 border shadow-md hover:shadow-lg transition-all duration-300 ease-in-out flex flex-col justify-between">
+        class="flex relative flex-col justify-between p-3 rounded-lg border border-l-8 shadow-md transition-all duration-300 ease-in-out hover:shadow-lg">
         <!-- Patient Info -->
         <div class="flex justify-between items-start mb-2">
-          <h2 class="text-xl font-bold leading-tight pr-4 flex items-center">
+          <h2 class="flex items-center pr-4 text-xl font-bold leading-tight">
             {{ patient.NAMA }} <font-awesome-icon :icon="patient.JENIS_KELAMIN === 1 ? 'mars' : 'venus'"
               :class="patient.JENIS_KELAMIN === 1 ? 'text-blue-300' : 'text-pink-400'" class="ml-1" />
           </h2>
@@ -121,27 +121,27 @@ const getTriagePillColor = (status) => {
         <!-- Status Indicators -->
         <div class="flex flex-col gap-2 mb-2">
           <div class="flex justify-between items-center space-x-1">
-            <span class="text-lg mr-1 font-semibold">🏥 {{ patient.RUANGAN }}</span>
+            <span class="mr-1 text-lg font-semibold">🏥 {{ patient.RUANGAN }}</span>
             <span v-if="patient.STATUS_TBAK === 1" :class="getTbakPillColor(patient.MASUK, patient.TANGGAL_TBAK)"
-              class="text-sm font-semibold px-2 py-1 rounded-full">
+              class="px-2 py-1 text-sm font-semibold rounded-full">
               Sudah Konsul
             </span>
             <span v-if="patient.TRIAGE_STATUS !== 'unclassified'"
               :class="['text-sm font-bold px-3 py-1 rounded-full', getTriagePillColor(patient.TRIAGE_STATUS)]">
               Triage: {{ patient.TRIAGE_STATUS }}
             </span>
-            <span v-else class="text-sm font-semibold px-3 py-1 rounded-full bg-gray-200 text-gray-700">
+            <span v-else class="px-3 py-1 text-sm font-semibold text-gray-700 bg-gray-200 rounded-full">
               Belum Triage
             </span>
           </div>
 
           <div v-if="patient.DPJP_RANAP"
-            class="flex items-center justify-center bg-purple-100 text-purple-800 rounded-full p-1">
+            class="flex justify-center items-center p-1 text-purple-800 bg-purple-100 rounded-full">
             <span class="text-sm font-semibold text-center">Siap Ranap DPJP: {{ patient.DPJP_RANAP }}</span>
           </div>
 
           <div v-if="patient.NOMOR_REFERENSI"
-            class="flex items-center justify-center bg-blue-100 text-blue-800 rounded-full p-1">
+            class="flex justify-center items-center p-1 text-blue-800 bg-blue-100 rounded-full">
             <span class="text-sm font-semibold">No. Ref: {{ patient.NOMOR_REFERENSI }}</span>
           </div>
         </div>
@@ -151,7 +151,7 @@ const getTriagePillColor = (status) => {
             <span class="mr-1">⏰</span>
             <p class="text-lg font-semibold">{{ patient.TANGGAL }}</p>
           </div>
-          <div class="text-right flex items-center">
+          <div class="flex items-center text-right">
             <span class="mr-1">⏳</span>
             <p class="text-lg font-semibold">{{ getTimeDiff(patient.MASUK) }}</p>
           </div>

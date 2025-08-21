@@ -24,6 +24,21 @@ class RencanaKontrolController extends Controller
     }
 
     /**
+     * Display the update form page for rencana kontrol.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function showUpdateForm(Request $request)
+    {
+        $searchData = $request->query('data') ? json_decode($request->query('data'), true) : [];
+        
+        return Inertia::render('RencanaKontrol/Update', [
+            'searchData' => $searchData
+        ]);
+    }
+
+    /**
      * Search rencana kontrol data from third party API.
      */
     public function cariData(Request $request)
