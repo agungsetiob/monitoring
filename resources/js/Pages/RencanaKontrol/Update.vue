@@ -302,32 +302,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.bg-pattern {
-  background-color: #f8fafc;
-  background-image: 
-    radial-gradient(circle at 25px 25px, rgba(255,255,255,.2) 2%, transparent 50%),
-    radial-gradient(circle at 75px 75px, rgba(255,255,255,.2) 2%, transparent 50%);
-  background-size: 100px 100px;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-</style>
