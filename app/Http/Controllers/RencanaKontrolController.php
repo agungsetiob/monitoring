@@ -27,7 +27,7 @@ class RencanaKontrolController extends Controller
      * Display the update form page for rencana kontrol.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Inertia\Response
      */
     public function showUpdateForm(Request $request)
     {
@@ -39,32 +39,38 @@ class RencanaKontrolController extends Controller
     }
 
     /**
-     * Search rencana kontrol data from third party API.
+     * Search rencana kontrol data from BPJS API.
      */
     public function cariData(Request $request)
     {
         $request->validate([
             'no_kartu' => 'required|string',
-            'tanggal_sep' => 'required|date',
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2020',
+            'filter' => 'nullable|string',
         ]);
 
         try {
-            // Panggil API pihak ketiga untuk cari data
-            $response = $this->apiService->cariData(
+            // Panggil API BPJS untuk cari data rencana kontrol
+            $response = $this->apiService->getListRencanaKontrolByNoKartu(
+                $request->bulan,
+                $request->tahun,
                 $request->no_kartu,
-                $request->tanggal_sep
+                $request->filter
             );
 
-            if ($response['success']) {
+            if (isset($response['metaData']) && $response['metaData']['code'] === '200') {
                 return response()->json([
                     'success' => true,
                     'message' => 'Data rencana kontrol berhasil ditemukan',
-                    'data' => $response['data'],
+                    'data' => $response['response'] ?? [],
+                    'metaData' => $response['metaData'],
                 ], 200, [], JSON_UNESCAPED_UNICODE);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => $response['message'] ?? 'Data tidak ditemukan',
+                    'message' => $response['metaData']['message'] ?? 'Data tidak ditemukan',
+                    'code' => $response['metaData']['code'] ?? null,
                 ], 404, [], JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {
@@ -79,40 +85,90 @@ class RencanaKontrolController extends Controller
     }
 
     /**
-     * Update rencana kontrol data via third party API.
+     * Insert new rencana kontrol via BPJS API.
      */
-    public function updateRencanaKontrol(Request $request)
+    public function insertRencanaKontrol(Request $request)
     {
         $request->validate([
-            'no_sep' => 'required|string',
-            'no_kartu' => 'required|string',
-            'tanggal_rencana' => 'required|date',
-            'poli_kontrol' => 'required|string',
-            'dokter' => 'required|string',
+            'noSEP' => 'required|string',
+            'kodeDokter' => 'required|string',
+            'poliKontrol' => 'required|string',
+            'tglRencanaKontrol' => 'required|date',
             'user' => 'required|string',
         ]);
 
         try {
-            // Panggil API pihak ketiga untuk update rencana kontrol
-            $response = $this->apiService->updateRencanaKontrol([
-                'no_sep' => $request->no_sep,
-                'no_kartu' => $request->no_kartu,
-                'tanggal_rencana' => $request->tanggal_rencana,
-                'poli_kontrol' => $request->poli_kontrol,
-                'dokter' => $request->dokter,
+            // Panggil API BPJS untuk insert rencana kontrol
+            $response = $this->apiService->insertRencanaKontrol([
+                'noSEP' => $request->noSEP,
+                'kodeDokter' => $request->kodeDokter,
+                'poliKontrol' => $request->poliKontrol,
+                'tglRencanaKontrol' => $request->tglRencanaKontrol,
                 'user' => $request->user,
             ]);
 
-            if ($response['success']) {
+            if (isset($response['metaData']) && $response['metaData']['code'] === '200') {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Rencana kontrol berhasil diupdate',
-                    'data' => $response['data'],
+                    'message' => 'Rencana kontrol berhasil dibuat',
+                    'data' => $response['response'] ?? [],
+                    'metaData' => $response['metaData'],
                 ], 200, [], JSON_UNESCAPED_UNICODE);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => $response['message'] ?? 'Gagal mengupdate rencana kontrol',
+                    'message' => $response['metaData']['message'] ?? 'Gagal membuat rencana kontrol',
+                    'code' => $response['metaData']['code'] ?? null,
+                ], 400, [], JSON_UNESCAPED_UNICODE);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error saat insert rencana kontrol: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat membuat rencana kontrol',
+                'error' => $e->getMessage(),
+            ], 500, [], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    /**
+     * Update rencana kontrol data via BPJS API.
+     */
+    public function updateRencanaKontrol(Request $request)
+    {
+        $request->validate([
+            'noSuratKontrol' => 'required|string',
+            'noSEP' => 'required|string',
+            'kodeDokter' => 'required|string',
+            'poliKontrol' => 'required|string',
+            'tglRencanaKontrol' => 'required|date',
+            'user' => 'required|string',
+        ]);
+
+        try {
+            // Panggil API BPJS untuk update rencana kontrol
+            $response = $this->apiService->updateRencanaKontrol([
+                'noSuratKontrol' => $request->noSuratKontrol,
+                'noSEP' => $request->noSEP,
+                'kodeDokter' => $request->kodeDokter,
+                'poliKontrol' => $request->poliKontrol,
+                'tglRencanaKontrol' => $request->tglRencanaKontrol,
+                'user' => $request->user,
+            ]);
+
+            if (isset($response['metaData']) && $response['metaData']['code'] === '200') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Rencana kontrol berhasil diupdate',
+                    'data' => $response['response'] ?? [],
+                    'metaData' => $response['metaData'],
+                ], 200, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $response['metaData']['message'] ?? 'Gagal mengupdate rencana kontrol',
+                    'code' => $response['metaData']['code'] ?? null,
                 ], 400, [], JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {
@@ -127,32 +183,101 @@ class RencanaKontrolController extends Controller
     }
 
     /**
-     * Get list of available poli for rencana kontrol.
+     * Get referensi dokter DPJP from BPJS API.
      */
-    public function getPoliList()
+    public function getReferensiDokter(Request $request)
     {
-        try {
-            // Panggil API pihak ketiga untuk mendapatkan daftar poli
-            $response = $this->apiService->getPoliList();
+        $request->validate([
+            'jnsPelayanan' => 'required|string',
+            'tglPelayanan' => 'required|date',
+            'spesialisKode' => 'required|string',
+        ]);
 
-            if ($response['success']) {
+        try {
+            // Panggil API BPJS untuk mendapatkan referensi dokter
+            $response = $this->apiService->getReferensiDokter(
+                $request->jnsPelayanan,
+                $request->tglPelayanan,
+                $request->spesialisKode
+            );
+
+            if (isset($response['metaData']) && $response['metaData']['code'] === '200') {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Daftar poli berhasil diambil',
-                    'data' => $response['data'],
+                    'message' => 'Referensi dokter berhasil diambil',
+                    'data' => $response['response'] ?? [],
+                    'metaData' => $response['metaData'],
                 ], 200, [], JSON_UNESCAPED_UNICODE);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mengambil daftar poli',
+                    'message' => $response['metaData']['message'] ?? 'Gagal mengambil referensi dokter',
+                    'code' => $response['metaData']['code'] ?? null,
                 ], 400, [], JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {
-            Log::error('Error saat mengambil daftar poli: ' . $e->getMessage());
+            Log::error('Error saat mengambil referensi dokter: ' . $e->getMessage());
             
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil daftar poli',
+                'message' => 'Terjadi kesalahan saat mengambil referensi dokter',
+                'error' => $e->getMessage(),
+            ], 500, [], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    /**
+     * Insert SEP version 2.0 via BPJS API.
+     */
+    public function insertSEP20(Request $request)
+    {
+        $request->validate([
+            'noKartu' => 'required|string',
+            'tglSep' => 'required|date',
+            'ppkPelayanan' => 'required|string',
+            'jnsPelayanan' => 'required|string',
+            'klsRawat' => 'required|string',
+            'noMR' => 'required|string',
+            'rujukan' => 'required|array',
+            'catatan' => 'nullable|string',
+            'diagAwal' => 'required|string',
+            'poli' => 'required|array',
+            'cob' => 'required|array',
+            'katarak' => 'required|array',
+            'jaminan' => 'required|array',
+            'tujuanKunj' => 'required|string',
+            'flagProcedure' => 'required|string',
+            'kdPenunjang' => 'nullable|string',
+            'assesmentPel' => 'required|string',
+            'skdp' => 'required|array',
+            'dpjpLayan' => 'required|string',
+            'noTelp' => 'required|string',
+            'user' => 'required|string',
+        ]);
+
+        try {
+            $response = $this->apiService->insertSEP20($request->all());
+
+            if (isset($response['metaData']) && $response['metaData']['code'] === '200') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'SEP 2.0 berhasil dibuat',
+                    'data' => $response['response'] ?? [],
+                    'metaData' => $response['metaData'],
+                ], 200, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $response['metaData']['message'] ?? 'Gagal membuat SEP 2.0',
+                    'code' => $response['metaData']['code'] ?? null,
+                ], 400, [], JSON_UNESCAPED_UNICODE);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error saat insert SEP 2.0: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat membuat SEP 2.0',
                 'error' => $e->getMessage(),
             ], 500, [], JSON_UNESCAPED_UNICODE);
         }
@@ -164,14 +289,13 @@ class RencanaKontrolController extends Controller
     public function getDokterList(Request $request)
     {
         $request->validate([
-            'kode_poli' => 'required|string',
+            'kodePoli' => 'required|string',
             'tanggal' => 'required|date',
         ]);
 
         try {
-            // Panggil API pihak ketiga untuk mendapatkan daftar dokter
             $response = $this->apiService->getDokterList(
-                $request->kode_poli,
+                $request->kodePoli,
                 $request->tanggal
             );
 
@@ -184,7 +308,7 @@ class RencanaKontrolController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mengambil daftar dokter',
+                    'message' => $response['message'] ?? 'Gagal mengambil daftar dokter',
                 ], 400, [], JSON_UNESCAPED_UNICODE);
             }
         } catch (\Exception $e) {

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 
 class RencanaKontrolApiService
@@ -25,43 +25,243 @@ class RencanaKontrolApiService
     }
 
     /**
-     * Cari data rencana kontrol berdasarkan nomor kartu dan tanggal SEP.
+     * Membuat timestamp UTC dalam detik sesuai standar BPJS.
      *
-     * @param string $noKartu
-     * @param string $tanggalSep
+     * @return string
+     */
+    private function makeTimestampSecondsUTC()
+    {
+        return (string) time();
+    }
+
+    /**
+     * Generate X-signature: base64(HMAC-SHA256(consumerID&timestamp, consumerSecret))
+     * Sesuai dokumentasi BPJS.
+     *
+     * @param string $consId
+     * @param string $timestamp
+     * @param string $secret
+     * @return string
+     */
+    private function makeSignature($consId, $timestamp, $secret)
+    {
+        $data = $consId . '&' . $timestamp;
+        return base64_encode(hash_hmac('sha256', $data, $secret, true));
+    }
+
+    /**
+     * Decrypt dan decompress response BPJS.
+     * 1) AES-256-CBC dengan key = SHA256(consId + secret + timestamp)
+     *    IV = 16 byte pertama dari hash yang sama
+     * 2) Hasil masih kompresi LZString → decompress
+     *
+     * @param string $cipherBase64
+     * @param string $consId
+     * @param string $secret
+     * @param string $timestamp
      * @return array
      */
-    public function cariData($noKartu, $tanggalSep)
+    private function decryptAndDecompress($cipherBase64, $consId, $secret, $timestamp)
     {
         try {
-            $endpoint = '/RencanaKontrol/ListRencanaKontrol';
-            $params = [
-                'noka' => $noKartu,
-                'tglSEP' => $tanggalSep,
+            $keyMaterial = $consId . $secret . $timestamp;
+            $hash = hash('sha256', $keyMaterial, true); // 32 bytes
+            $iv = substr($hash, 0, 16);
+
+            $decrypted = openssl_decrypt(
+                base64_decode($cipherBase64),
+                'AES-256-CBC',
+                $hash,
+                OPENSSL_RAW_DATA,
+                $iv
+            );
+
+            if ($decrypted === false) {
+                throw new \Exception('Gagal decrypt data');
+            }
+
+            // Decompress LZString (simulasi - PHP tidak memiliki LZString native)
+            // Untuk implementasi lengkap, gunakan library seperti matthiasmullie/lz-string
+            $jsonText = $this->lzStringDecompress($decrypted);
+            
+            if (!$jsonText) {
+                throw new \Exception('Gagal decompress LZString: hasil kosong/invalid');
+            }
+
+            return json_decode($jsonText, true);
+        } catch (\Exception $e) {
+            Log::error('Error decrypt and decompress: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Simulasi LZString decompression.
+     * Untuk implementasi lengkap, gunakan library matthiasmullie/lz-string.
+     *
+     * @param string $compressed
+     * @return string
+     */
+    private function lzStringDecompress($compressed)
+    {
+        // Implementasi sederhana - untuk production gunakan library yang tepat
+        // composer require matthiasmullie/lz-string
+        try {
+            // Jika data sudah dalam format JSON, langsung return
+            if (json_decode($compressed)) {
+                return $compressed;
+            }
+            
+            // Untuk sementara, asumsikan data sudah terdekompresi
+            return $compressed;
+        } catch (\Exception $e) {
+            return $compressed;
+        }
+    }
+
+    /**
+     * Ambil Data Nomor Surat Kontrol berdasarkan No Kartu.
+     *
+     * @param string $bulan "01" .. "12"
+     * @param string $tahun "2025" (4 digit)
+     * @param string $noKartu
+     * @param int $filter 1: tanggal entri, 2: tgl rencana kontrol
+     * @return array
+     */
+    public function getListRencanaKontrolByNoKartu($bulan, $tahun, $noKartu, $filter = 2)
+    {
+        try {
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+            $endpoint = "/RencanaKontrol/ListRencanaKontrol/Bulan/{$bulan}/Tahun/{$tahun}/Nokartu/{$noKartu}/filter/{$filter}";
+            
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Accept' => 'application/json',
             ];
 
-            $response = $this->makeRequest('GET', $endpoint, $params);
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->get($this->baseUrl . $endpoint);
 
-            if ($response['success']) {
+            if (!$response->successful()) {
+                throw new \Exception('HTTP request failed: ' . $response->status());
+            }
+
+            $data = $response->json();
+            
+            if (!$data) {
+                throw new \Exception('Response kosong dari server BPJS');
+            }
+
+            // Jika response sudah plaintext JSON, langsung kembalikan
+            if (isset($data['response']) && is_array($data['response'])) {
+                return $data;
+            }
+
+            // Jika terenkripsi (string base64), lakukan decrypt+decompress
+            if (isset($data['response']) && is_string($data['response'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
                 return [
-                    'success' => true,
-                    'data' => $this->transformCariDataResponse($response['data']),
+                    'metaData' => $data['metaData'],
+                    'response' => $decryptedObj,
                 ];
             }
 
-            return [
-                'success' => false,
-                'message' => $response['message'] ?? 'Data tidak ditemukan',
-            ];
+            // Beberapa implementasi meletakkan payload terenkripsi pada field 'data'
+            if (isset($data['data']) && is_string($data['data'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['data'], $this->consId, $this->secretKey, $ts);
+                return [
+                    'metaData' => $data['metaData'] ?? null,
+                    'response' => $decryptedObj,
+                ];
+            }
+
+            return $data;
         } catch (\Exception $e) {
-            Log::error('Error saat mencari data rencana kontrol: ' . $e->getMessage(), [
+            Log::error('Error saat mengambil list rencana kontrol: ' . $e->getMessage(), [
+                'bulan' => $bulan,
+                'tahun' => $tahun,
                 'no_kartu' => $noKartu,
-                'tanggal_sep' => $tanggalSep,
+                'filter' => $filter,
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mencari data',
+                'message' => 'Terjadi kesalahan saat mengambil data',
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Insert Rencana Kontrol.
+     *
+     * @param array $rencanaKontrolData
+     * @param array $options
+     * @return array
+     */
+    public function insertRencanaKontrol($rencanaKontrolData, $options = [])
+    {
+        try {
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+            $endpoint = '/RencanaKontrol/insert';
+            $contentType = isset($options['contentTypeJson']) && $options['contentTypeJson'] 
+                ? 'application/json' 
+                : 'application/x-www-form-urlencoded';
+
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => $contentType,
+                'Accept' => 'application/json',
+            ];
+
+            // Bungkus sesuai skema: { request: { ... } }
+            $body = ['request' => $rencanaKontrolData];
+            $bodyString = json_encode($body);
+
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->withBody($bodyString, $contentType)
+                ->post($this->baseUrl . $endpoint);
+
+            if (!$response->successful()) {
+                throw new \Exception('HTTP request failed: ' . $response->status());
+            }
+
+            $data = $response->json();
+            
+            if (!$data) {
+                throw new \Exception('Response kosong dari server BPJS');
+            }
+
+            if (isset($data['response']) && is_string($data['response'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
+                return [
+                    'metaData' => $data['metaData'],
+                    'response' => $decryptedObj,
+                ];
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error('Error saat insert rencana kontrol: ' . $e->getMessage(), [
+                'data' => $rencanaKontrolData,
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat insert rencana kontrol',
                 'error' => $e->getMessage(),
             ];
         }
@@ -70,38 +270,61 @@ class RencanaKontrolApiService
     /**
      * Update rencana kontrol.
      *
-     * @param array $data
+     * @param array $rencanaKontrolData
+     * @param array $options
      * @return array
      */
-    public function updateRencanaKontrol($data)
+    public function updateRencanaKontrol($rencanaKontrolData, $options = [])
     {
         try {
-            $endpoint = '/RencanaKontrol/UpdateRencanaKontrol';
-            $payload = [
-                'noSEP' => $data['no_sep'],
-                'noKartu' => $data['no_kartu'],
-                'tglRencanaKontrol' => $data['tanggal_rencana'],
-                'poliKontrol' => $data['poli_kontrol'],
-                'dokter' => $data['dokter'],
-                'user' => $data['user'],
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+            $endpoint = '/RencanaKontrol/Update';
+            $contentType = isset($options['contentTypeJson']) && $options['contentTypeJson'] 
+                ? 'application/json' 
+                : 'application/x-www-form-urlencoded';
+
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => $contentType,
+                'Accept' => 'application/json',
             ];
 
-            $response = $this->makeRequest('POST', $endpoint, $payload);
+            // Bungkus sesuai skema: { request: { ... } }
+            $body = ['request' => $rencanaKontrolData];
+            $bodyString = json_encode($body);
 
-            if ($response['success']) {
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->withBody($bodyString, $contentType)
+                ->put($this->baseUrl . $endpoint);
+
+            if (!$response->successful()) {
+                throw new \Exception('HTTP request failed: ' . $response->status());
+            }
+
+            $data = $response->json();
+            
+            if (!$data) {
+                throw new \Exception('Response kosong dari server BPJS');
+            }
+
+            if (isset($data['response']) && is_string($data['response'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
                 return [
-                    'success' => true,
-                    'data' => $this->transformUpdateResponse($response['data']),
+                    'metaData' => $data['metaData'],
+                    'response' => $decryptedObj,
                 ];
             }
 
-            return [
-                'success' => false,
-                'message' => $response['message'] ?? 'Gagal mengupdate rencana kontrol',
-            ];
+            return $data;
         } catch (\Exception $e) {
             Log::error('Error saat mengupdate rencana kontrol: ' . $e->getMessage(), [
-                'data' => $data,
+                'data' => $rencanaKontrolData,
             ]);
 
             return [
@@ -113,36 +336,130 @@ class RencanaKontrolApiService
     }
 
     /**
-     * Ambil daftar poli.
+     * Insert SEP versi 2.0.
      *
+     * @param array $sepData
+     * @param array $options
      * @return array
      */
-    public function getPoliList()
+    public function insertSEP20($sepData, $options = [])
     {
         try {
-            // Cache daftar poli selama 1 jam
-            return Cache::remember('poli_list', 3600, function () {
-                $endpoint = '/referensi/poli';
-                $response = $this->makeRequest('GET', $endpoint);
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
 
-                if ($response['success']) {
-                    return [
-                        'success' => true,
-                        'data' => $this->transformPoliListResponse($response['data']),
-                    ];
-                }
+            $endpoint = '/SEP/2.0/insert';
+            $contentType = isset($options['contentTypeJson']) && $options['contentTypeJson'] 
+                ? 'application/json' 
+                : 'application/x-www-form-urlencoded';
 
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => $contentType,
+                'Accept' => 'application/json',
+            ];
+
+            // Bungkus sesuai skema: { request: { ... } }
+            $body = ['request' => $sepData];
+            $bodyString = json_encode($body);
+
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->withBody($bodyString, $contentType)
+                ->post($this->baseUrl . $endpoint);
+
+            if (!$response->successful()) {
+                throw new \Exception('HTTP request failed: ' . $response->status());
+            }
+
+            $data = $response->json();
+            
+            if (!$data) {
+                throw new \Exception('Response kosong dari server BPJS');
+            }
+
+            if (isset($data['response']) && is_string($data['response'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
                 return [
-                    'success' => false,
-                    'message' => 'Gagal mengambil daftar poli',
+                    'metaData' => $data['metaData'],
+                    'response' => $decryptedObj,
                 ];
-            });
+            }
+
+            return $data;
         } catch (\Exception $e) {
-            Log::error('Error saat mengambil daftar poli: ' . $e->getMessage());
+            Log::error('Error saat insert SEP 2.0: ' . $e->getMessage(), [
+                'data' => $sepData,
+            ]);
 
             return [
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengambil daftar poli',
+                'message' => 'Terjadi kesalahan saat insert SEP 2.0',
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Get referensi dokter DPJP.
+     *
+     * @param string $jnsPelayanan
+     * @param string $tglPelayanan
+     * @param string $spesialisKode
+     * @return array
+     */
+    public function getReferensiDokter($jnsPelayanan, $tglPelayanan, $spesialisKode)
+    {
+        try {
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+            $endpoint = "/referensi/dokter/pelayanan/{$jnsPelayanan}/tglPelayanan/{$tglPelayanan}/Spesialis/{$spesialisKode}";
+
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Accept' => 'application/json',
+            ];
+
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->get($this->baseUrl . $endpoint);
+
+            if (!$response->successful()) {
+                throw new \Exception('HTTP request failed: ' . $response->status());
+            }
+
+            $data = $response->json();
+            
+            if (!$data) {
+                throw new \Exception('Response kosong dari server BPJS');
+            }
+
+            if (isset($data['response']) && is_string($data['response'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
+                return [
+                    'metaData' => $data['metaData'],
+                    'response' => $decryptedObj,
+                ];
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error('Error saat mengambil referensi dokter: ' . $e->getMessage(), [
+                'jnsPelayanan' => $jnsPelayanan,
+                'tglPelayanan' => $tglPelayanan,
+                'spesialisKode' => $spesialisKode,
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil referensi dokter',
                 'error' => $e->getMessage(),
             ];
         }
@@ -193,130 +510,141 @@ class RencanaKontrolApiService
     }
 
     /**
-     * Make HTTP request to third party API.
+     * Make HTTP request to BPJS API with encryption/decryption support.
      *
      * @param string $method
      * @param string $endpoint
      * @param array $data
+     * @param array $options
      * @return array
      */
-    private function makeRequest($method, $endpoint, $data = [])
+    private function makeRequest($method, $endpoint, $data = [], $options = [])
     {
-        $url = $this->baseUrl . $endpoint;
+        $maxRetries = 3;
+        $retryDelay = 1; // seconds
+        $useEncryption = $options['useEncryption'] ?? false;
+        $contentType = $options['contentType'] ?? 'application/json';
 
-        // Generate headers untuk setiap request
-        $headers = [
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
-            'X-cons-id' => $this->consId,
-            'X-timestamp' => now()->timestamp,
-            'X-signature' => $this->generateSignature(),
-            'user_key' => $this->userKey,
-        ];
-
-        $response = Http::withHeaders($headers)
-            ->timeout($this->timeout)
-            ->retry(3, 1000) // Retry 3 kali dengan delay 1 detik
-            ->when($method === 'GET', function ($http) use ($url, $data) {
-                return $http->get($url, $data);
-            })
-            ->when($method === 'POST', function ($http) use ($url, $data) {
-                return $http->post($url, $data);
-            });
-
-        if ($response->successful()) {
-            $responseData = $response->json();
-            
-            // Sesuaikan dengan format response API BPJS
-            if (isset($responseData['metaData']['code']) && $responseData['metaData']['code'] === '200') {
-                return [
-                    'success' => true,
-                    'data' => $responseData['response'] ?? [],
-                    'message' => $responseData['metaData']['message'] ?? 'Success',
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $ts = $this->makeTimestampSecondsUTC();
+                $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+                
+                $headers = [
+                    'X-cons-id' => $this->consId,
+                    'X-timestamp' => $ts,
+                    'X-signature' => $signature,
+                    'user_key' => $this->userKey,
+                    'Content-Type' => $contentType,
+                    'Accept' => 'application/json',
                 ];
+                
+                $url = $this->baseUrl . $endpoint;
+                $body = $data;
+                
+                // Wrap data if encryption is used
+                if ($useEncryption && !empty($data)) {
+                    $body = ['request' => $data];
+                }
+                
+                $bodyString = json_encode($body);
+                
+                $httpClient = Http::withHeaders($headers)->timeout($this->timeout);
+                
+                switch (strtoupper($method)) {
+                    case 'GET':
+                        $response = $httpClient->get($url);
+                        break;
+                    case 'POST':
+                        $response = $httpClient->withBody($bodyString, $contentType)->post($url);
+                        break;
+                    case 'PUT':
+                        $response = $httpClient->withBody($bodyString, $contentType)->put($url);
+                        break;
+                    case 'DELETE':
+                        $response = $httpClient->delete($url);
+                        break;
+                    default:
+                        throw new \Exception('Unsupported HTTP method: ' . $method);
+                }
+
+                if ($response->successful()) {
+                    $responseData = $response->json();
+                    
+                    // Handle encrypted response
+                    if ($useEncryption && isset($responseData['response']) && is_string($responseData['response'])) {
+                        $decryptedObj = $this->decryptAndDecompress($responseData['response'], $this->consId, $this->secretKey, $ts);
+                        return [
+                        'success' => true,
+                        'data' => [
+                            'metaData' => $responseData['metaData'] ?? null,
+                            'response' => $decryptedObj,
+                        ],
+                        'status_code' => $response->status(),
+                    ];
+                }
+
+                // Sesuaikan dengan format response API BPJS
+                if (isset($responseData['metaData']['code']) && $responseData['metaData']['code'] === '200') {
+                    return [
+                        'success' => true,
+                        'data' => $responseData['response'] ?? [],
+                        'message' => $responseData['metaData']['message'] ?? 'Success',
+                    ];
+                }
+
+                    return [
+                        'success' => false,
+                        'message' => $responseData['metaData']['message'] ?? 'Request failed',
+                        'code' => $responseData['metaData']['code'] ?? null,
+                    ];
+                }
+
+                // Handle specific HTTP status codes
+                if ($response->status() === 429) {
+                    // Rate limited, wait longer before retry
+                    sleep($retryDelay * 2);
+                    continue;
+                }
+
+                if ($response->status() >= 500) {
+                    // Server error, retry
+                    sleep($retryDelay);
+                    continue;
+                }
+
+                // Client error, don't retry
+                return [
+                    'success' => false,
+                    'message' => 'HTTP Error: ' . $response->status(),
+                    'status_code' => $response->status(),
+                    'response_body' => $response->body(),
+                ];
+            } catch (\Exception $e) {
+                Log::error('HTTP request failed (attempt ' . $attempt . '): ' . $e->getMessage(), [
+                    'method' => $method,
+                    'endpoint' => $endpoint,
+                    'data' => $data,
+                ]);
+
+                if ($attempt === $maxRetries) {
+                    return [
+                        'success' => false,
+                        'message' => 'Request failed after ' . $maxRetries . ' attempts: ' . $e->getMessage(),
+                        'error' => $e->getMessage(),
+                    ];
+                }
+
+                sleep($retryDelay);
             }
 
-            return [
-                'success' => false,
-                'message' => $responseData['metaData']['message'] ?? 'Request failed',
-                'code' => $responseData['metaData']['code'] ?? null,
-            ];
+            $retryDelay *= 2; // Exponential backoff
         }
 
         return [
             'success' => false,
-            'message' => 'HTTP request failed: ' . $response->status(),
-            'code' => $response->status(),
+            'message' => 'Request failed after maximum retries',
         ];
-    }
-
-    /**
-     * Generate signature untuk autentikasi API.
-     *
-     * @return string
-     */
-    private function generateSignature()
-    {
-        // Implementasi signature sesuai dengan dokumentasi API BPJS
-        $timestamp = now()->timestamp;
-
-        $data = $this->consId . '&' . $timestamp;
-        $signature = hash_hmac('sha256', $data, $this->secretKey, true);
-        
-        return base64_encode($signature);
-    }
-
-    /**
-     * Transform response data dari cari data.
-     *
-     * @param array $data
-     * @return array
-     */
-    private function transformCariDataResponse($data)
-    {
-        // Sesuaikan dengan struktur response API yang sebenarnya
-        return [
-            'no_kartu' => $data['noKartu'] ?? '',
-            'nama_peserta' => $data['nama'] ?? '',
-            'no_sep' => $data['noSEP'] ?? '',
-            'tanggal_sep' => $data['tglSEP'] ?? '',
-            'poli_asal' => $data['poliAsal'] ?? '',
-            'diagnosa' => $data['diagnosa'] ?? '',
-            'terapi' => $data['terapi'] ?? '',
-        ];
-    }
-
-    /**
-     * Transform response data dari update rencana kontrol.
-     *
-     * @param array $data
-     * @return array
-     */
-    private function transformUpdateResponse($data)
-    {
-        return [
-            'no_surat_kontrol' => $data['noSuratKontrol'] ?? '',
-            'tanggal_terbit' => $data['tglTerbitKontrol'] ?? '',
-            'tanggal_rencana' => $data['tglRencanaKontrol'] ?? '',
-            'poli_kontrol' => $data['namaPoliKontrol'] ?? '',
-            'dokter' => $data['namaDokter'] ?? '',
-        ];
-    }
-
-    /**
-     * Transform response data dari daftar poli.
-     *
-     * @param array $data
-     * @return array
-     */
-    private function transformPoliListResponse($data)
-    {
-        return collect($data)->map(function ($item) {
-            return [
-                'kode' => $item['kode'] ?? '',
-                'nama' => $item['nama'] ?? '',
-            ];
-        })->toArray();
     }
 
     /**
