@@ -8,39 +8,63 @@ const errorMessage = ref('');
 
 const searchForm = reactive({
   no_kartu: '',
-  tanggal_sep: ''
+  bulan: new Date().getMonth() + 1,
+  tahun: new Date().getFullYear(),
+  filter: ''
 });
 
 const resetForm = () => {
   searchForm.no_kartu = '';
-  searchForm.tanggal_sep = '';
+  searchForm.bulan = new Date().getMonth() + 1;
+  searchForm.tahun = new Date().getFullYear();
+  searchForm.filter = '';
   errorMessage.value = '';
 };
 
+const searchResult = ref(null);
+
 const cariData = async () => {
-  if (!searchForm.no_kartu || !searchForm.tanggal_sep) {
-    errorMessage.value = 'Nomor kartu dan tanggal SEP harus diisi';
+  if (!searchForm.no_kartu || !searchForm.bulan || !searchForm.tahun) {
+    errorMessage.value = 'Nomor kartu, bulan, dan tahun harus diisi';
     return;
   }
 
   isLoading.value = true;
   errorMessage.value = '';
+  searchResult.value = null;
   
   try {
     const response = await axios.post('/rencana-kontrol/cari-data', searchForm);
     
     if (response.data.success) {
-      // Redirect to update page with search data
-      const searchData = encodeURIComponent(JSON.stringify(response.data.data));
-      router.visit(`/rencana-kontrol/update?data=${searchData}`);
+      searchResult.value = response.data.data;
+      errorMessage.value = '';
     } else {
       errorMessage.value = response.data.message;
+      searchResult.value = null;
     }
   } catch (error) {
     console.error('Error saat mencari data:', error);
     errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mencari data';
+    searchResult.value = null;
   } finally {
     isLoading.value = false;
+  }
+};
+
+const editRencanaKontrol = (item) => {
+  // Redirect to update page with selected item data
+  const searchData = encodeURIComponent(JSON.stringify(item));
+  router.visit(`/rencana-kontrol/update?data=${searchData}`);
+};
+
+const printSuratKontrol = (item) => {
+  // Implementasi print surat kontrol
+  if (item.noSuratKontrol) {
+    // Bisa redirect ke halaman print atau buka window baru
+    window.open(`/rencana-kontrol/print/${item.noSuratKontrol}`, '_blank');
+  } else {
+    errorMessage.value = 'Nomor surat kontrol tidak tersedia';
   }
 };
 </script>
@@ -97,17 +121,57 @@ const cariData = async () => {
             </div>
             
             <div>
-              <label for="tanggal_sep" class="block mb-2 text-sm font-medium text-gray-700">
-                Tanggal SEP
+              <label for="bulan" class="block mb-2 text-sm font-medium text-gray-700">
+                Bulan
+              </label>
+              <select 
+                id="bulan"
+                v-model="searchForm.bulan" 
+                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="tahun" class="block mb-2 text-sm font-medium text-gray-700">
+                Tahun
               </label>
               <input 
-                id="tanggal_sep"
-                v-model="searchForm.tanggal_sep" 
-                type="date" 
+                id="tahun"
+                v-model="searchForm.tahun" 
+                type="number" 
+                min="2020"
+                :max="new Date().getFullYear() + 1"
                 class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
             </div>
+          </div>
+          
+          <div>
+            <label for="filter" class="block mb-2 text-sm font-medium text-gray-700">
+              Filter (Opsional)
+            </label>
+            <input 
+              id="filter"
+              v-model="searchForm.filter" 
+              type="text" 
+              class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Filter pencarian (opsional)"
+            >
           </div>
           
           <div class="flex gap-3">
@@ -135,20 +199,51 @@ const cariData = async () => {
       </div>
 
       <!-- Search Result -->
-      <div v-if="searchResult" class="p-6 mb-6 bg-white rounded-xl shadow-lg">
-        <h3 class="mb-4 text-lg font-bold text-gray-800">Data Ditemukan</h3>
+      <div v-if="searchResult && searchResult.length > 0" class="p-6 mb-6 bg-white rounded-xl shadow-lg">
+        <h3 class="mb-4 text-lg font-bold text-gray-800">Data Rencana Kontrol Ditemukan ({{ searchResult.length }} data)</h3>
         
-        <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
-          <div class="space-y-2">
-            <div><span class="font-medium">Nomor Kartu:</span> {{ searchResult.no_kartu }}</div>
-            <div><span class="font-medium">Nama Peserta:</span> {{ searchResult.nama_peserta }}</div>
-            <div><span class="font-medium">Nomor SEP:</span> {{ searchResult.no_sep }}</div>
+        <div class="space-y-4">
+          <div v-for="(item, index) in searchResult" :key="index" class="p-4 rounded-lg border border-gray-200">
+            <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+              <div class="space-y-2">
+                <div><span class="font-medium">No. Surat Kontrol:</span> {{ item.noSuratKontrol || '-' }}</div>
+                <div><span class="font-medium">Nama Peserta:</span> {{ item.nama || '-' }}</div>
+                <div><span class="font-medium">No. Kartu:</span> {{ item.noKartu || '-' }}</div>
+                <div><span class="font-medium">Kode Poli:</span> {{ item.kodePoli || '-' }}</div>
+              </div>
+              <div class="space-y-2">
+                <div><span class="font-medium">Nama Poli:</span> {{ item.namaPoli || '-' }}</div>
+                <div><span class="font-medium">Nama Dokter:</span> {{ item.namaDokter || '-' }}</div>
+                <div><span class="font-medium">Tgl. Rencana:</span> {{ item.tglRencanaKontrol ? dayjs(item.tglRencanaKontrol).format('DD-MM-YYYY') : '-' }}</div>
+                <div><span class="font-medium">Tgl. Terbit:</span> {{ item.tglTerbitKontrol ? dayjs(item.tglTerbitKontrol).format('DD-MM-YYYY') : '-' }}</div>
+              </div>
+            </div>
+            
+            <div class="flex gap-2 mt-4">
+              <button 
+                @click="editRencanaKontrol(item)"
+                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg transition duration-300 hover:bg-blue-700"
+              >
+                Edit
+              </button>
+              <button 
+                @click="printSuratKontrol(item)"
+                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700"
+              >
+                Print Surat
+              </button>
+            </div>
           </div>
-          <div class="space-y-2">
-            <div><span class="font-medium">Tanggal SEP:</span> {{ dayjs(searchResult.tanggal_sep).format('DD-MM-YYYY') }}</div>
-            <div><span class="font-medium">Poli Asal:</span> {{ searchResult.poli_asal }}</div>
-            <div><span class="font-medium">Diagnosa:</span> {{ searchResult.diagnosa }}</div>
-          </div>
+        </div>
+      </div>
+      
+      <!-- No Data Found -->
+      <div v-else-if="searchResult && searchResult.length === 0" class="p-6 mb-6 bg-yellow-50 rounded-xl border border-yellow-200">
+        <div class="flex items-center">
+          <svg class="mr-2 w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="font-medium text-yellow-800">Tidak ada data rencana kontrol ditemukan untuk kriteria pencarian tersebut.</span>
         </div>
       </div>
 

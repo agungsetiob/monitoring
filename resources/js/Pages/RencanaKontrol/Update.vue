@@ -18,18 +18,18 @@ const errorMessage = ref('');
 const updateResult = ref(null);
 
 const updateForm = reactive({
-  no_sep: props.searchData?.no_sep || '',
-  no_kartu: props.searchData?.no_kartu || '',
-  tanggal_rencana: '',
-  poli_kontrol: '',
-  dokter: '',
+  noSuratKontrol: props.searchData?.noSuratKontrol || '',
+  noSEP: props.searchData?.noSEP || '',
+  kodeDokter: '',
+  poliKontrol: '',
+  tglRencanaKontrol: '',
   user: 'admin' // Default user, bisa disesuaikan dengan auth user
 });
 
 const resetForm = () => {
-  updateForm.tanggal_rencana = '';
-  updateForm.poli_kontrol = '';
-  updateForm.dokter = '';
+  updateForm.tglRencanaKontrol = '';
+  updateForm.poliKontrol = '';
+  updateForm.kodeDokter = '';
   updateSuccess.value = false;
   errorMessage.value = '';
   updateResult.value = null;
@@ -38,7 +38,13 @@ const resetForm = () => {
 
 const loadPoliList = async () => {
   try {
-    const response = await axios.get('/rencana-kontrol/poli-list');
+    const response = await axios.get('/rencana-kontrol/referensi-dokter', {
+      params: {
+        jnsPelayanan: '2', // Rawat Jalan
+        tglPelayanan: dayjs().format('YYYY-MM-DD'),
+        spesialisKode: '001' // Default spesialis
+      }
+    });
     if (response.data.success) {
       poliList.value = response.data.data;
     }
@@ -49,15 +55,15 @@ const loadPoliList = async () => {
 };
 
 const loadDokterList = async () => {
-  if (!updateForm.poli_kontrol || !updateForm.tanggal_rencana) {
+  if (!updateForm.poliKontrol || !updateForm.tglRencanaKontrol) {
     return;
   }
 
   try {
     const response = await axios.get('/rencana-kontrol/dokter-list', {
       params: {
-        kode_poli: updateForm.poli_kontrol,
-        tanggal: updateForm.tanggal_rencana
+        kodePoli: updateForm.poliKontrol,
+        tanggal: updateForm.tglRencanaKontrol
       }
     });
     
@@ -71,7 +77,7 @@ const loadDokterList = async () => {
 };
 
 const updateRencanaKontrol = async () => {
-  if (!updateForm.tanggal_rencana || !updateForm.poli_kontrol || !updateForm.dokter) {
+  if (!updateForm.noSuratKontrol || !updateForm.noSEP || !updateForm.tglRencanaKontrol || !updateForm.poliKontrol || !updateForm.kodeDokter) {
     errorMessage.value = 'Semua field harus diisi';
     return;
   }
@@ -101,7 +107,7 @@ const updateRencanaKontrol = async () => {
 
 // Watch for changes in poli and tanggal to load dokter list
 const onPoliOrTanggalChange = () => {
-  updateForm.dokter = '';
+  updateForm.kodeDokter = '';
   dokterList.value = [];
   loadDokterList();
 };
@@ -177,14 +183,16 @@ onMounted(() => {
         
         <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
           <div class="space-y-2">
-            <div><span class="font-medium">Nomor Kartu:</span> {{ props.searchData.no_kartu }}</div>
-            <div><span class="font-medium">Nama Peserta:</span> {{ props.searchData.nama_peserta }}</div>
-            <div><span class="font-medium">Nomor SEP:</span> {{ props.searchData.no_sep }}</div>
+            <div><span class="font-medium">No. Surat Kontrol:</span> {{ props.searchData.noSuratKontrol || '-' }}</div>
+            <div><span class="font-medium">Nama Peserta:</span> {{ props.searchData.nama || '-' }}</div>
+            <div><span class="font-medium">No. Kartu:</span> {{ props.searchData.noKartu || '-' }}</div>
+            <div><span class="font-medium">Kode Poli:</span> {{ props.searchData.kodePoli || '-' }}</div>
           </div>
           <div class="space-y-2">
-            <div><span class="font-medium">Tanggal SEP:</span> {{ dayjs(props.searchData.tanggal_sep).format('DD-MM-YYYY') }}</div>
-            <div><span class="font-medium">Poli Asal:</span> {{ props.searchData.poli_asal }}</div>
-            <div><span class="font-medium">Diagnosa:</span> {{ props.searchData.diagnosa }}</div>
+            <div><span class="font-medium">Nama Poli:</span> {{ props.searchData.namaPoli || '-' }}</div>
+            <div><span class="font-medium">Nama Dokter:</span> {{ props.searchData.namaDokter || '-' }}</div>
+            <div><span class="font-medium">Tgl. Rencana:</span> {{ props.searchData.tglRencanaKontrol ? dayjs(props.searchData.tglRencanaKontrol).format('DD-MM-YYYY') : '-' }}</div>
+            <div><span class="font-medium">Tgl. Terbit:</span> {{ props.searchData.tglTerbitKontrol ? dayjs(props.searchData.tglTerbitKontrol).format('DD-MM-YYYY') : '-' }}</div>
           </div>
         </div>
       </div>
@@ -195,13 +203,13 @@ onMounted(() => {
         
         <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
           <div class="space-y-2">
-            <div><span class="font-medium">No. Surat Kontrol:</span> <span class="font-mono text-blue-600">{{ updateResult.no_surat_kontrol }}</span></div>
-            <div><span class="font-medium">Tanggal Terbit:</span> {{ dayjs(updateResult.tanggal_terbit).format('DD-MM-YYYY') }}</div>
+            <div><span class="font-medium">No. Surat Kontrol:</span> <span class="font-mono text-blue-600">{{ updateResult.noSuratKontrol }}</span></div>
+            <div><span class="font-medium">Tanggal Terbit:</span> {{ dayjs(updateResult.tglTerbitKontrol).format('DD-MM-YYYY') }}</div>
           </div>
           <div class="space-y-2">
-            <div><span class="font-medium">Tanggal Rencana:</span> {{ dayjs(updateResult.tanggal_rencana).format('DD-MM-YYYY') }}</div>
-            <div><span class="font-medium">Poli Kontrol:</span> {{ updateResult.poli_kontrol }}</div>
-            <div><span class="font-medium">Dokter:</span> {{ updateResult.dokter }}</div>
+            <div><span class="font-medium">Tanggal Rencana:</span> {{ dayjs(updateResult.tglRencanaKontrol).format('DD-MM-YYYY') }}</div>
+            <div><span class="font-medium">Nama Poli:</span> {{ updateResult.namaPoli }}</div>
+            <div><span class="font-medium">Nama Dokter:</span> {{ updateResult.namaDokter }}</div>
           </div>
         </div>
       </div>
@@ -212,17 +220,44 @@ onMounted(() => {
         
         <form @submit.prevent="updateRencanaKontrol" class="space-y-6">
           <!-- Hidden fields -->
-          <input type="hidden" v-model="updateForm.no_sep">
-          <input type="hidden" v-model="updateForm.no_kartu">
+          <input type="hidden" v-model="updateForm.noSuratKontrol">
+          <input type="hidden" v-model="updateForm.noSEP">
+          
+          <!-- Display read-only fields -->
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-700">
+                No. Surat Kontrol
+              </label>
+              <input 
+                type="text" 
+                :value="updateForm.noSuratKontrol"
+                class="px-4 py-3 w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-600"
+                readonly
+              >
+            </div>
+            
+            <div>
+              <label class="block mb-2 text-sm font-medium text-gray-700">
+                No. SEP
+              </label>
+              <input 
+                type="text" 
+                :value="updateForm.noSEP"
+                class="px-4 py-3 w-full rounded-lg border border-gray-300 bg-gray-50 text-gray-600"
+                readonly
+              >
+            </div>
+          </div>
           
           <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <label for="tanggal_rencana" class="block mb-2 text-sm font-medium text-gray-700">
+              <label for="tglRencanaKontrol" class="block mb-2 text-sm font-medium text-gray-700">
                 Tanggal Rencana Kontrol <span class="text-red-500">*</span>
               </label>
               <input 
-                id="tanggal_rencana"
-                v-model="updateForm.tanggal_rencana" 
+                id="tglRencanaKontrol"
+                v-model="updateForm.tglRencanaKontrol" 
                 type="date" 
                 class="px-4 py-3 w-full rounded-lg border border-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 @change="onPoliOrTanggalChange"
@@ -233,12 +268,12 @@ onMounted(() => {
             </div>
             
             <div>
-              <label for="poli_kontrol" class="block mb-2 text-sm font-medium text-gray-700">
+              <label for="poliKontrol" class="block mb-2 text-sm font-medium text-gray-700">
                 Poli Kontrol <span class="text-red-500">*</span>
               </label>
               <select 
-                id="poli_kontrol"
-                v-model="updateForm.poli_kontrol" 
+                id="poliKontrol"
+                v-model="updateForm.poliKontrol" 
                 class="px-4 py-3 w-full rounded-lg border border-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 @change="onPoliOrTanggalChange"
                 required
@@ -252,12 +287,12 @@ onMounted(() => {
             </div>
             
             <div class="md:col-span-2">
-              <label for="dokter" class="block mb-2 text-sm font-medium text-gray-700">
+              <label for="kodeDokter" class="block mb-2 text-sm font-medium text-gray-700">
                 Dokter <span class="text-red-500">*</span>
               </label>
               <select 
-                id="dokter"
-                v-model="updateForm.dokter" 
+                id="kodeDokter"
+                v-model="updateForm.kodeDokter" 
                 class="px-4 py-3 w-full rounded-lg border border-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 :disabled="dokterList.length === 0"
                 required
@@ -276,7 +311,7 @@ onMounted(() => {
           <div class="flex gap-3 pt-6 border-t border-gray-200">
             <button 
               type="submit" 
-              :disabled="isLoading || !updateForm.tanggal_rencana || !updateForm.poli_kontrol || !updateForm.dokter"
+              :disabled="isLoading || !updateForm.tglRencanaKontrol || !updateForm.poliKontrol || !updateForm.kodeDokter"
               class="flex gap-2 items-center px-8 py-3 font-semibold text-white bg-green-600 rounded-lg shadow-lg transition duration-300 hover:bg-green-700 disabled:bg-gray-400"
             >
               <svg v-if="isLoading" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
