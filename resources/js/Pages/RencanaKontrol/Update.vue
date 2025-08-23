@@ -78,15 +78,19 @@ const updateRencanaKontrol = async () => {
   isUpdating.value = true;
   resetMessages();
   
+  const updateData = {
+    noSuratKontrol: updateForm.noSuratKontrol,
+    noSEP: detailData.value.sep?.noSep,
+    kodeDokter: detailData.value.dokter?.kodeDokter || detailData.value.kodeDokter,
+    poliKontrol: detailData.value.poliTujuan || detailData.value.poliKontrol,
+    tglRencanaKontrol: updateForm.tglRencanaKontrol,
+    user: updateForm.user
+  };
+  
+  console.log('Data yang akan dikirim untuk update:', updateData);
+  
   try {
-    const response = await axios.post('/rencana-kontrol/update', {
-      noSuratKontrol: updateForm.noSuratKontrol,
-      noSEP: detailData.value.sep?.noSep,
-      kodeDokter: detailData.value.kodeDokter,
-      poliKontrol: detailData.value.poliKontrol,
-      tglRencanaKontrol: updateForm.tglRencanaKontrol,
-      user: updateForm.user
-    });
+    const response = await axios.post('/rencana-kontrol/update', updateData);
     
     if (response.data.success) {
       successMessage.value = 'Rencana kontrol berhasil diupdate';
@@ -99,7 +103,15 @@ const updateRencanaKontrol = async () => {
     }
   } catch (error) {
     console.error('Error saat update:', error);
-    errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mengupdate data';
+    
+    // Handle validation errors (422)
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      const validationErrors = Object.values(error.response.data.errors).flat();
+      errorMessage.value = 'Validation Error: ' + validationErrors.join(', ');
+    } else {
+      errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mengupdate data';
+    }
+    
     successMessage.value = '';
   } finally {
     isUpdating.value = false;
@@ -230,8 +242,8 @@ onMounted(() => {
           
           <div class="p-4 bg-gray-50 rounded-lg">
             <label class="block text-sm font-medium text-gray-600">Dokter</label>
-            <p class="text-lg font-semibold text-gray-900">{{ detailData.namaDokter || '-' }}</p>
-            <p class="text-sm text-gray-500">{{ detailData.kodeDokter || '-' }}</p>
+            <p class="text-lg font-semibold text-gray-900">{{ detailData.dokter?.namaDokter || detailData.namaDokter || '-' }}</p>
+            <p class="text-sm text-gray-500">{{ detailData.dokter?.kodeDokter || detailData.kodeDokter || '-' }}</p>
           </div>
           
           <div class="p-4 bg-gray-50 rounded-lg">
