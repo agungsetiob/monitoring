@@ -1,7 +1,8 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
 import dayjs from 'dayjs';
+import DokterDropdown from '@/Components/DokterDropdown.vue';
 
 const props = defineProps({
   searchData: {
@@ -18,13 +19,22 @@ const errorMessage = ref('');
 const successMessage = ref('');
 const detailData = ref(null);
 const dokterList = ref([]);
-
 const updateForm = reactive({
   noSuratKontrol: '',
   tglRencanaKontrol: '',
   kodeDokter: '',
   user: 'admin' // Default user
 });
+
+// Computed property untuk dokter yang dipilih
+const selectedDokter = computed(() => {
+  return dokterList.value.find(dokter => dokter.kodeDokter === updateForm.kodeDokter) || null;
+});
+
+// Method untuk handle select dokter dari component
+const handleSelectDokter = (dokter) => {
+  updateForm.kodeDokter = dokter.kodeDokter;
+};
 
 const resetMessages = () => {
   errorMessage.value = '';
@@ -430,27 +440,22 @@ onMounted(() => {
               </div>
               
               <div>
-                <label for="kodeDokter" class="block mb-2 text-sm font-medium text-gray-700">
+                <label class="block mb-2 text-sm font-medium text-gray-700">
                   Pilih Dokter
                   <span v-if="isLoadingDokter" class="text-sm text-blue-600">(Memuat...)</span>
                 </label>
-                <select 
-                  id="kodeDokter"
-                  v-model="updateForm.kodeDokter" 
-                  class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  :disabled="isLoadingDokter || dokterList.length === 0"
-                  required
-                >
-                  <option value="" disabled>{{ isLoadingDokter ? 'Memuat dokter...' : dokterList.length === 0 ? 'Tidak ada dokter tersedia' : 'Pilih dokter' }}</option>
-                  <option 
-                    v-for="dokter in dokterList" 
-                    :key="dokter.kodeDokter" 
-                    :value="dokter.kodeDokter"
-                  >
-                    {{ dokter.namaDokter }} ({{ dokter.kodeDokter }})
-                  </option>
-                </select>
-                <p v-if="dokterList.length === 0 && !isLoadingDokter && updateForm.tglRencanaKontrol" class="mt-1 text-sm text-gray-500">
+                
+                <DokterDropdown
+                  :dokter-list="dokterList"
+                  :selected-dokter="selectedDokter"
+                  :is-loading="isLoadingDokter"
+                  placeholder="Pilih dokter"
+                  empty-message="Tidak ada dokter tersedia"
+                  empty-sub-message="Silakan pilih tanggal terlebih dahulu"
+                  @select="handleSelectDokter"
+                />
+                
+                <p v-if="dokterList.length === 0 && !isLoadingDokter && updateForm.tglRencanaKontrol" class="mt-2 text-sm text-gray-500">
                   Tidak ada jadwal praktek dokter untuk tanggal yang dipilih
                 </p>
               </div>
