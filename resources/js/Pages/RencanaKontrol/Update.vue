@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, watch } from 'vue';
 import dayjs from 'dayjs';
 
 const props = defineProps({
@@ -13,12 +13,15 @@ const props = defineProps({
 const isLoading = ref(false);
 const isLoadingDetail = ref(false);
 const isUpdating = ref(false);
+const isLoadingDokter = ref(false);
 const errorMessage = ref('');
 const detailData = ref(null);
+const dokterList = ref([]);
 
 const updateForm = reactive({
   noSuratKontrol: '',
   tglRencanaKontrol: '',
+  kodeDokter: '',
   user: 'admin' // Default user
 });
 
@@ -29,6 +32,10 @@ const resetMessages = () => {
 const getDetailRencanaKontrol = async () => {
   if (!updateForm.noSuratKontrol) {
     errorMessage.value = 'Nomor surat kontrol harus diisi';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
     return;
   }
 
@@ -47,27 +54,98 @@ const getDetailRencanaKontrol = async () => {
       if (detailData.value.tglRencanaKontrol) {
         updateForm.tglRencanaKontrol = dayjs(detailData.value.tglRencanaKontrol).format('YYYY-MM-DD');
       }
+      // Set kode dokter saat ini ke form
+      if (detailData.value.dokter?.kodeDokter || detailData.value.kodeDokter) {
+        updateForm.kodeDokter = detailData.value.dokter?.kodeDokter || detailData.value.kodeDokter;
+      }
       errorMessage.value = '';
+      
+      // Load jadwal praktek dokter setelah mendapat detail
+      await getJadwalPraktekDokter();
     } else {
       detailData.value = null;
       errorMessage.value = response.data.message;
+      // Auto-hide error toast after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 5000);
     }
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mengambil detail data';
     detailData.value = null;
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
   } finally {
     isLoadingDetail.value = false;
+  }
+};
+
+const getJadwalPraktekDokter = async () => {
+  if (!detailData.value || !updateForm.tglRencanaKontrol) {
+    return;
+  }
+
+  isLoadingDokter.value = true;
+  dokterList.value = [];
+  
+  try {
+    const response = await axios.post('/rencana-kontrol/jadwal-praktek-dokter', {
+      jnsKontrol: detailData.value.jnsKontrol,
+      kodePoli: detailData.value.poliTujuan || detailData.value.poliKontrol,
+      tglRencanaKontrol: updateForm.tglRencanaKontrol
+    });
+    
+    if (response.data.success && response.data.data) {
+      dokterList.value = response.data.data.list;
+      errorMessage.value = '';
+    } else {
+      dokterList.value = [];
+      errorMessage.value = response.data.message || 'Tidak ada jadwal praktek dokter tersedia';
+      // Auto-hide error toast after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 5000);
+    }
+  } catch (error) {
+    console.error('Error saat mengambil jadwal praktek dokter:', error);
+    dokterList.value = [];
+    errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mengambil jadwal praktek dokter';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
+  } finally {
+    isLoadingDokter.value = false;
   }
 };
 
 const updateRencanaKontrol = async () => {
   if (!updateForm.noSuratKontrol || !updateForm.tglRencanaKontrol) {
     errorMessage.value = 'Nomor surat kontrol dan tanggal rencana kontrol harus diisi';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
+    return;
+  }
+
+  if (!updateForm.kodeDokter) {
+    errorMessage.value = 'Silakan pilih dokter terlebih dahulu';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
     return;
   }
 
   if (!detailData.value) {
     errorMessage.value = 'Silakan ambil detail data terlebih dahulu';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
     return;
   }
 
@@ -77,7 +155,7 @@ const updateRencanaKontrol = async () => {
   const updateData = {
     noSuratKontrol: updateForm.noSuratKontrol,
     noSEP: detailData.value.sep?.noSep,
-    kodeDokter: detailData.value.dokter?.kodeDokter || detailData.value.kodeDokter,
+    kodeDokter: updateForm.kodeDokter,
     poliKontrol: detailData.value.poliTujuan || detailData.value.poliKontrol,
     tglRencanaKontrol: updateForm.tglRencanaKontrol,
     user: updateForm.user
@@ -114,6 +192,13 @@ const updateRencanaKontrol = async () => {
     isUpdating.value = false;
   }
 };
+
+// Watch for changes in tglRencanaKontrol to reload dokter list
+watch(() => updateForm.tglRencanaKontrol, async (newDate) => {
+  if (newDate && detailData.value) {
+    await getJadwalPraktekDokter();
+  }
+});
 
 // Get noSuratKontrol from URL params on mount
 onMounted(() => {
@@ -305,6 +390,34 @@ onMounted(() => {
                 >
               </div>
               
+              <div>
+                <label for="kodeDokter" class="block mb-2 text-sm font-medium text-gray-700">
+                  Pilih Dokter
+                  <span v-if="isLoadingDokter" class="text-sm text-blue-600">(Memuat...)</span>
+                </label>
+                <select 
+                  id="kodeDokter"
+                  v-model="updateForm.kodeDokter" 
+                  class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  :disabled="isLoadingDokter || dokterList.length === 0"
+                  required
+                >
+                  <option value="" disabled>{{ isLoadingDokter ? 'Memuat dokter...' : dokterList.length === 0 ? 'Tidak ada dokter tersedia' : 'Pilih dokter' }}</option>
+                  <option 
+                    v-for="dokter in dokterList" 
+                    :key="dokter.kodeDokter" 
+                    :value="dokter.kodeDokter"
+                  >
+                    {{ dokter.namaDokter }} ({{ dokter.kodeDokter }})
+                  </option>
+                </select>
+                <p v-if="dokterList.length === 0 && !isLoadingDokter && updateForm.tglRencanaKontrol" class="mt-1 text-sm text-gray-500">
+                  Tidak ada jadwal praktek dokter untuk tanggal yang dipilih
+                </p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-1">
               <div>
                 <label for="user" class="block mb-2 text-sm font-medium text-gray-700">
                   User

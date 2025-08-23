@@ -585,6 +585,84 @@ class RencanaKontrolApiService
     }
 
     /**
+     * Get Jadwal Praktek Dokter untuk Rencana Kontrol.
+     *
+     * @param string $jnsKontrol Jenis kontrol (1: SPRI, 2: Rencana Kontrol)
+     * @param string $kdPoli Kode poli
+     * @param string $tglRencanaKontrol Tanggal rencana kontrol (format yyyy-MM-dd)
+     * @return array
+     */
+    public function getJadwalPraktekDokter($jnsKontrol, $kdPoli, $tglRencanaKontrol)
+    {
+        try {
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+            $endpoint = "/RencanaKontrol/JadwalPraktekDokter/JnsKontrol/{$jnsKontrol}/KdPoli/{$kdPoli}/TglRencanaKontrol/{$tglRencanaKontrol}";
+            
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Accept' => 'application/json',
+            ];
+
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->get($this->baseUrl . $endpoint);
+
+            if (!$response->successful()) {
+                throw new \Exception('HTTP request failed: ' . $response->status());
+            }
+
+            $data = $response->json();
+            
+            if (!$data) {
+                throw new \Exception('Response kosong dari server BPJS');
+            }
+
+            // Jika response sudah plaintext JSON, langsung kembalikan
+            if (isset($data['response']) && is_array($data['response'])) {
+                return $data;
+            }
+
+            // Jika terenkripsi (string base64), lakukan decrypt+decompress
+            if (isset($data['response']) && is_string($data['response'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
+                return [
+                    'metaData' => $data['metaData'],
+                    'response' => $decryptedObj,
+                ];
+            }
+
+            // Beberapa implementasi meletakkan payload terenkripsi pada field 'data'
+            if (isset($data['data']) && is_string($data['data'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['data'], $this->consId, $this->secretKey, $ts);
+                return [
+                    'metaData' => $data['metaData'] ?? null,
+                    'response' => $decryptedObj,
+                ];
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error('Error saat mengambil jadwal praktek dokter: ' . $e->getMessage(), [
+                'jns_kontrol' => $jnsKontrol,
+                'kd_poli' => $kdPoli,
+                'tgl_rencana_kontrol' => $tglRencanaKontrol,
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil jadwal praktek dokter',
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Make HTTP request to BPJS API with encryption/decryption support.
      *
      * @param string $method

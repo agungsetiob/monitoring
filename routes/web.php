@@ -42,6 +42,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:igd,admin'])->group(fun
     Route::get('/rencana-kontrol/update', [RencanaKontrolController::class, 'showUpdateForm'])->name('rencana-kontrol.show-update');
     Route::post('/rencana-kontrol/cari-data', [RencanaKontrolController::class, 'cariData'])->name('rencana-kontrol.cari-data');
     Route::post('/rencana-kontrol/detail', [RencanaKontrolController::class, 'getDetailByNoSuratKontrol'])->name('rencana-kontrol.detail');
+    Route::post('/rencana-kontrol/jadwal-praktek-dokter', [RencanaKontrolController::class, 'getJadwalPraktekDokter'])->name('rencana-kontrol.jadwal-praktek-dokter');
     Route::post('/rencana-kontrol/update', [RencanaKontrolController::class, 'updateRencanaKontrol'])->name('rencana-kontrol.update');
 });
 
