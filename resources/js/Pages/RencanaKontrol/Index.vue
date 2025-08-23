@@ -10,14 +10,14 @@ const searchForm = reactive({
   no_kartu: '',
   bulan: String(new Date().getMonth() + 1).padStart(2, '0'),
   tahun: String(new Date().getFullYear()),
-  filter: ''
+  filter: '2'
 });
 
 const resetForm = () => {
   searchForm.no_kartu = '';
   searchForm.bulan = String(new Date().getMonth() + 1).padStart(2, '0');
   searchForm.tahun = String(new Date().getFullYear());
-  searchForm.filter = '';
+  searchForm.filter = '2';
   errorMessage.value = '';
 };
 
@@ -165,15 +165,17 @@ const printSuratKontrol = (item) => {
           
           <div>
             <label for="filter" class="block mb-2 text-sm font-medium text-gray-700">
-              Filter (Opsional)
+              Filter
             </label>
-            <input 
+            <select 
               id="filter"
               v-model="searchForm.filter" 
-              type="text" 
               class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Filter pencarian (opsional)"
             >
+              <option value="">Pilih Filter</option>
+              <option value="1">Tanggal Entri</option>
+              <option value="2">Tanggal Rencana Kontrol</option>
+            </select>
           </div>
           
           <div class="flex gap-3">

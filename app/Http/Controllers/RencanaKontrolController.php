@@ -47,7 +47,7 @@ class RencanaKontrolController extends Controller
             'no_kartu' => 'required|string',
             'bulan' => 'required|string',
             'tahun' => 'required|string',
-            'filter' => 'nullable|string',
+            'filter' => 'required|string',
         ]);
 
         try {
