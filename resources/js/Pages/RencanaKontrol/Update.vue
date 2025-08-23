@@ -1,7 +1,8 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
 import dayjs from 'dayjs';
+import DokterDropdown from '@/Components/DokterDropdown.vue';
 
 const props = defineProps({
   searchData: {
@@ -13,27 +14,49 @@ const props = defineProps({
 const isLoading = ref(false);
 const isLoadingDetail = ref(false);
 const isUpdating = ref(false);
+const isLoadingDokter = ref(false);
 const errorMessage = ref('');
+const successMessage = ref('');
 const detailData = ref(null);
-
+const dokterList = ref([]);
 const updateForm = reactive({
   noSuratKontrol: '',
   tglRencanaKontrol: '',
+  kodeDokter: '',
   user: 'admin' // Default user
 });
 
-const resetMessages = () => {
-  errorMessage.value = '';
+// Computed property untuk dokter yang dipilih
+const selectedDokter = computed(() => {
+  return dokterList.value.find(dokter => dokter.kodeDokter === updateForm.kodeDokter) || null;
+});
+
+// Method untuk handle select dokter dari component
+const handleSelectDokter = (dokter) => {
+  updateForm.kodeDokter = dokter.kodeDokter;
 };
 
-const getDetailRencanaKontrol = async () => {
+const resetMessages = () => {
+  errorMessage.value = '';
+  successMessage.value = '';
+};
+
+const getDetailRencanaKontrol = async (preserveSuccessMessage = false) => {
   if (!updateForm.noSuratKontrol) {
     errorMessage.value = 'Nomor surat kontrol harus diisi';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
     return;
   }
 
   isLoadingDetail.value = true;
-  resetMessages();
+  if (!preserveSuccessMessage) {
+    resetMessages();
+  } else {
+    errorMessage.value = ''; // Only reset error message
+  }
   detailData.value = null;
   
   try {
@@ -47,27 +70,98 @@ const getDetailRencanaKontrol = async () => {
       if (detailData.value.tglRencanaKontrol) {
         updateForm.tglRencanaKontrol = dayjs(detailData.value.tglRencanaKontrol).format('YYYY-MM-DD');
       }
+      // Set kode dokter saat ini ke form
+      if (detailData.value.dokter?.kodeDokter || detailData.value.kodeDokter) {
+        updateForm.kodeDokter = detailData.value.dokter?.kodeDokter || detailData.value.kodeDokter;
+      }
       errorMessage.value = '';
+      
+      // Load jadwal praktek dokter setelah mendapat detail
+      await getJadwalPraktekDokter();
     } else {
       detailData.value = null;
       errorMessage.value = response.data.message;
+      // Auto-hide error toast after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 5000);
     }
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mengambil detail data';
     detailData.value = null;
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
   } finally {
     isLoadingDetail.value = false;
+  }
+};
+
+const getJadwalPraktekDokter = async () => {
+  if (!detailData.value || !updateForm.tglRencanaKontrol) {
+    return;
+  }
+
+  isLoadingDokter.value = true;
+  dokterList.value = [];
+  
+  try {
+    const response = await axios.post('/rencana-kontrol/jadwal-praktek-dokter', {
+      jnsKontrol: detailData.value.jnsKontrol,
+      kodePoli: detailData.value.poliTujuan || detailData.value.poliKontrol,
+      tglRencanaKontrol: updateForm.tglRencanaKontrol
+    });
+    
+    if (response.data.success && response.data.data) {
+      dokterList.value = response.data.data.list;
+      errorMessage.value = '';
+    } else {
+      dokterList.value = [];
+      errorMessage.value = response.data.message || 'Tidak ada jadwal praktek dokter tersedia';
+      // Auto-hide error toast after 5 seconds
+      setTimeout(() => {
+        errorMessage.value = '';
+      }, 5000);
+    }
+  } catch (error) {
+    console.error('Error saat mengambil jadwal praktek dokter:', error);
+    dokterList.value = [];
+    errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mengambil jadwal praktek dokter';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
+  } finally {
+    isLoadingDokter.value = false;
   }
 };
 
 const updateRencanaKontrol = async () => {
   if (!updateForm.noSuratKontrol || !updateForm.tglRencanaKontrol) {
     errorMessage.value = 'Nomor surat kontrol dan tanggal rencana kontrol harus diisi';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
+    return;
+  }
+
+  if (!updateForm.kodeDokter) {
+    errorMessage.value = 'Silakan pilih dokter terlebih dahulu';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
     return;
   }
 
   if (!detailData.value) {
     errorMessage.value = 'Silakan ambil detail data terlebih dahulu';
+    // Auto-hide error toast after 5 seconds
+    setTimeout(() => {
+      errorMessage.value = '';
+    }, 5000);
     return;
   }
 
@@ -77,7 +171,7 @@ const updateRencanaKontrol = async () => {
   const updateData = {
     noSuratKontrol: updateForm.noSuratKontrol,
     noSEP: detailData.value.sep?.noSep,
-    kodeDokter: detailData.value.dokter?.kodeDokter || detailData.value.kodeDokter,
+    kodeDokter: updateForm.kodeDokter,
     poliKontrol: detailData.value.poliTujuan || detailData.value.poliKontrol,
     tglRencanaKontrol: updateForm.tglRencanaKontrol,
     user: updateForm.user
@@ -88,8 +182,17 @@ const updateRencanaKontrol = async () => {
     
     if (response.data.success) {
       errorMessage.value = '';
-      // Refresh detail data
-      await getDetailRencanaKontrol();
+      successMessage.value = 'Data rencana kontrol berhasil diupdate!';
+      
+      // Refresh detail data after showing success message
+      setTimeout(async () => {
+        await getDetailRencanaKontrol(true); // Preserve success message
+      }, 1000); // Delay 1 second to let user see the success message
+      
+      // Auto-hide success toast after 5 seconds
+      setTimeout(() => {
+        successMessage.value = '';
+      }, 5000);
     } else {
       errorMessage.value = response.data.message;
     }
@@ -108,12 +211,17 @@ const updateRencanaKontrol = async () => {
     setTimeout(() => {
       errorMessage.value = '';
     }, 5000);
-    
-    successMessage.value = '';
   } finally {
     isUpdating.value = false;
   }
 };
+
+// Watch for changes in tglRencanaKontrol to reload dokter list
+watch(() => updateForm.tglRencanaKontrol, async (newDate) => {
+  if (newDate && detailData.value) {
+    await getJadwalPraktekDokter();
+  }
+});
 
 // Get noSuratKontrol from URL params on mount
 onMounted(() => {
@@ -165,6 +273,32 @@ onMounted(() => {
               </div>
               <div class="flex-shrink-0 ml-4">
                 <button @click="errorMessage = ''" class="inline-flex text-red-400 hover:text-red-600 focus:outline-none">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Success Toast Alert -->
+      <Transition name="toast">
+        <div v-if="successMessage" class="fixed top-4 right-4 z-50 w-full max-w-sm">
+          <div class="p-4 bg-green-50 rounded-lg border border-green-200 shadow-lg">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div class="flex-1 ml-3">
+                <h3 class="text-sm font-medium text-green-800">Berhasil!</h3>
+                <p class="mt-1 text-sm text-green-700">{{ successMessage }}</p>
+              </div>
+              <div class="flex-shrink-0 ml-4">
+                <button @click="successMessage = ''" class="inline-flex text-green-400 hover:text-green-600 focus:outline-none">
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                   </svg>
@@ -305,6 +439,29 @@ onMounted(() => {
                 >
               </div>
               
+              <div>
+                <label class="block mb-2 text-sm font-medium text-gray-700">
+                  Pilih Dokter
+                  <span v-if="isLoadingDokter" class="text-sm text-blue-600">(Memuat...)</span>
+                </label>
+                
+                <DokterDropdown
+                  :dokter-list="dokterList"
+                  :selected-dokter="selectedDokter"
+                  :is-loading="isLoadingDokter"
+                  placeholder="Pilih dokter"
+                  empty-message="Tidak ada dokter tersedia"
+                  empty-sub-message="Silakan pilih tanggal terlebih dahulu"
+                  @select="handleSelectDokter"
+                />
+                
+                <p v-if="dokterList.length === 0 && !isLoadingDokter && updateForm.tglRencanaKontrol" class="mt-2 text-sm text-gray-500">
+                  Tidak ada jadwal praktek dokter untuk tanggal yang dipilih
+                </p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-1">
               <div>
                 <label for="user" class="block mb-2 text-sm font-medium text-gray-700">
                   User

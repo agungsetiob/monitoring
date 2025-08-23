@@ -173,6 +173,49 @@ class RencanaKontrolController extends Controller
     }
 
     /**
+     * Get jadwal praktek dokter for rencana kontrol.
+     */
+    public function getJadwalPraktekDokter(Request $request)
+    {
+        $request->validate([
+            'jnsKontrol' => 'required|string',
+            'kodePoli' => 'required|string',
+            'tglRencanaKontrol' => 'required|date',
+        ]);
+
+        try {
+            $response = $this->apiService->getJadwalPraktekDokter(
+                $request->jnsKontrol,
+                $request->kodePoli,
+                $request->tglRencanaKontrol
+            );
+
+            if (isset($response['metaData']) && $response['metaData']['code'] === '200') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Jadwal praktek dokter berhasil diambil',
+                    'data' => $response['response'] ?? [],
+                    'metaData' => $response['metaData'],
+                ], 200, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $response['metaData']['message'] ?? 'Tidak ada jadwal praktek dokter tersedia',
+                    'data' => [],
+                ], 400, [], JSON_UNESCAPED_UNICODE);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error saat mengambil jadwal praktek dokter: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil jadwal praktek dokter',
+                'error' => $e->getMessage(),
+            ], 500, [], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    /**
      * Update rencana kontrol data via BPJS API.
      */
     public function updateRencanaKontrol(Request $request)
