@@ -237,7 +237,7 @@ class RencanaKontrolController extends Controller
                 'kodeDokter' => $request->kodeDokter,
                 'poliKontrol' => $request->poliKontrol,
                 'tglRencanaKontrol' => $request->tglRencanaKontrol,
-                'user' => $request->user,
+                'user' => auth()->user()->name,
             ]);
 
             if (isset($response['metaData']) && $response['metaData']['code'] === '200') {

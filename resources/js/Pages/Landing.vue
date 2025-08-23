@@ -39,8 +39,8 @@ import FeatureCard from '@/Components/FeatureCard.vue';
     <FeatureCard
       title="Rencana Kontrol"
       :link="route('rencana-kontrol.index')"
-      icon="bed-pulse"
-      color="green"
+      icon="notes-medical"
+      color="red"
     >
       Kelola dan pantau rencana kontrol pasien.
     </FeatureCard>

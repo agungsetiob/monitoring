@@ -2,6 +2,7 @@
 import { Head, router } from '@inertiajs/vue3';
 import { ref, reactive, onMounted } from 'vue';
 import dayjs from 'dayjs';
+import Tooltip from '@/Components/Tooltip.vue';
 
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -240,10 +241,12 @@ const editRencanaKontrol = (item) => {
                   </td>
                   <td class="px-4 py-3 text-sm border-b">
                     <div class="flex gap-2">
-                      <button @click="editRencanaKontrol(item)"
-                        class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded transition duration-300 hover:bg-blue-700">
-                        Edit
-                      </button>
+                      <Tooltip text="Ubah kontrol" bgColor="bg-blue-600">
+                        <button @click="editRencanaKontrol(item)"
+                          class="px-2 py-1 text-xs font-medium text-blue-600 border border-blue-600 rounded transition duration-300 hover:bg-blue-200">
+                          <font-awesome-icon icon="edit" />
+                        </button>
+                      </Tooltip>
                     </div>
                   </td>
                 </tr>

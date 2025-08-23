@@ -64,7 +64,7 @@ onUnmounted(() => {
     <!-- Dropdown Button -->
     <div 
       @click="toggleDropdown"
-      class="px-4 py-3 w-full bg-white rounded-lg border border-gray-300 transition-all duration-200 cursor-pointer hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      class="px-3 py-2 w-full bg-white rounded-lg border border-gray-300 transition-all duration-200 cursor-pointer hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       :class="{
         'border-blue-500 ring-2 ring-blue-500': isOpen,
         'bg-gray-100 cursor-not-allowed': isLoading

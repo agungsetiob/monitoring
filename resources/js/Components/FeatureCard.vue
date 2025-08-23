@@ -13,14 +13,14 @@ const borderColor = {
   blue: 'border-blue-500 hover:border-blue-700',
   teal: 'border-teal-500 hover:border-teal-700',
   yellow: 'border-yellow-500 hover:border-yellow-700',
-  green: 'border-green-500 hover:border-green-700'
+  red: 'border-red-500 hover:border-red-700'
 }[props.color];
 
 const iconColor = {
   blue: 'text-blue-600 group-hover:text-blue-800',
   teal: 'text-teal-600 group-hover:text-teal-800',
   yellow: 'text-yellow-500 group-hover:text-yellow-700',
-  green: 'text-green-600 group-hover:text-green-800'
+  red: 'text-red-600 group-hover:text-red-800'
 }[props.color];
 
 </script>
@@ -34,7 +34,7 @@ const iconColor = {
     <div :class="iconColor" class="mb-4 text-6xl transition-colors duration-300">
       <font-awesome-icon :icon="icon" class="w-24 h-24" />
     </div>
-    <h2 class="mb-2 text-3xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-opacity-80">
+    <h2 class="mb-2 text-center text-3xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-opacity-80">
       {{ title }}
     </h2>
     <p class="text-lg text-center text-gray-600">

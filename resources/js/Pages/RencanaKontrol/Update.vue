@@ -350,7 +350,7 @@ onMounted(() => {
       <div v-if="detailData" class="p-6 mb-6 bg-white rounded-xl shadow-lg">
         <h3 class="mb-4 text-lg font-bold text-gray-800">Detail Rencana Kontrol</h3>
         
-        <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2">
+        <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-4">
           <div class="p-4 bg-gray-50 rounded-lg">
             <label class="block text-sm font-medium text-gray-600">Nomor Surat Kontrol</label>
             <p class="text-lg font-semibold text-gray-900">{{ detailData.noSuratKontrol || '-' }}</p>
@@ -422,7 +422,7 @@ onMounted(() => {
 
         <!-- Update Form -->
         <div class="pt-6 border-t border-gray-200">
-          <h4 class="mb-4 text-lg font-bold text-gray-800">Update Tanggal Rencana Kontrol</h4>
+          <h4 class="mb-4 text-lg font-bold text-gray-800">Ubah Rencana Kontrol</h4>
           
           <form @submit.prevent="updateRencanaKontrol" class="space-y-4">
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -461,7 +461,7 @@ onMounted(() => {
               </div>
             </div>
             
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-1">
+            <!-- <div class="grid grid-cols-1 gap-4 md:grid-cols-1">
               <div>
                 <label for="user" class="block mb-2 text-sm font-medium text-gray-700">
                   User
@@ -475,7 +475,7 @@ onMounted(() => {
                   required
                 >
               </div>
-            </div>
+            </div> -->
             
             <div class="flex gap-3">
               <button 
@@ -487,7 +487,7 @@ onMounted(() => {
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {{ isUpdating ? 'Mengupdate...' : 'Update Tanggal' }}
+                {{ isUpdating ? 'Mengupdate...' : 'Update' }}
               </button>
             </div>
           </form>
