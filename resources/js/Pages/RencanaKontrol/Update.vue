@@ -132,7 +132,7 @@ onMounted(() => {
   <Head title="Update Tanggal Rencana Kontrol" />
   
   <div class="p-4 min-h-screen bg-pattern md:p-6">
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-8xl">
       <!-- Header -->
       <div class="flex flex-col px-6 py-4 mb-6 text-white bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl md:flex-row md:items-center md:justify-between">
         <h1 class="mb-2 text-2xl font-extrabold md:text-3xl md:mb-0">

@@ -16,10 +16,10 @@ class UserSeeder extends Seeder
     {
         // Hapus semua pengguna yang ada
         User::create([
-            'name' => 'Admin IGD',
-            'email' => 'igd@dhaan.com',
+            'name' => 'Admin',
+            'email' => 'admin@dhaan.com',
             'password' => Hash::make('12345678'),
-            'role' => 'igd',
+            'role' => 'admin',
         ]);
     }
 }
