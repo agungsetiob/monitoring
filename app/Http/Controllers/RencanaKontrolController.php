@@ -136,6 +136,43 @@ class RencanaKontrolController extends Controller
     }
 
     /**
+     * Get detail rencana kontrol by no surat kontrol.
+     */
+    public function getDetailByNoSuratKontrol(Request $request)
+    {
+        $request->validate([
+            'noSuratKontrol' => 'required|string',
+        ]);
+
+        try {
+            $response = $this->apiService->GetDetailByNoSuratKontrol($request->noSuratKontrol);
+
+            if (isset($response['metaData']) && $response['metaData']['code'] === '200') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Detail rencana kontrol berhasil diambil',
+                    'data' => $response['response'] ?? [],
+                    'metaData' => $response['metaData'],
+                ], 200, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $response['metaData']['message'] ?? 'Gagal mengambil detail rencana kontrol',
+                    'data' => null,
+                ], 400, [], JSON_UNESCAPED_UNICODE);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error saat mengambil detail rencana kontrol: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil detail rencana kontrol',
+                'error' => $e->getMessage(),
+            ], 500, [], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+    /**
      * Update rencana kontrol data via BPJS API.
      */
     public function updateRencanaKontrol(Request $request)

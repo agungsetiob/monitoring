@@ -511,6 +511,80 @@ class RencanaKontrolApiService
     }
 
     /**
+     * Get Detail by Nomor Surat Kontrol - Melihat data SEP untuk keperluan rencana kontrol berdasarkan nomor surat kontrol.
+     *
+     * @param string $noSuratKontrol Nomor Surat Kontrol Peserta
+     * @return array
+     */
+    public function GetDetailByNoSuratKontrol($noSuratKontrol)
+    {
+        try {
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+            $endpoint = "/RencanaKontrol/noSuratKontrol/{$noSuratKontrol}";
+            
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Accept' => 'application/json',
+            ];
+
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->get($this->baseUrl . $endpoint);
+
+            if (!$response->successful()) {
+                throw new \Exception('HTTP request failed: ' . $response->status());
+            }
+
+            $data = $response->json();
+            
+            if (!$data) {
+                throw new \Exception('Response kosong dari server BPJS');
+            }
+
+            // Jika response sudah plaintext JSON, langsung kembalikan
+            if (isset($data['response']) && is_array($data['response'])) {
+                return $data;
+            }
+
+            // Jika terenkripsi (string base64), lakukan decrypt+decompress
+            if (isset($data['response']) && is_string($data['response'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
+                return [
+                    'metaData' => $data['metaData'],
+                    'response' => $decryptedObj,
+                ];
+            }
+
+            // Beberapa implementasi meletakkan payload terenkripsi pada field 'data'
+            if (isset($data['data']) && is_string($data['data'])) {
+                $decryptedObj = $this->decryptAndDecompress($data['data'], $this->consId, $this->secretKey, $ts);
+                return [
+                    'metaData' => $data['metaData'] ?? null,
+                    'response' => $decryptedObj,
+                ];
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error('Error saat mengambil data SEP by no surat kontrol: ' . $e->getMessage(), [
+                'no_surat_kontrol' => $noSuratKontrol,
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data SEP',
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Make HTTP request to BPJS API with encryption/decryption support.
      *
      * @param string $method

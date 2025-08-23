@@ -54,9 +54,8 @@ const cariData = async () => {
 };
 
 const editRencanaKontrol = (item) => {
-  // Redirect to update page with selected item data
-  const searchData = encodeURIComponent(JSON.stringify(item));
-  router.visit(`/rencana-kontrol/update?data=${searchData}`);
+  // Redirect to update page with only noSuratKontrol
+  router.visit(`/rencana-kontrol/update?noSuratKontrol=${item.noSuratKontrol}`);
 };
 </script>
 
