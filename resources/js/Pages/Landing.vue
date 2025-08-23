@@ -35,5 +35,14 @@ import FeatureCard from '@/Components/FeatureCard.vue';
     >
       Laporan monitoring pasien Gawat Darurat.
     </FeatureCard>
+
+    <FeatureCard
+      title="Rencana Kontrol"
+      :link="route('rencana-kontrol.index')"
+      icon="bed-pulse"
+      color="green"
+    >
+      Kelola dan pantau rencana kontrol pasien.
+    </FeatureCard>
   </LandingSection>
 </template>

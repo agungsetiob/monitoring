@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AntreanResepController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PatientMonitoringController;
+use App\Http\Controllers\RencanaKontrolController;
 use App\Http\Controllers\TriageReportController;
 use Inertia\Inertia;
 
@@ -35,6 +36,13 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:igd,admin'])->group(fun
 
     Route::get('/laporan-los', [LosReportController::class, 'index'])->name('laporan.los');
     Route::get('/laporan-los/data', [LosReportController::class, 'getLosReport'])->name('laporan.los.data');
+    
+    // Rencana Kontrol Routes
+    Route::get('/rencana-kontrol', [RencanaKontrolController::class, 'index'])->name('rencana-kontrol.index');
+    Route::get('/rencana-kontrol/update', [RencanaKontrolController::class, 'showUpdateForm'])->name('rencana-kontrol.show-update');
+    Route::post('/rencana-kontrol/cari-data', [RencanaKontrolController::class, 'cariData'])->name('rencana-kontrol.cari-data');
+    Route::post('/rencana-kontrol/detail', [RencanaKontrolController::class, 'getDetailByNoSuratKontrol'])->name('rencana-kontrol.detail');
+    Route::post('/rencana-kontrol/update', [RencanaKontrolController::class, 'updateRencanaKontrol'])->name('rencana-kontrol.update');
 });
 
 Route::middleware(['throttle:60,1'])->group(function () {

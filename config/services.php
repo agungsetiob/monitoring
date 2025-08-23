@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Rencana Kontrol API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for third party API integration for Rencana Kontrol
+    | features. This includes BPJS API endpoints and authentication.
+    |
+    */
+
+    'rencana_kontrol' => [
+        'base_url' => env('RENCANA_KONTROL_API_URL', ),
+        'cons_id' => env('RENCANA_KONTROL_CONS_ID'),
+        'secret_key' => env('RENCANA_KONTROL_SECRET_KEY'),
+        'user_key' => env('RENCANA_KONTROL_USER_KEY'),
+        'timeout' => env('RENCANA_KONTROL_TIMEOUT', 30),
+    ],
+
 ];
