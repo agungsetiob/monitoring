@@ -21,7 +21,7 @@ const resetForm = () => {
   errorMessage.value = '';
 };
 
-const searchResult = ref(null);
+const searchResult = ref([]);
 
 const cariData = async () => {
   if (!searchForm.no_kartu || !searchForm.bulan || !searchForm.tahun) {
@@ -31,22 +31,23 @@ const cariData = async () => {
 
   isLoading.value = true;
   errorMessage.value = '';
-  searchResult.value = null;
+  searchResult.value = [];
   
   try {
     const response = await axios.post('/rencana-kontrol/cari-data', searchForm);
     
     if (response.data.success) {
       searchResult.value = response.data.data;
+      console.log(searchResult)
       errorMessage.value = '';
     } else {
+      searchResult.value = [];
       errorMessage.value = response.data.message;
-      searchResult.value = null;
     }
   } catch (error) {
     console.error('Error saat mencari data:', error);
     errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mencari data';
-    searchResult.value = null;
+    searchResult.value = [];
   } finally {
     isLoading.value = false;
   }
@@ -203,54 +204,65 @@ const printSuratKontrol = (item) => {
       </div>
 
       <!-- Search Result -->
-      <div v-if="searchResult && searchResult.length > 0" class="p-6 mb-6 bg-white rounded-xl shadow-lg">
+      <div class="p-6 mb-6 bg-white rounded-xl shadow-lg">
         <h3 class="mb-4 text-lg font-bold text-gray-800">Data Rencana Kontrol Ditemukan ({{ searchResult.length }} data)</h3>
         
-        <div class="space-y-4">
-          <div v-for="(item, index) in searchResult" :key="index" class="p-4 rounded-lg border border-gray-200">
-            <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
-              <div class="space-y-2">
-                <div><span class="font-medium">No. Surat Kontrol:</span> {{ item.noSuratKontrol || '-' }}</div>
-                <div><span class="font-medium">Nama Peserta:</span> {{ item.nama || '-' }}</div>
-                <div><span class="font-medium">No. Kartu:</span> {{ item.noKartu || '-' }}</div>
-                <div><span class="font-medium">Kode Poli:</span> {{ item.kodePoli || '-' }}</div>
-              </div>
-              <div class="space-y-2">
-                <div><span class="font-medium">Nama Poli:</span> {{ item.namaPoli || '-' }}</div>
-                <div><span class="font-medium">Nama Dokter:</span> {{ item.namaDokter || '-' }}</div>
-                <div><span class="font-medium">Tgl. Rencana:</span> {{ item.tglRencanaKontrol ? dayjs(item.tglRencanaKontrol).format('DD-MM-YYYY') : '-' }}</div>
-                <div><span class="font-medium">Tgl. Terbit:</span> {{ item.tglTerbitKontrol ? dayjs(item.tglTerbitKontrol).format('DD-MM-YYYY') : '-' }}</div>
-              </div>
-            </div>
-            
-            <div class="flex gap-2 mt-4">
-              <button 
-                @click="editRencanaKontrol(item)"
-                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg transition duration-300 hover:bg-blue-700"
-              >
-                Edit
-              </button>
-              <button 
-                @click="printSuratKontrol(item)"
-                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700"
-              >
-                Print Surat
-              </button>
-            </div>
-          </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white rounded-lg border border-gray-200">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. Surat Kontrol</th>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Nama Peserta</th>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. Kartu</th>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Poli</th>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Dokter</th>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Tgl. Rencana</th>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Tgl. Terbit</th>
+                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template v-if="searchResult && searchResult.length > 0">
+                <tr v-for="(item, index) in searchResult" :key="index" class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.noSuratKontrol || '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.nama || '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.noKartu || '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">
+                    <div>{{ item.kodePoli || '-' }}</div>
+                    <div class="text-xs text-gray-500">{{ item.namaPoli || '-' }}</div>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.namaDokter || '-' }}</td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">
+                    {{ item.tglRencanaKontrol ? dayjs(item.tglRencanaKontrol).format('DD-MM-YYYY') : '-' }}
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-900 border-b">
+                    {{ item.tglTerbitKontrol ? dayjs(item.tglTerbitKontrol).format('DD-MM-YYYY') : '-' }}
+                  </td>
+                  <td class="px-4 py-3 text-sm border-b">
+                    <div class="flex gap-2">
+                      <button 
+                        @click="editRencanaKontrol(item)"
+                        class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded transition duration-300 hover:bg-blue-700"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        @click="printSuratKontrol(item)"
+                        class="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded transition duration-300 hover:bg-green-700"
+                      >
+                        Print
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+              <tr v-else>
+                <td colspan="8" class="px-4 py-3 text-center text-gray-500">Tidak ada data</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      
-      <!-- No Data Found -->
-      <div v-else-if="searchResult && searchResult.length === 0" class="p-6 mb-6 bg-yellow-50 rounded-xl border border-yellow-200">
-        <div class="flex items-center">
-          <svg class="mr-2 w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-          </svg>
-          <span class="font-medium text-yellow-800">Tidak ada data rencana kontrol ditemukan untuk kriteria pencarian tersebut.</span>
-        </div>
-      </div>
-
 
     </div>
   </div>
