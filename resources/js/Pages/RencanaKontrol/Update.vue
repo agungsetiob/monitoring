@@ -15,6 +15,7 @@ const isLoadingDetail = ref(false);
 const isUpdating = ref(false);
 const isLoadingDokter = ref(false);
 const errorMessage = ref('');
+const successMessage = ref('');
 const detailData = ref(null);
 const dokterList = ref([]);
 
@@ -27,9 +28,10 @@ const updateForm = reactive({
 
 const resetMessages = () => {
   errorMessage.value = '';
+  successMessage.value = '';
 };
 
-const getDetailRencanaKontrol = async () => {
+const getDetailRencanaKontrol = async (preserveSuccessMessage = false) => {
   if (!updateForm.noSuratKontrol) {
     errorMessage.value = 'Nomor surat kontrol harus diisi';
     // Auto-hide error toast after 5 seconds
@@ -40,7 +42,11 @@ const getDetailRencanaKontrol = async () => {
   }
 
   isLoadingDetail.value = true;
-  resetMessages();
+  if (!preserveSuccessMessage) {
+    resetMessages();
+  } else {
+    errorMessage.value = ''; // Only reset error message
+  }
   detailData.value = null;
   
   try {
@@ -166,8 +172,17 @@ const updateRencanaKontrol = async () => {
     
     if (response.data.success) {
       errorMessage.value = '';
-      // Refresh detail data
-      await getDetailRencanaKontrol();
+      successMessage.value = 'Data rencana kontrol berhasil diupdate!';
+      
+      // Refresh detail data after showing success message
+      setTimeout(async () => {
+        await getDetailRencanaKontrol(true); // Preserve success message
+      }, 1000); // Delay 1 second to let user see the success message
+      
+      // Auto-hide success toast after 5 seconds
+      setTimeout(() => {
+        successMessage.value = '';
+      }, 5000);
     } else {
       errorMessage.value = response.data.message;
     }
@@ -186,8 +201,6 @@ const updateRencanaKontrol = async () => {
     setTimeout(() => {
       errorMessage.value = '';
     }, 5000);
-    
-    successMessage.value = '';
   } finally {
     isUpdating.value = false;
   }
@@ -250,6 +263,32 @@ onMounted(() => {
               </div>
               <div class="flex-shrink-0 ml-4">
                 <button @click="errorMessage = ''" class="inline-flex text-red-400 hover:text-red-600 focus:outline-none">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- Success Toast Alert -->
+      <Transition name="toast">
+        <div v-if="successMessage" class="fixed top-4 right-4 z-50 w-full max-w-sm">
+          <div class="p-4 bg-green-50 rounded-lg border border-green-200 shadow-lg">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div class="flex-1 ml-3">
+                <h3 class="text-sm font-medium text-green-800">Berhasil!</h3>
+                <p class="mt-1 text-sm text-green-700">{{ successMessage }}</p>
+              </div>
+              <div class="flex-shrink-0 ml-4">
+                <button @click="successMessage = ''" class="inline-flex text-green-400 hover:text-green-600 focus:outline-none">
                   <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                   </svg>
