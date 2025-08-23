@@ -65,24 +65,16 @@ class RencanaKontrolApiService
     {
         try {
             $keyMaterial = $consId . $secret . $timestamp;
-            $hash = hash('sha256', $keyMaterial, true); // 32 bytes
-            $iv = substr($hash, 0, 16);
-
-            $decrypted = openssl_decrypt(
-                base64_decode($cipherBase64),
-                'AES-256-CBC',
-                $hash,
-                OPENSSL_RAW_DATA,
-                $iv
-            );
-
+            
+            // Decrypt using the simplified method
+            $decrypted = $this->stringDecrypt($keyMaterial, $cipherBase64);
+            
             if ($decrypted === false) {
                 throw new \Exception('Gagal decrypt data');
             }
 
-            // Decompress LZString (simulasi - PHP tidak memiliki LZString native)
-            // Untuk implementasi lengkap, gunakan library seperti matthiasmullie/lz-string
-            $jsonText = $this->lzStringDecompress($decrypted);
+            // Decompress LZString
+            $jsonText = $this->decompress($decrypted);
             
             if (!$jsonText) {
                 throw new \Exception('Gagal decompress LZString: hasil kosong/invalid');
@@ -96,27 +88,36 @@ class RencanaKontrolApiService
     }
 
     /**
-     * Simulasi LZString decompression.
-     * Untuk implementasi lengkap, gunakan library matthiasmullie/lz-string.
+     * String decrypt function using AES-256-CBC.
      *
-     * @param string $compressed
-     * @return string
+     * @param string $key
+     * @param string $string
+     * @return string|false
      */
-    private function lzStringDecompress($compressed)
+    private function stringDecrypt($key, $string)
     {
-        // Implementasi sederhana - untuk production gunakan library yang tepat
-        // composer require matthiasmullie/lz-string
-        try {
-            // Jika data sudah dalam format JSON, langsung return
-            if (json_decode($compressed)) {
-                return $compressed;
-            }
-            
-            // Untuk sementara, asumsikan data sudah terdekompresi
-            return $compressed;
-        } catch (\Exception $e) {
-            return $compressed;
-        }
+        $encrypt_method = 'AES-256-CBC';
+        
+        // hash
+        $key_hash = hex2bin(hash('sha256', $key));
+        
+        // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
+        $iv = substr(hex2bin(hash('sha256', $key)), 0, 16);
+        
+        $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key_hash, OPENSSL_RAW_DATA, $iv);
+        
+        return $output;
+    }
+    
+    /**
+     * LZString decompress function using nullpunkt/lz-string-php library.
+     *
+     * @param string $string
+     * @return string|null
+     */
+    private function decompress($string)
+    {
+        return \LZCompressor\LZString::decompressFromEncodedURIComponent($string);
     }
 
     /**
@@ -125,10 +126,10 @@ class RencanaKontrolApiService
      * @param string $bulan "01" .. "12"
      * @param string $tahun "2025" (4 digit)
      * @param string $noKartu
-     * @param int $filter 1: tanggal entri, 2: tgl rencana kontrol
+     * @param string $filter 1: tanggal entri, 2: tgl rencana kontrol
      * @return array
      */
-    public function getListRencanaKontrolByNoKartu($bulan, $tahun, $noKartu, $filter = 2)
+    public function getListRencanaKontrolByNoKartu($bulan, $tahun, $noKartu, $filter)
     {
         try {
             $ts = $this->makeTimestampSecondsUTC();

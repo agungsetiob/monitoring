@@ -45,18 +45,21 @@ class RencanaKontrolController extends Controller
     {
         $request->validate([
             'no_kartu' => 'required|string',
-            'bulan' => 'required|integer|min:1|max:12',
-            'tahun' => 'required|integer|min:2020',
+            'bulan' => 'required|string',
+            'tahun' => 'required|string',
             'filter' => 'nullable|string',
         ]);
 
         try {
             // Panggil API BPJS untuk cari data rencana kontrol
+            // Jika filter kosong atau null, gunakan default value 2
+            $filter = $request->filter ?: "2";
+            
             $response = $this->apiService->getListRencanaKontrolByNoKartu(
                 $request->bulan,
                 $request->tahun,
                 $request->no_kartu,
-                $request->filter
+                $filter
             );
 
             if (isset($response['metaData']) && $response['metaData']['code'] === '200') {

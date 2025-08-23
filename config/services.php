@@ -46,7 +46,7 @@ return [
     */
 
     'rencana_kontrol' => [
-        'base_url' => env('RENCANA_KONTROL_API_URL', 'https://apijkn-dev.bpjs-kesehatan.go.id/vclaim-rest-dev'),
+        'base_url' => env('RENCANA_KONTROL_API_URL', ),
         'cons_id' => env('RENCANA_KONTROL_CONS_ID'),
         'secret_key' => env('RENCANA_KONTROL_SECRET_KEY'),
         'user_key' => env('RENCANA_KONTROL_USER_KEY'),

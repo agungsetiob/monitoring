@@ -8,15 +8,15 @@ const errorMessage = ref('');
 
 const searchForm = reactive({
   no_kartu: '',
-  bulan: new Date().getMonth() + 1,
-  tahun: new Date().getFullYear(),
+  bulan: String(new Date().getMonth() + 1).padStart(2, '0'),
+  tahun: String(new Date().getFullYear()),
   filter: ''
 });
 
 const resetForm = () => {
   searchForm.no_kartu = '';
-  searchForm.bulan = new Date().getMonth() + 1;
-  searchForm.tahun = new Date().getFullYear();
+  searchForm.bulan = String(new Date().getMonth() + 1).padStart(2, '0');
+  searchForm.tahun = String(new Date().getFullYear());
   searchForm.filter = '';
   errorMessage.value = '';
 };
@@ -130,15 +130,15 @@ const printSuratKontrol = (item) => {
                 class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
-                <option value="1">Januari</option>
-                <option value="2">Februari</option>
-                <option value="3">Maret</option>
-                <option value="4">April</option>
-                <option value="5">Mei</option>
-                <option value="6">Juni</option>
-                <option value="7">Juli</option>
-                <option value="8">Agustus</option>
-                <option value="9">September</option>
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
                 <option value="10">Oktober</option>
                 <option value="11">November</option>
                 <option value="12">Desember</option>
@@ -152,10 +152,12 @@ const printSuratKontrol = (item) => {
               <input 
                 id="tahun"
                 v-model="searchForm.tahun" 
-                type="number" 
-                min="2020"
-                :max="new Date().getFullYear() + 1"
+                type="text" 
+                minlength="4"
+                maxlength="4"
+                pattern="[0-9]{4}"
                 class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="YYYY"
                 required
               >
             </div>
