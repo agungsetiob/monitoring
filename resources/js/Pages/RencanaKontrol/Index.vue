@@ -37,7 +37,7 @@ const cariData = async () => {
     const response = await axios.post('/rencana-kontrol/cari-data', searchForm);
     
     if (response.data.success) {
-      searchResult.value = response.data.data;
+      searchResult.value = response.data.data.list;
       console.log(searchResult)
       errorMessage.value = '';
     } else {
@@ -57,16 +57,6 @@ const editRencanaKontrol = (item) => {
   // Redirect to update page with selected item data
   const searchData = encodeURIComponent(JSON.stringify(item));
   router.visit(`/rencana-kontrol/update?data=${searchData}`);
-};
-
-const printSuratKontrol = (item) => {
-  // Implementasi print surat kontrol
-  if (item.noSuratKontrol) {
-    // Bisa redirect ke halaman print atau buka window baru
-    window.open(`/rencana-kontrol/print/${item.noSuratKontrol}`, '_blank');
-  } else {
-    errorMessage.value = 'Nomor surat kontrol tidak tersedia';
-  }
 };
 </script>
 
@@ -245,12 +235,6 @@ const printSuratKontrol = (item) => {
                         class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded transition duration-300 hover:bg-blue-700"
                       >
                         Edit
-                      </button>
-                      <button 
-                        @click="printSuratKontrol(item)"
-                        class="px-3 py-1 text-xs font-medium text-white bg-green-600 rounded transition duration-300 hover:bg-green-700"
-                      >
-                        Print
                       </button>
                     </div>
                   </td>
