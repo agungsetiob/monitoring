@@ -12,13 +12,15 @@ const props = defineProps({
 const borderColor = {
   blue: 'border-blue-500 hover:border-blue-700',
   teal: 'border-teal-500 hover:border-teal-700',
-  yellow: 'border-yellow-500 hover:border-yellow-700'
+  yellow: 'border-yellow-500 hover:border-yellow-700',
+  green: 'border-green-500 hover:border-green-700'
 }[props.color];
 
 const iconColor = {
   blue: 'text-blue-600 group-hover:text-blue-800',
   teal: 'text-teal-600 group-hover:text-teal-800',
-  yellow: 'text-yellow-500 group-hover:text-yellow-700'
+  yellow: 'text-yellow-500 group-hover:text-yellow-700',
+  green: 'text-green-600 group-hover:text-green-800'
 }[props.color];
 
 </script>
@@ -26,16 +28,16 @@ const iconColor = {
 <template>
   <Link
     :href="link"
-    class="group flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-2 border-b-4"
+    class="flex flex-col justify-center items-center p-8 bg-white rounded-2xl border-b-4 shadow-xl transition-all duration-300 ease-in-out transform group hover:shadow-2xl hover:-translate-y-2"
     :class="borderColor"
   >
-    <div :class="iconColor" class="text-6xl transition-colors duration-300 mb-4">
-      <font-awesome-icon :icon="icon" class="h-24 w-24" />
+    <div :class="iconColor" class="mb-4 text-6xl transition-colors duration-300">
+      <font-awesome-icon :icon="icon" class="w-24 h-24" />
     </div>
-    <h2 class="text-3xl font-bold text-gray-800 mb-2 group-hover:text-opacity-80 transition-colors duration-300">
+    <h2 class="mb-2 text-3xl font-bold text-gray-800 transition-colors duration-300 group-hover:text-opacity-80">
       {{ title }}
     </h2>
-    <p class="text-lg text-gray-600 text-center">
+    <p class="text-lg text-center text-gray-600">
       <slot />
     </p>
   </Link>

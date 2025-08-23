@@ -43,7 +43,6 @@ const getDetailRencanaKontrol = async () => {
     
     if (response.data.success) {
       detailData.value = response.data.data;
-      console.log(response.data.data)
       // Set tanggal rencana kontrol saat ini ke form
       if (detailData.value.tglRencanaKontrol) {
         updateForm.tglRencanaKontrol = dayjs(detailData.value.tglRencanaKontrol).format('YYYY-MM-DD');
@@ -54,7 +53,6 @@ const getDetailRencanaKontrol = async () => {
       errorMessage.value = response.data.message;
     }
   } catch (error) {
-    console.error('Error saat mengambil detail:', error);
     errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mengambil detail data';
     detailData.value = null;
   } finally {
@@ -84,8 +82,6 @@ const updateRencanaKontrol = async () => {
     tglRencanaKontrol: updateForm.tglRencanaKontrol,
     user: updateForm.user
   };
-  
-  console.log('Data yang akan dikirim untuk update:', updateData);
   
   try {
     const response = await axios.post('/rencana-kontrol/update', updateData);
@@ -344,29 +340,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.bg-pattern {
-  background-color: #f8fafc;
-  background-image: 
-    radial-gradient(circle at 25px 25px, rgba(255,255,255,.2) 2%, transparent 50%),
-    radial-gradient(circle at 75px 75px, rgba(255,255,255,.2) 2%, transparent 50%);
-  background-size: 100px 100px;
-}
-
-.toast-enter-active, .toast-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-enter-from {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-
-</style>
