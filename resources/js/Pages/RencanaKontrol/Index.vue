@@ -216,7 +216,6 @@ const editRencanaKontrol = (item) => {
                 <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. Surat Kontrol</th>
                 <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Jenis</th>
                 <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Nama Peserta</th>
-                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. Kartu</th>
                 <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Poli</th>
                 <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Dokter</th>
                 <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Tgl. Rencana</th>
@@ -230,7 +229,6 @@ const editRencanaKontrol = (item) => {
                   <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.noSuratKontrol || '-' }}</td>
                   <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.namaJnsKontrol || '-' }}</td>
                   <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.nama || '-' }}</td>
-                  <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.noKartu || '-' }}</td>
                   <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.namaPoliTujuan || '-' }}</td>
                   <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.namaDokter || '-' }}</td>
                   <td class="px-4 py-3 text-sm text-gray-900 border-b">
@@ -241,7 +239,7 @@ const editRencanaKontrol = (item) => {
                   </td>
                   <td class="px-4 py-3 text-sm border-b">
                     <div class="flex gap-2">
-                      <Tooltip text="Ubah kontrol" bgColor="bg-blue-600">
+                      <Tooltip text="Ubah rencana" bgColor="bg-blue-600">
                         <button @click="editRencanaKontrol(item)"
                           class="px-2 py-1 text-xs font-medium text-blue-600 border border-blue-600 rounded transition duration-300 hover:bg-blue-200">
                           <font-awesome-icon icon="edit" />
