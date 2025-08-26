@@ -5,6 +5,7 @@ use App\Http\Controllers\AntreanResepController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PatientMonitoringController;
 use App\Http\Controllers\RencanaKontrolController;
+use App\Http\Controllers\ApolController;
 use App\Http\Controllers\TriageReportController;
 use Inertia\Inertia;
 
@@ -36,7 +37,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:igd,admin'])->group(fun
 
     Route::get('/laporan-los', [LosReportController::class, 'index'])->name('laporan.los');
     Route::get('/laporan-los/data', [LosReportController::class, 'getLosReport'])->name('laporan.los.data');
-    
+
     // Rencana Kontrol Routes
     Route::get('/rencana-kontrol', [RencanaKontrolController::class, 'index'])->name('rencana-kontrol.index');
     Route::get('/rencana-kontrol/update', [RencanaKontrolController::class, 'showUpdateForm'])->name('rencana-kontrol.show-update');
@@ -60,4 +61,23 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     Route::post('/rencana-kontrol/cari-data', [RencanaKontrolController::class, 'cariData'])->name('rencana-kontrol.cari-data');
     Route::post('/rencana-kontrol/detail', [RencanaKontrolController::class, 'getDetailByNoSuratKontrol'])->name('rencana-kontrol.detail');
     Route::post('/rencana-kontrol/update', [RencanaKontrolController::class, 'updateRencanaKontrol'])->name('rencana-kontrol.update');
+});
+Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(function () {
+    Route::get('/apol', [ApolController::class, 'index'])->name('apol.index');
+    Route::post('/apol/daftar-resep', [ApolController::class, 'getDaftarResep']);
+    Route::post('/apol/ajax/daftar-resep', [ApolController::class, 'ajaxGetDaftarResep']);
+    Route::post('/apol/export-resep', [ApolController::class, 'exportDaftarResep']);
+    Route::post('/apol/summary-resep', [ApolController::class, 'getSummaryResep']);
+    Route::delete('/apol/hapus-resep', [ApolController::class, 'hapusResep'])->name('apol.hapus-resep');
+    Route::post('/apol/hapus-obat', [ApolController::class, 'hapusObat']);
+    Route::get('/apol/pelayanan/obat/daftar/{nosep?}', [ApolController::class, 'getDaftarPelayananObat'])
+    ->name('apol.obat.daftar');
+// Opsional: versi query param fallback ?nosep=...
+Route::get('/apol/pelayanan/obat/daftar', [ApolController::class, 'getDaftarPelayananObat']);
+    Route::post('/apol/hapus-resep',   [ApolController::class, 'hapusResep']); // alias untuk klien yg tidak support DELETE
+    Route::get('/apol/debug/config', [ApolController::class, 'debugConfig'])->name('debug.config');
+    Route::get('/apol/debug/endpoint', [ApolController::class, 'testEndpoint'])->name('debug.endpoint');
+    Route::get('/apol/debug/auth', [ApolController::class, 'testAuthentication'])->name('debug.auth');
+    Route::get('/apol/debug/doc-format', [ApolController::class, 'testDocumentationFormat'])->name('debug.doc-format');
+    Route::get('/apol/debug/connection', [ApolController::class, 'testConnection'])->name('debug.connection');
 });

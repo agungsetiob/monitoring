@@ -44,5 +44,13 @@ import FeatureCard from '@/Components/FeatureCard.vue';
     >
       Kelola dan pantau rencana kontrol pasien.
     </FeatureCard>
+    <FeatureCard
+      title="Daftar Resep"
+      :link="route('apol.index')"
+      icon="pills"
+      color="purple"
+    >
+      Kelola Daftar Resep pasien.
+    </FeatureCard>
   </LandingSection>
 </template>
