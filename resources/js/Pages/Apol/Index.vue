@@ -3,6 +3,9 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, reactive, onMounted, computed } from 'vue';
 import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
+import Modal from '@/Components/Modal.vue'
+import SuccessFlash from '@/Components/SuccessFlash.vue'
+import ErrorFlash from '@/Components/ErrorFlash.vue'
 
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -95,52 +98,52 @@ const normalizeListObat = (list) => {
 };
 
 const loadObatList = async (nosepApotek) => {
-  obatList.value = [];
-  if (!nosepApotek) return;
+    obatList.value = [];
+    if (!nosepApotek) return;
 
-  isLoadingObatList.value = true;
-  try {
-    // prefer RESTful: /apol/pelayanan/obat/daftar/{nosep}
-    let res;
+    isLoadingObatList.value = true;
     try {
-      res = await axios.get(`/apol/pelayanan/obat/daftar/${encodeURIComponent(nosepApotek)}`);
-    } catch {
-      // fallback query param: /apol/pelayanan/obat/daftar?nosep=...
-      res = await axios.get('/apol/pelayanan/obat/daftar', { params: { nosep: nosepApotek } });
+        // prefer RESTful: /apol/pelayanan/obat/daftar/{nosep}
+        let res;
+        try {
+            res = await axios.get(`/apol/pelayanan/obat/daftar/${encodeURIComponent(nosepApotek)}`);
+        } catch {
+            // fallback query param: /apol/pelayanan/obat/daftar?nosep=...
+            res = await axios.get('/apol/pelayanan/obat/daftar', { params: { nosep: nosepApotek } });
+        }
+
+        const payload = res?.data || {};
+
+        // Cari listobat di berbagai bentuk payload
+        let list = [];
+        const candidates = [
+            payload?.listobat,
+            payload?.detailsep?.listobat,
+            payload?.data?.listobat,
+            payload?.data?.detailsep?.listobat,
+            payload?.response?.listobat,
+            payload?.response?.detailsep?.listobat,
+        ];
+        for (const cand of candidates) {
+            const norm = normalizeListObat(cand);
+            if (norm.length) { list = norm; break; }
+        }
+
+        obatList.value = list.map(o => ({
+            kodeobat: String(o.kodeobat ?? o.kdobat ?? '').trim(),
+            namaobat: o.namaobat ?? o.nmobat ?? '-',
+            tipeobat: (o.tipeobat ?? o.tipeObat ?? 'N').toString().toUpperCase(),
+            signa1: o.signa1 ?? o.signa ?? null,
+            signa2: o.signa2 ?? null,
+            jumlah: o.jumlah ?? o.qty ?? null,
+            hari: o.hari ?? null,
+            harga: o.harga ?? null,
+        }));
+    } catch (e) {
+        showMessage(e?.response?.data?.message || 'Gagal memuat daftar obat');
+    } finally {
+        isLoadingObatList.value = false;
     }
-
-    const payload = res?.data || {};
-
-    // Cari listobat di berbagai bentuk payload
-    let list = [];
-    const candidates = [
-      payload?.listobat,
-      payload?.detailsep?.listobat,
-      payload?.data?.listobat,
-      payload?.data?.detailsep?.listobat,
-      payload?.response?.listobat,
-      payload?.response?.detailsep?.listobat,
-    ];
-    for (const cand of candidates) {
-      const norm = normalizeListObat(cand);
-      if (norm.length) { list = norm; break; }
-    }
-
-    obatList.value = list.map(o => ({
-      kodeobat: String(o.kodeobat ?? o.kdobat ?? '').trim(),
-      namaobat: o.namaobat ?? o.nmobat ?? '-',
-      tipeobat: (o.tipeobat ?? o.tipeObat ?? 'N').toString().toUpperCase(),
-      signa1: o.signa1 ?? o.signa ?? null,
-      signa2: o.signa2 ?? null,
-      jumlah: o.jumlah ?? o.qty ?? null,
-      hari: o.hari ?? null,
-      harga: o.harga ?? null,
-    }));
-  } catch (e) {
-    showMessage(e?.response?.data?.message || 'Gagal memuat daftar obat');
-  } finally {
-    isLoadingObatList.value = false;
-  }
 };
 
 
@@ -441,18 +444,21 @@ const formatTanggal = (tanggal) => {
 };
 
 const getJenisObatText = (kode) => {
-    switch (kode) {
+    switch (String(kode)) {
         case '0': return 'Semua';
-        case '1': return 'Generik';
-        case '2': return 'Paten';
-        default: return kode || '-';
+        case '1': return 'Obat PRB';
+        case '2': return 'Obat Kronis Belum Stabil';
+        case '3': return 'Obat Kemoterapi';
+        default: return kode ?? '-';
     }
 };
 
 const getJenisObatClass = (kode) => {
-    switch (kode) {
-        case '1': return 'bg-green-100 text-green-800';
-        case '2': return 'bg-blue-100 text-blue-800';
+    switch (String(kode)) {
+        case '1': return 'bg-green-100 text-green-800';   // PRB
+        case '2': return 'bg-amber-100 text-amber-800';   // Kronis blm stabil
+        case '3': return 'bg-purple-100 text-purple-800'; // Kemoterapi
+        case '0': return 'bg-gray-100 text-gray-800';     // Semua
         default: return 'bg-gray-100 text-gray-800';
     }
 };
@@ -482,91 +488,18 @@ const getJenisObatClass = (kode) => {
                     Kembali
                 </button>
             </div>
-
             <!-- Error Toast Alert -->
-            <Transition name="toast">
-                <div v-if="errorMessage" class="fixed top-4 right-4 z-50 w-full max-w-sm">
-                    <div class="p-4 bg-red-50 rounded-lg border border-red-200 shadow-lg">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1 ml-3">
-                                <h3 class="text-sm font-medium text-red-800">Error!</h3>
-                                <p class="mt-1 text-sm text-red-700">{{ errorMessage }}</p>
-                            </div>
-                            <div class="flex-shrink-0 ml-4">
-                                <button @click="errorMessage = ''"
-                                    class="inline-flex text-red-400 hover:text-red-600 focus:outline-none">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </Transition>
-
+            <ErrorFlash   :flash="{ error:   errorMessage   }" @clearFlash="errorMessage   = ''" />
             <!-- Success Toast Alert -->
-            <Transition name="toast">
-                <div v-if="successMessage" class="fixed top-4 right-4 z-50 w-full max-w-sm">
-                    <div class="p-4 bg-green-50 rounded-lg border border-green-200 shadow-lg">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1 ml-3">
-                                <h3 class="text-sm font-medium text-green-800">Success!</h3>
-                                <p class="mt-1 text-sm text-green-700">{{ successMessage }}</p>
-                            </div>
-                            <div class="flex-shrink-0 ml-4">
-                                <button @click="successMessage = ''"
-                                    class="inline-flex text-green-400 hover:text-green-600 focus:outline-none">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </Transition>
-
+            <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
             <!-- Search Form -->
             <div class="p-6 mb-6 bg-white rounded-xl shadow-lg">
                 <h2 class="mb-4 text-xl font-bold text-gray-800">Filter Daftar Resep</h2>
 
                 <form @submit.prevent="cariData" class="space-y-4">
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <div>
-                            <label class="block mb-2 text-sm font-medium text-gray-700">
-                                Kode PPK
-                            </label>
-                            <div
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-800 border border-gray-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M20 6L9 17l-5-5"></path>
-                                </svg>
-                                <span class="font-semibold">{{ searchForm.kdppk || '-' }}</span>
-                            </div>
-                            <!-- tetap kirim ke server -->
-                            <input type="hidden" v-model="searchForm.kdppk" />
-                        </div>
+                    <input type="hidden" v-model="searchForm.kdppk" />
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+
 
                         <div>
                             <label for="KdJnsObat" class="block mb-2 text-sm font-medium text-gray-700">
@@ -574,12 +507,12 @@ const getJenisObatClass = (kode) => {
                             </label>
                             <select id="KdJnsObat" v-model="searchForm.KdJnsObat"
                                 class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                <option value="0">Semua Jenis Obat</option>
-                                <option value="1">Obat Generik</option>
-                                <option value="2">Obat Paten</option>
+                                <option value="0">Semua</option>
+                                <option value="1">Obat PRB</option>
+                                <option value="2">Obat Kronis Belum Stabil</option>
+                                <option value="3">Obat Kemoterapi</option>
                             </select>
                         </div>
-
                         <div>
                             <label for="JnsTgl" class="block mb-2 text-sm font-medium text-gray-700">
                                 Jenis Tanggal
@@ -587,11 +520,10 @@ const getJenisObatClass = (kode) => {
                             <select id="JnsTgl" v-model="searchForm.JnsTgl"
                                 class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
                                 <option value="TGLPELSJP">Tanggal Pelayanan SJP</option>
+                                <option value="TGLRSP">Tanggal Resep</option>
                             </select>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                             <label for="TglMulai" class="block mb-2 text-sm font-medium text-gray-700">
                                 Tanggal Mulai *
@@ -715,11 +647,11 @@ const getJenisObatClass = (kode) => {
                                         item.NOSEP_KUNJUNGAN || '-' }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NAMA || '-'
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLENTRY)
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{
                                         formatTanggal(item.TGLPELRSP) }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b text-right font-medium">
@@ -779,133 +711,125 @@ const getJenisObatClass = (kode) => {
                     </table>
                 </div>
                 <!-- Modal Hapus Resep -->
-                <Transition name="toast">
-                    <div v-if="showDeleteModal"
-                        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
-                        <div class="w-full max-w-2xl rounded-xl bg-white shadow-2xl">
-                            <div class="flex items-center justify-between px-5 py-4 border-b">
-                                <h3 class="text-lg font-semibold">Hapus Resep</h3>
-                                <button @click="closeDelete" class="text-gray-500 hover:text-gray-700">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                <Modal :show="showDeleteModal" max-width="2xl" @close="closeDelete">
+                    <div class="flex items-center justify-between px-5 py-4 border-b">
+                        <h3 class="text-lg font-semibold">Hapus Resep</h3>
+                        <button @click="closeDelete" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
 
-                            <div class="px-5 py-4 space-y-4">
-                                <p class="text-sm text-gray-600">
-                                    Pastikan <b>No Resep</b>, <b>No SEP Apotek/SJP</b>, dan <b>Ref Asal SJP</b> sesuai.
-                                    Centang opsi di bawah untuk menghapus <b>semua obat</b> lebih dulu (disarankan).
-                                </p>
+                    <div class="px-5 py-4 space-y-4">
+                        <div class="px-5 py-4 space-y-4">
+                            <p class="text-sm text-gray-600">
+                                Pastikan <b>No Resep</b>, <b>No SEP Apotek/SJP</b>, dan <b>Ref Asal SJP</b> sesuai.
+                                Centang opsi di bawah untuk menghapus <b>semua obat</b> lebih dulu (disarankan).
+                            </p>
 
-                                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                    <div class="md:col-span-1">
-                                        <label class="block mb-1 text-sm font-medium text-gray-700">No Resep</label>
-                                        <input v-model="deleteForm.noresep" type="text"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                            placeholder="Contoh: 0SI44" />
-                                    </div>
-
-                                    <div class="md:col-span-1">
-                                        <label class="block mb-1 text-sm font-medium text-gray-700">No SEP
-                                            Apotek/SJP</label>
-                                        <input v-model="deleteForm.nosjp" type="text"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                            placeholder="Contoh: 1801A00104190000001" />
-                                    </div>
-
-                                    <div class="md:col-span-1">
-                                        <label class="block mb-1 text-sm font-medium text-gray-700">Ref Asal SJP</label>
-                                        <input v-model="deleteForm.refasalsjp" type="text"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                            placeholder="Contoh: 1801R0010419V000001" />
-                                    </div>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">No Resep</label>
+                                    <input v-model="deleteForm.noresep" type="text"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                        placeholder="Contoh: 0SI44" />
                                 </div>
 
-                                <!-- Toggle purge-first -->
-                                <div class="flex items-center gap-3 mt-2">
-                                    <input id="purgeFirst" type="checkbox" v-model="purgeObatFirst"
-                                        class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500" />
-                                    <label for="purgeFirst" class="text-sm text-gray-700">
-                                        Hapus <b>semua obat</b> pada resep ini sebelum hapus resep
-                                    </label>
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">No SEP
+                                        Apotek/SJP</label>
+                                    <input v-model="deleteForm.nosjp" type="text"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                        placeholder="Contoh: 1801A00104190000001" />
                                 </div>
 
-                                <!-- Daftar obat -->
-                                <div class="border rounded-lg p-3">
-                                    <div class="flex items-center justify-between">
-                                        <h4 class="text-sm font-semibold text-gray-800">
-                                            Daftar Obat ({{ isLoadingObatList ? 'memuat...' : obatList.length + ' item'
-                                            }})
-                                        </h4>
-                                        <button
-                                            class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
-                                            @click="loadObatList(deleteForm.nosjp)" :disabled="isLoadingObatList">
-                                            Muat Ulang
-                                        </button>
-                                    </div>
-
-                                    <div v-if="isLoadingObatList" class="text-xs text-gray-500 mt-2">Mengambil data...
-                                    </div>
-                                    <div v-else-if="obatList.length === 0" class="text-xs text-gray-500 mt-2">Tidak ada
-                                        obat.</div>
-                                    <ul v-else class="mt-2 space-y-1 max-h-48 overflow-auto pr-1">
-                                        <li v-for="(o, idx) in obatList" :key="idx"
-                                            class="text-sm flex items-center justify-between border-b last:border-0 py-1">
-                                            <div class="flex-1 min-w-0">
-                                                <div class="font-medium truncate">{{ o.namaobat }}</div>
-                                                <div class="text-xs text-gray-500">
-                                                    Kode: <span class="font-mono">{{ o.kodeobat }}</span>
-                                                    &middot; Tipe: {{ o.tipeobat || 'N' }}
-                                                    <template v-if="o.jumlah"> &middot; Jml: {{ o.jumlah }}</template>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
-
-                                    <!-- Progress hapus obat -->
-                                    <div v-if="isDeleting && purgeObatFirst" class="mt-3 text-xs">
-                                        <div class="mb-1">Menghapus obat: {{ deleteStats.done }}/{{ deleteStats.total }}
-                                            selesai,
-                                            gagal: {{ deleteStats.failed }}</div>
-                                        <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
-                                            <div class="h-2 bg-rose-600"
-                                                :style="{ width: (deleteStats.total ? (deleteStats.done / deleteStats.total * 100) : 0) + '%' }">
-                                            </div>
-                                        </div>
-                                        <div v-if="deleteStats.failed > 0" class="mt-2 text-rose-600">
-                                            Beberapa obat gagal dihapus. Resep tidak akan dihapus sampai semua obat
-                                            terhapus.
-                                        </div>
-                                    </div>
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">Ref Asal SJP</label>
+                                    <input v-model="deleteForm.refasalsjp" type="text"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                        placeholder="Contoh: 1801R0010419V000001" />
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-end gap-3 px-5 py-4 border-t">
-                                <button @click="closeDelete"
-                                    class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
-                                    Batal
-                                </button>
-                                <button :disabled="isDeleting || deleteDisabled" @click="submitDelete"
-                                    class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
-                                    <svg v-if="isDeleting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="4">
-                                        </circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                    {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
-                                </button>
+                            <!-- Toggle purge-first -->
+                            <div class="flex items-center gap-3 mt-2">
+                                <input id="purgeFirst" type="checkbox" v-model="purgeObatFirst"
+                                    class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500" />
+                                <label for="purgeFirst" class="text-sm text-gray-700">
+                                    Hapus <b>semua obat</b> pada resep ini sebelum hapus resep
+                                </label>
+                            </div>
+
+                            <!-- Daftar obat -->
+                            <div class="border rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-sm font-semibold text-gray-800">
+                                        Daftar Obat ({{ isLoadingObatList ? 'memuat...' : obatList.length + ' item'
+                                        }})
+                                    </h4>
+                                    <button class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
+                                        @click="loadObatList(deleteForm.nosjp)" :disabled="isLoadingObatList">
+                                        Muat Ulang
+                                    </button>
+                                </div>
+
+                                <div v-if="isLoadingObatList" class="text-xs text-gray-500 mt-2">Mengambil data...
+                                </div>
+                                <div v-else-if="obatList.length === 0" class="text-xs text-gray-500 mt-2">Tidak ada
+                                    obat.</div>
+                                <ul v-else class="mt-2 space-y-1 max-h-48 overflow-auto pr-1">
+                                    <li v-for="(o, idx) in obatList" :key="idx"
+                                        class="text-sm flex items-center justify-between border-b last:border-0 py-1">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="font-medium truncate">{{ o.namaobat }}</div>
+                                            <div class="text-xs text-gray-500">
+                                                Kode: <span class="font-mono">{{ o.kodeobat }}</span>
+                                                &middot; Tipe: {{ o.tipeobat || 'N' }}
+                                                <template v-if="o.jumlah"> &middot; Jml: {{ o.jumlah }}</template>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+
+                                <!-- Progress hapus obat -->
+                                <div v-if="isDeleting && purgeObatFirst" class="mt-3 text-xs">
+                                    <div class="mb-1">Menghapus obat: {{ deleteStats.done }}/{{ deleteStats.total }}
+                                        selesai,
+                                        gagal: {{ deleteStats.failed }}</div>
+                                    <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
+                                        <div class="h-2 bg-rose-600"
+                                            :style="{ width: (deleteStats.total ? (deleteStats.done / deleteStats.total * 100) : 0) + '%' }">
+                                        </div>
+                                    </div>
+                                    <div v-if="deleteStats.failed > 0" class="mt-2 text-rose-600">
+                                        Beberapa obat gagal dihapus. Resep tidak akan dihapus sampai semua obat
+                                        terhapus.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </Transition>
 
-
+                    <div class="flex items-center justify-end gap-3 px-5 py-4 border-t">
+                        <button @click="closeDelete"
+                            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            Batal
+                        </button>
+                        <button :disabled="isDeleting || deleteDisabled" @click="submitDelete"
+                            class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
+                            <svg v-if="isDeleting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
+                        </button>
+                    </div>
+                </Modal>
             </div>
         </div>
     </div>
@@ -917,16 +841,5 @@ const getJenisObatClass = (kode) => {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25'%3E%3Cdefs%3E%3ClinearGradient id='a' gradientUnits='userSpaceOnUse' x1='0' x2='0' y1='0' y2='100%25' gradientTransform='rotate(240)'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='1' stop-color='%234FE'/%3E%3C/linearGradient%3E%3Cpattern patternUnits='userSpaceOnUse' id='b' width='540' height='450' x='0' y='0' viewBox='0 0 1080 900'%3E%3Cg fill-opacity='0.1'%3E%3Cpolygon fill='%23444' points='90 150 0 300 180 300'/%3E%3Cpolygon points='90 150 180 0 0 0'/%3E%3Cpolygon fill='%23AAA' points='270 150 360 0 180 0'/%3E%3Cpolygon fill='%23DDD' points='450 150 360 300 540 300'/%3E%3Cpolygon fill='%23999' points='450 150 540 0 360 0'/%3E%3Cpolygon points='630 150 540 300 720 300'/%3E%3Cpolygon fill='%23DDD' points='630 150 720 0 540 0'/%3E%3Cpolygon fill='%23444' points='810 150 720 300 900 300'/%3E%3Cpolygon fill='%23FFF' points='810 150 900 0 720 0'/%3E%3Cpolygon fill='%23DDD' points='990 150 900 300 1080 300'/%3E%3Cpolygon fill='%23444' points='990 150 1080 0 900 0'/%3E%3Cpolygon fill='%23DDD' points='90 450 0 600 180 600'/%3E%3Cpolygon points='90 450 180 300 0 300'/%3E%3Cpolygon fill='%23666' points='270 450 180 600 360 600'/%3E%3Cpolygon fill='%23AAA' points='270 450 360 300 180 300'/%3E%3Cpolygon fill='%23DDD' points='450 450 360 600 540 600'/%3E%3Cpolygon fill='%23999' points='450 450 540 300 360 300'/%3E%3Cpolygon fill='%23999' points='630 450 540 600 720 600'/%3E%3Cpolygon fill='%23FFF' points='630 450 720 300 540 300'/%3E%3Cpolygon points='810 450 720 600 900 600'/%3E%3Cpolygon fill='%23DDD' points='810 450 900 300 720 300'/%3E%3Cpolygon fill='%23AAA' points='990 450 900 600 1080 600'/%3E%3Cpolygon fill='%23444' points='990 450 1080 300 900 300'/%3E%3Cpolygon fill='%23222' points='90 750 0 900 180 900'/%3E%3Cpolygon points='270 750 180 900 360 900'/%3E%3Cpolygon fill='%23DDD' points='270 750 360 600 180 600'/%3E%3Cpolygon points='450 750 540 600 360 600'/%3E%3Cpolygon points='630 750 540 900 720 900'/%3E%3Cpolygon fill='%23444' points='630 750 720 600 540 600'/%3E%3Cpolygon fill='%23AAA' points='810 750 720 900 900 900'/%3E%3Cpolygon fill='%23666' points='810 750 900 600 720 600'/%3E%3Cpolygon fill='%23999' points='990 750 900 900 1080 900'/%3E%3Cpolygon fill='%23999' points='180 0 90 150 270 150'/%3E%3Cpolygon fill='%23444' points='360 0 270 150 450 150'/%3E%3Cpolygon fill='%23FFF' points='540 0 450 150 630 150'/%3E%3Cpolygon points='900 0 810 150 990 150'/%3E%3Cpolygon fill='%23222' points='0 300 -90 450 90 450'/%3E%3Cpolygon fill='%23FFF' points='0 300 90 150 -90 150'/%3E%3Cpolygon fill='%23FFF' points='180 300 90 450 270 450'/%3E%3Cpolygon fill='%23666' points='180 300 270 150 90 150'/%3E%3Cpolygon fill='%23222' points='360 300 270 450 450 450'/%3E%3Cpolygon fill='%23FFF' points='360 300 450 150 270 150'/%3E%3Cpolygon fill='%23444' points='540 300 450 450 630 450'/%3E%3Cpolygon fill='%23222' points='540 300 630 150 450 150'/%3E%3Cpolygon fill='%23AAA' points='720 300 630 450 810 450'/%3E%3Cpolygon fill='%23666' points='720 300 810 150 630 150'/%3E%3Cpolygon fill='%23FFF' points='900 300 810 450 990 450'/%3E%3Cpolygon fill='%23999' points='900 300 990 150 810 150'/%3E%3Cpolygon points='0 600 -90 750 90 750'/%3E%3Cpolygon fill='%23666' points='0 600 90 450 -90 450'/%3E%3Cpolygon fill='%23AAA' points='180 600 90 750 270 750'/%3E%3Cpolygon fill='%23444' points='180 600 270 450 90 450'/%3E%3Cpolygon fill='%23444' points='360 600 270 750 450 750'/%3E%3Cpolygon fill='%23999' points='360 600 450 450 270 450'/%3E%3Cpolygon fill='%23666' points='540 600 630 450 450 450'/%3E%3Cpolygon fill='%23222' points='720 600 630 750 810 750'/%3E%3Cpolygon fill='%23FFF' points='900 600 810 750 990 750'/%3E%3Cpolygon fill='%23222' points='900 600 990 450 810 450'/%3E%3Cpolygon fill='%23DDD' points='0 900 90 750 -90 750'/%3E%3Cpolygon fill='%23444' points='180 900 270 750 90 750'/%3E%3Cpolygon fill='%23FFF' points='360 900 450 750 270 750'/%3E%3Cpolygon fill='%23AAA' points='540 900 630 750 450 750'/%3E%3Cpolygon fill='%23FFF' points='720 900 810 750 630 750'/%3E%3Cpolygon fill='%23222' points='900 900 990 750 810 750'/%3E%3Cpolygon fill='%23222' points='1080 300 990 450 1170 450'/%3E%3Cpolygon fill='%23FFF' points='1080 300 1170 150 990 150'/%3E%3Cpolygon points='1080 600 990 750 1170 750'/%3E%3Cpolygon fill='%23666' points='1080 600 1170 450 990 450'/%3E%3Cpolygon fill='%23DDD' points='1080 900 1170 750 990 750'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect x='0' y='0' fill='url(%23a)' width='100%25' height='100%25'/%3E%3Crect x='0' y='0' fill='url(%23b)' width='100%25' height='100%25'/%3E%3C/svg%3E");
     background-attachment: fixed;
     background-size: cover;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-    transition: all 0.3s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-    opacity: 0;
-    transform: translateX(100%);
 }
 </style>

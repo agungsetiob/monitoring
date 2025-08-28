@@ -172,11 +172,11 @@ class ApolApiService
 
         return [
             'success' => false,
-            'message' => 'Semua metode request gagal - kemungkinan format request tidak sesuai atau endpoint membutuhkan konfigurasi khusus',
+            'message' => 'Data Tidak Ditemukan',
             'error' => $lastError ? $lastError->getMessage() : 'Unknown error',
             'metaData' => [
                 'code' => '500',
-                'message' => 'All request methods failed - server keeps returning HTML error page'
+                'message' => 'Data Tidak Ditemukan'
             ]
         ];
     }
@@ -376,39 +376,40 @@ class ApolApiService
      * Process HTTP response
      */
     private function processResponse($response, $timestamp)
-    {
-        Log::info('APOL Response', [
-            'status' => $response->status(),
-            'headers' => $response->headers(),
-            'body_preview' => substr($response->body(), 0, 500) . '...'
-        ]);
+{
+    Log::info('APOL Response', [
+        'status' => $response->status(),
+        'headers' => $response->headers(),
+        'body_preview' => substr($response->body(), 0, 500) . '...'
+    ]);
 
-        if (!$response->successful()) {
-            $errorMessage = 'HTTP request failed: ' . $response->status();
-            $body = $response->body();
-
-            // Check if it's HTML error page
-            if (strpos($body, '<html') !== false || strpos($body, 'Request Error') !== false) {
-                $errorMessage .= ' - Server returned HTML error page (likely routing/endpoint issue)';
-            } else {
-                $errorMessage .= ' - Response: ' . $body;
-            }
-
-            throw new \Exception($errorMessage);
-        }
-
+    // Kalau status sukses 200
+    if ($response->successful()) {
         $data = $response->json();
 
         if (!$data) {
-            throw new \Exception('Response kosong dari server BPJS');
+            return [
+                'success'  => false,
+                'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
+                'response' => []
+            ];
         }
 
         // Handle encrypted response
         if (isset($data['response']) && is_string($data['response'])) {
             try {
                 $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $timestamp);
+
+                if (empty($decryptedObj)) {
+                    return [
+                        'success'  => false,
+                        'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
+                        'response' => []
+                    ];
+                }
+
                 return [
-                    'metaData' => $data['metaData'],
+                    'metaData' => $data['metaData'] ?? ['code' => 200, 'message' => 'OK'],
                     'response' => $decryptedObj,
                 ];
             } catch (\Exception $e) {
@@ -416,8 +417,35 @@ class ApolApiService
             }
         }
 
+        // Kalau ada response tapi kosong/null
+        if (isset($data['response']) && empty($data['response'])) {
+            return [
+                'success'  => false,
+                'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
+                'response' => []
+            ];
+        }
+
         return $data;
     }
+
+    // Kalau status bukan 200
+    $errorMessage = 'HTTP request failed: ' . $response->status();
+    $body = $response->body();
+
+    if ($this->looksLikeHtmlError($response)) {
+        $errorMessage .= ' - Server returned HTML error page';
+    } else {
+        $errorMessage .= ' - Response: ' . $body;
+    }
+
+    return [
+        'success'  => false,
+        'metaData' => ['code' => (string)$response->status(), 'message' => $errorMessage],
+        'response' => []
+    ];
+}
+
 
     /**
      * Check if response is successful

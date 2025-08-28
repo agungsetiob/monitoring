@@ -162,14 +162,14 @@ private function normalizeListObat($list): array
         // Validation dengan pesan error yang lebih jelas
         $validator = \Validator::make($request->all(), [
             'kdppk' => 'required|string|max:20',
-            'KdJnsObat' => 'nullable|string|in:0,1,2',
-            'JnsTgl' => 'required|string|in:TGLPELSJP',
+            'KdJnsObat' => 'nullable|string|in:0,1,2,3',
+            'JnsTgl' => 'required|string|in:TGLPELSJP,TGLRSP',
             'TglMulai' => 'required|string',
             'TglAkhir' => 'required|string',
         ], [
             'kdppk.required' => 'Kode PPK harus diisi',
             'kdppk.max' => 'Kode PPK maksimal 20 karakter',
-            'JnsTgl.in' => 'Jenis tanggal harus TGLPELSJP',
+            'JnsTgl.in' => 'Jenis tanggal harus TGLPELSJP Atau TGLRSP',
             'TglMulai.required' => 'Tanggal mulai harus diisi',
             'TglAkhir.required' => 'Tanggal akhir harus diisi',
         ]);
@@ -334,7 +334,7 @@ private function normalizeListObat($list): array
         $request->validate([
             'kdppk' => 'required|string',
             'KdJnsObat' => 'nullable|string',
-            'JnsTgl' => 'required|string|in:TGLPELSJP',
+            'JnsTgl' => 'required|string|in:TGLPELSJP,TGLRSP',
             'TglMulai' => 'required|string',
             'TglAkhir' => 'required|string',
             'format' => 'required|string|in:excel,csv',
@@ -403,7 +403,7 @@ private function normalizeListObat($list): array
         $request->validate([
             'kdppk' => 'required|string',
             'KdJnsObat' => 'nullable|string',
-            'JnsTgl' => 'required|string|in:TGLPELSJP',
+            'JnsTgl' => 'required|string|in:TGLPELSJP,TGLRSP',
             'TglMulai' => 'required|string',
             'TglAkhir' => 'required|string',
         ]);
@@ -639,7 +639,7 @@ private function normalizeListObat($list): array
             $result = $this->apiService->attemptDocumentationFormat(
                 '1712A001',
                 '0',
-                'TGLPELSJP',
+                'TGLPELSJP,TGLRSP',
                 '2025-08-01 00:00:00',
                 '2025-08-31 23:59:59'
             );
