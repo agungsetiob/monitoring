@@ -227,7 +227,6 @@ const resetForm = () => {
 };
 
 const searchResult = ref([]);
-const isExporting = ref(false);
 
 // Set default dates (current month)
 onMounted(async () => {
@@ -295,110 +294,6 @@ const cariData = async () => {
     } finally {
         isLoading.value = false;
     }
-};
-
-const exportData = async (format) => {
-    if (searchResult.value.length === 0) {
-        showMessage('Tidak ada data untuk di-export. Lakukan pencarian terlebih dahulu.');
-        return;
-    }
-
-    isExporting.value = true;
-
-    try {
-        const exportPayload = {
-            ...searchForm,
-            format: format
-        };
-
-        const response = await axios.post('/apol/export-resep', exportPayload, {
-            responseType: format === 'excel' ? 'blob' : 'json'
-        });
-
-        if (format === 'excel') {
-            const blob = new Blob([response.data], {
-                type: 'application/vnd.ms-excel'
-            });
-
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `daftar_resep_${dayjs().format('YYYYMMDD_HHmmss')}.xls`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-
-            showMessage(`Data berhasil di-export dalam format Excel (.xls)`, 'success');
-        } else {
-            if (response.data.success) {
-                const csvContent = convertToCSV(response.data.data);
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `daftar_resep_${dayjs().format('YYYYMMDD_HHmmss')}.csv`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-
-                showMessage(`Data berhasil di-export dalam format CSV`, 'success');
-            } else {
-                showMessage(response.data.message || 'Export gagal');
-            }
-        }
-    } catch (error) {
-        showMessage(error.response?.data?.message || 'Terjadi kesalahan saat export data');
-    } finally {
-        isExporting.value = false;
-    }
-};
-
-const convertToCSV = (data) => {
-    if (!data || data.length === 0) return '';
-
-    const headers = [
-        'No',
-        'No. Resep',
-        'No. Apotek',
-        'No. SEP Kunjungan',
-        'No. Kartu',
-        'Nama Peserta',
-        'Tgl. Entry',
-        'Tgl. Resep',
-        'Tgl. Pelayanan',
-        'Biaya Tagih',
-        'Biaya Verifikasi',
-        'Jenis Obat',
-        'Faskes Asal',
-        'Flag Iter'
-    ];
-
-    const csvContent = [headers.join(',')];
-
-    data.forEach((item, index) => {
-        const row = [
-            index + 1,
-            `"${item.NORESEP || ''}"`,
-            `"${item.NOAPOTIK || ''}"`,
-            `"${item.NOSEP_KUNJUNGAN || ''}"`,
-            `"${item.NOKARTU || ''}"`,
-            `"${item.NAMA || ''}"`,
-            `"${formatTanggal(item.TGLENTRY)}"`,
-            `"${formatTanggal(item.TGLRESEP)}"`,
-            `"${formatTanggal(item.TGLPELRSP)}"`,
-            `"${item.BYTAGRSP || '0'}"`,
-            `"${item.BYVERRSP || '0'}"`,
-            `"${getJenisObatText(item.KDJNSOBAT)}"`,
-            `"${item.FASKESASAL || ''}"`,
-            `"${item.FLAGITER === 'True' ? 'Ya' : 'Tidak'}"`
-        ];
-        csvContent.push(row.join(','));
-    });
-
-    return csvContent.join('\n');
 };
 
 const getSummary = async () => {
@@ -555,32 +450,6 @@ const getJenisObatClass = (kode) => {
                         </button>
                     </div>
                 </form>
-            </div>
-
-            <!-- Export Actions -->
-            <div v-if="searchResult.length > 0" class="p-4 mb-6 bg-white rounded-xl shadow-lg">
-                <h3 class="mb-3 text-lg font-bold text-gray-800">Export Data</h3>
-                <div class="flex gap-3">
-                    <button @click="exportData('excel')" :disabled="isExporting"
-                        class="flex gap-2 items-center px-3 py-2 font-semibold text-white bg-emerald-600 rounded-lg transition duration-300 hover:bg-emerald-700 disabled:bg-emerald-400">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        {{ isExporting ? 'Exporting...' : 'Excel' }}
-                    </button>
-
-                    <button @click="exportData('csv')" :disabled="isExporting"
-                        class="flex gap-2 items-center px-3 py-2 font-semibold text-white bg-orange-600 rounded-lg transition duration-300 hover:bg-orange-700 disabled:bg-orange-400">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        {{ isExporting ? 'Exporting...' : 'CSV' }}
-                    </button>
-                </div>
             </div>
 
             <!-- Search Result -->

@@ -52,19 +52,19 @@ class ApolController extends Controller
     {
         $data = [
             'nosepapotek' => $request->input('nosepapotek') ?: $request->input('nosjp') ?: $request->input('nosep'),
-            'noresep'     => $request->input('noresep'),
-            'kodeobat'    => $request->input('kodeobat') ?: $request->input('kdobat'),
-            'tipeobat'    => strtoupper((string) $request->input('tipeobat', 'N')),
+            'noresep' => $request->input('noresep'),
+            'kodeobat' => $request->input('kodeobat') ?: $request->input('kdobat'),
+            'tipeobat' => strtoupper((string) $request->input('tipeobat', 'N')),
         ];
 
         $v = \Validator::make($data, [
             'nosepapotek' => 'required|string',
-            'noresep'     => 'required|string',
-            'kodeobat'    => 'required|string',
-            'tipeobat'    => 'in:N,K',
+            'noresep' => 'required|string',
+            'kodeobat' => 'required|string',
+            'tipeobat' => 'in:N,K',
         ]);
         if ($v->fails()) {
-            return response()->json(['success'=>false,'message'=>'Validasi gagal: '.$v->errors()->first(),'errors'=>$v->errors()], 422);
+            return response()->json(['success' => false, 'message' => 'Validasi gagal: ' . $v->errors()->first(), 'errors' => $v->errors()], 422);
         }
 
         $resp = $this->apiService->hapusObat($data['nosepapotek'], $data['noresep'], $data['kodeobat'], $data['tipeobat']);
@@ -73,82 +73,87 @@ class ApolController extends Controller
     }
 
 
-public function getDaftarPelayananObat(Request $request, $nosep = null)
-{
-    // Ambil dari path param atau query param
-    $nosep = $nosep ?: $request->query('nosep');
+    public function getDaftarPelayananObat(Request $request, $nosep = null)
+    {
+        // Ambil dari path param atau query param
+        $nosep = $nosep ?: $request->query('nosep');
 
-    // Validasi sederhana
-    $validator = \Validator::make(['nosep' => $nosep], [
-        'nosep' => 'required|string',
-    ], [
-        'nosep.required' => 'Nomor SEP Apotek/SJP (nosep) harus diisi',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Validasi gagal: ' . $validator->errors()->first(),
-            'errors'  => $validator->errors(),
-        ], 422);
-    }
-
-    try {
-        \Log::info('APOL getDaftarPelayananObat', ['nosep' => $nosep]);
-
-        $response = $this->apiService->getDaftarPelayananObat($nosep);
-
-        // Pakai handler universal yang sudah kamu buat
-        return $this->handleApiResponse($response);
-    } catch (\Exception $e) {
-        \Log::error('Error getDaftarPelayananObat: '.$e->getMessage(), [
-            'nosep' => $nosep,
-            'trace' => $e->getTraceAsString()
+        // Validasi sederhana
+        $validator = \Validator::make(['nosep' => $nosep], [
+            'nosep' => 'required|string',
+        ], [
+            'nosep.required' => 'Nomor SEP Apotek/SJP (nosep) harus diisi',
         ]);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal mengambil daftar pelayanan obat',
-            'error'   => $e->getMessage(),
-        ], 500);
-    }
-}
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal: ' . $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
-/**
- * Normalisasi listobat yang kadang object tunggal, kadang array.
- * @param mixed $list
- * @return array<int, array<string,mixed>>
- */
-private function normalizeListObat($list): array
-{
-    if (empty($list)) return [];
+        try {
+            \Log::info('APOL getDaftarPelayananObat', ['nosep' => $nosep]);
 
-    // jika server kadang kirim object tunggal
-    if (is_array($list) && (
-        isset($list['kodeobat']) || isset($list['kdobat']) ||
-        isset($list['KdObat'])   || isset($list['KDOBAT']) ||
-        isset($list['kd_obat'])
-    )) {
-        $list = [$list];
-    }
+            $response = $this->apiService->getDaftarPelayananObat($nosep);
 
-    if (!is_array($list)) return [];
+            // Pakai handler universal yang sudah kamu buat
+            return $this->handleApiResponse($response);
+        } catch (\Exception $e) {
+            \Log::error('Error getDaftarPelayananObat: ' . $e->getMessage(), [
+                'nosep' => $nosep,
+                'trace' => $e->getTraceAsString()
+            ]);
 
-    $out = [];
-    foreach ($list as $it) {
-        if (!is_array($it)) continue;
-
-        $kode = $it['kodeobat'] ?? $it['kdobat'] ?? $it['KdObat'] ?? $it['KDOBAT'] ?? $it['kd_obat'] ?? null;
-        $tipe = $it['tipeobat'] ?? $it['tipeObat'] ?? $it['tipe_obat'] ?? 'N';
-
-        $it['kodeobat'] = (string) $kode;
-        $it['tipeobat'] = strtoupper((string) $tipe);
-
-        $out[] = $it;
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil daftar pelayanan obat',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    return array_values($out);
-}
+    /**
+     * Normalisasi listobat yang kadang object tunggal, kadang array.
+     * @param mixed $list
+     * @return array<int, array<string,mixed>>
+     */
+    private function normalizeListObat($list): array
+    {
+        if (empty($list))
+            return [];
+
+        // jika server kadang kirim object tunggal
+        if (
+            is_array($list) && (
+                isset($list['kodeobat']) || isset($list['kdobat']) ||
+                isset($list['KdObat']) || isset($list['KDOBAT']) ||
+                isset($list['kd_obat'])
+            )
+        ) {
+            $list = [$list];
+        }
+
+        if (!is_array($list))
+            return [];
+
+        $out = [];
+        foreach ($list as $it) {
+            if (!is_array($it))
+                continue;
+
+            $kode = $it['kodeobat'] ?? $it['kdobat'] ?? $it['KdObat'] ?? $it['KDOBAT'] ?? $it['kd_obat'] ?? null;
+            $tipe = $it['tipeobat'] ?? $it['tipeObat'] ?? $it['tipe_obat'] ?? 'N';
+
+            $it['kodeobat'] = (string) $kode;
+            $it['tipeobat'] = strtoupper((string) $tipe);
+
+            $out[] = $it;
+        }
+
+        return array_values($out);
+    }
 
 
     /**
@@ -325,76 +330,6 @@ private function normalizeListObat($list): array
     {
         return $this->ajaxGetDaftarResep($request);
     }
-
-    /**
-     * Export daftar resep ke format Excel/CSV.
-     */
-    public function exportDaftarResep(Request $request)
-    {
-        $request->validate([
-            'kdppk' => 'required|string',
-            'KdJnsObat' => 'nullable|string',
-            'JnsTgl' => 'required|string|in:TGLPELSJP,TGLRSP',
-            'TglMulai' => 'required|string',
-            'TglAkhir' => 'required|string',
-            'format' => 'required|string|in:excel,csv',
-        ]);
-
-        try {
-            // Set default value untuk KdJnsObat jika tidak diisi
-            $kdJnsObat = $request->KdJnsObat ?: "0";
-
-            $response = $this->apiService->getDaftarResep(
-                $request->kdppk,
-                $kdJnsObat,
-                $request->JnsTgl,
-                $request->TglMulai,
-                $request->TglAkhir
-            );
-
-            // Check if successful
-            $isSuccessful = false;
-            $data = [];
-
-            if (isset($response['metaData']) && ($response['metaData']['code'] === '200' || $response['metaData']['code'] === 200)) {
-                $isSuccessful = true;
-                $data = $response['response'] ?? [];
-            } elseif (isset($response['success']) && $response['success']) {
-                $isSuccessful = true;
-                $data = $response['data'] ?? $response['response'] ?? [];
-            } elseif (isset($response['response']) || isset($response['data'])) {
-                $isSuccessful = true;
-                $data = $response['response'] ?? $response['data'] ?? [];
-            }
-
-            if ($isSuccessful) {
-                // Format filename
-                $filename = 'daftar_resep_' . date('YmdHis') . '.' . $request->format;
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Data resep siap untuk di-export',
-                    'data' => $data,
-                    'filename' => $filename,
-                    'format' => $request->format,
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => $response['message'] ?? 'Data tidak ditemukan untuk di-export',
-                ], 400);
-            }
-        } catch (\Exception $e) {
-            Log::error('Error saat export daftar resep: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat export daftar resep',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
     /**
      * Get summary statistik daftar resep.
      */
@@ -492,28 +427,28 @@ private function normalizeListObat($list): array
     public function hapusResep(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'nosjp'      => 'required|string',
+            'nosjp' => 'required|string',
             'refasalsjp' => 'required|string',
-            'noresep'    => 'required|string',
+            'noresep' => 'required|string',
         ], [
-            'nosjp.required'      => 'No SJP harus diisi',
+            'nosjp.required' => 'No SJP harus diisi',
             'refasalsjp.required' => 'Ref Asal SJP harus diisi',
-            'noresep.required'    => 'No Resep harus diisi',
+            'noresep.required' => 'No Resep harus diisi',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal: ' . $validator->errors()->first(),
-                'errors'  => $validator->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
 
         try {
             Log::info('APOL HapusResep Request Input', [
-                'nosjp'      => $request->nosjp,
+                'nosjp' => $request->nosjp,
                 'refasalsjp' => $request->refasalsjp,
-                'noresep'    => $request->noresep,
+                'noresep' => $request->noresep,
             ]);
 
             $response = $this->apiService->hapusResep(
@@ -527,13 +462,13 @@ private function normalizeListObat($list): array
         } catch (\Exception $e) {
             Log::error('Error saat hapus resep via AJAX: ' . $e->getMessage(), [
                 'request_data' => $request->all(),
-                'trace'        => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menghapus resep',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
                 'debug_info' => [
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),

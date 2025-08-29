@@ -121,19 +121,19 @@ class ApolApiService
     public function getDaftarResep($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
     {
         $attempts = [
-            'form_data_direct' => function() use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
+            'form_data_direct' => function () use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
                 return $this->attemptFormData($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
             },
-            'json_wrapped_form' => function() use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
+            'json_wrapped_form' => function () use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
                 return $this->attemptJsonWrapped($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
             },
-            'documentation_format' => function() use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
+            'documentation_format' => function () use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
                 return $this->attemptDocumentationFormat($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
             },
-            'json_direct' => function() use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
+            'json_direct' => function () use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
                 return $this->attemptJsonDirect($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
             },
-            'raw_json_body' => function() use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
+            'raw_json_body' => function () use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
                 return $this->attemptAlternativeDateFormat($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
             }
         ];
@@ -376,75 +376,75 @@ class ApolApiService
      * Process HTTP response
      */
     private function processResponse($response, $timestamp)
-{
-    Log::info('APOL Response', [
-        'status' => $response->status(),
-        'headers' => $response->headers(),
-        'body_preview' => substr($response->body(), 0, 500) . '...'
-    ]);
+    {
+        Log::info('APOL Response', [
+            'status' => $response->status(),
+            'headers' => $response->headers(),
+            'body_preview' => substr($response->body(), 0, 500) . '...'
+        ]);
 
-    // Kalau status sukses 200
-    if ($response->successful()) {
-        $data = $response->json();
+        // Kalau status sukses 200
+        if ($response->successful()) {
+            $data = $response->json();
 
-        if (!$data) {
-            return [
-                'success'  => false,
-                'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
-                'response' => []
-            ];
-        }
-
-        // Handle encrypted response
-        if (isset($data['response']) && is_string($data['response'])) {
-            try {
-                $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $timestamp);
-
-                if (empty($decryptedObj)) {
-                    return [
-                        'success'  => false,
-                        'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
-                        'response' => []
-                    ];
-                }
-
+            if (!$data) {
                 return [
-                    'metaData' => $data['metaData'] ?? ['code' => 200, 'message' => 'OK'],
-                    'response' => $decryptedObj,
+                    'success' => false,
+                    'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
+                    'response' => []
                 ];
-            } catch (\Exception $e) {
-                Log::warning('Failed to decrypt response: ' . $e->getMessage());
             }
+
+            // Handle encrypted response
+            if (isset($data['response']) && is_string($data['response'])) {
+                try {
+                    $decryptedObj = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $timestamp);
+
+                    if (empty($decryptedObj)) {
+                        return [
+                            'success' => false,
+                            'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
+                            'response' => []
+                        ];
+                    }
+
+                    return [
+                        'metaData' => $data['metaData'] ?? ['code' => 200, 'message' => 'OK'],
+                        'response' => $decryptedObj,
+                    ];
+                } catch (\Exception $e) {
+                    Log::warning('Failed to decrypt response: ' . $e->getMessage());
+                }
+            }
+
+            // Kalau ada response tapi kosong/null
+            if (isset($data['response']) && empty($data['response'])) {
+                return [
+                    'success' => false,
+                    'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
+                    'response' => []
+                ];
+            }
+
+            return $data;
         }
 
-        // Kalau ada response tapi kosong/null
-        if (isset($data['response']) && empty($data['response'])) {
-            return [
-                'success'  => false,
-                'metaData' => ['code' => '204', 'message' => 'Data tidak ada / kosong'],
-                'response' => []
-            ];
+        // Kalau status bukan 200
+        $errorMessage = 'HTTP request failed: ' . $response->status();
+        $body = $response->body();
+
+        if ($this->looksLikeHtmlError($response)) {
+            $errorMessage .= ' - Server returned HTML error page';
+        } else {
+            $errorMessage .= ' - Response: ' . $body;
         }
 
-        return $data;
+        return [
+            'success' => false,
+            'metaData' => ['code' => (string) $response->status(), 'message' => $errorMessage],
+            'response' => []
+        ];
     }
-
-    // Kalau status bukan 200
-    $errorMessage = 'HTTP request failed: ' . $response->status();
-    $body = $response->body();
-
-    if ($this->looksLikeHtmlError($response)) {
-        $errorMessage .= ' - Server returned HTML error page';
-    } else {
-        $errorMessage .= ' - Response: ' . $body;
-    }
-
-    return [
-        'success'  => false,
-        'metaData' => ['code' => (string)$response->status(), 'message' => $errorMessage],
-        'response' => []
-    ];
-}
 
 
     /**
@@ -578,393 +578,404 @@ class ApolApiService
         }
     }
     public function hapusResep(string $nosjp, string $refasalsjp, string $noresep)
-{
-    $attempts = [
-        // Attempt A: DELETE + asForm() + field "request" berisi JSON string (pola umum BPJS)
-        'delete_form_request_wrapper' => function () use ($nosjp, $refasalsjp, $noresep) {
-            return $this->attemptHapusResepFormWrapped($nosjp, $refasalsjp, $noresep);
-        },
-        // Attempt B: DELETE + raw JSON tapi Content-Type x-www-form-urlencoded (pola "Documentation Format" yg sering berhasil)
-        'delete_raw_json_as_urlencoded' => function () use ($nosjp, $refasalsjp, $noresep) {
-            return $this->attemptHapusResepRawJsonAsUrlencoded($nosjp, $refasalsjp, $noresep);
-        },
-        // Attempt C: DELETE + application/json murni
-        'delete_application_json' => function () use ($nosjp, $refasalsjp, $noresep) {
-            return $this->attemptHapusResepJsonDirect($nosjp, $refasalsjp, $noresep);
-        },
-    ];
+    {
+        $attempts = [
+            // Attempt A: DELETE + asForm() + field "request" berisi JSON string (pola umum BPJS)
+            'delete_form_request_wrapper' => function () use ($nosjp, $refasalsjp, $noresep) {
+                return $this->attemptHapusResepFormWrapped($nosjp, $refasalsjp, $noresep);
+            },
+            // Attempt B: DELETE + raw JSON tapi Content-Type x-www-form-urlencoded (pola "Documentation Format" yg sering berhasil)
+            'delete_raw_json_as_urlencoded' => function () use ($nosjp, $refasalsjp, $noresep) {
+                return $this->attemptHapusResepRawJsonAsUrlencoded($nosjp, $refasalsjp, $noresep);
+            },
+            // Attempt C: DELETE + application/json murni
+            // 'delete_application_json' => function () use ($nosjp, $refasalsjp, $noresep) {
+            //     return $this->attemptHapusResepJsonDirect($nosjp, $refasalsjp, $noresep);
+            // },
+        ];
 
-    $lastError = null;
+        $lastError = null;
 
-    foreach ($attempts as $name => $cb) {
-        try {
-            Log::info("HapusResep: mencoba metode {$name}");
-            $result = $cb();
+        foreach ($attempts as $name => $cb) {
+            try {
+                Log::info("HapusResep: mencoba metode {$name}");
+                $result = $cb();
 
-            if ($this->isSuccessfulResponse($result)) {
-                Log::info("HapusResep: SUKSES dengan metode {$name}");
-                return $result;
-            }
+                if ($this->isSuccessfulResponse($result)) {
+                    Log::info("HapusResep: SUKSES dengan metode {$name}");
+                    return $result;
+                }
 
-            Log::info("HapusResep: metode {$name} tidak sukses", [
-                'has_meta' => isset($result['metaData']),
-                'meta_code' => $result['metaData']['code'] ?? null,
-            ]);
+                Log::info("HapusResep: metode {$name} tidak sukses", [
+                    'has_meta' => isset($result['metaData']),
+                    'meta_code' => $result['metaData']['code'] ?? null,
+                ]);
 
-        } catch (\Exception $e) {
-            $lastError = $e;
-            Log::warning("HapusResep: metode {$name} gagal: ".$e->getMessage());
-        }
-    }
-
-    Log::error('HapusResep: semua metode gagal', [
-        'last_error' => $lastError?->getMessage(),
-        'params' => compact('nosjp','refasalsjp','noresep')
-    ]);
-
-    return [
-        'success'  => false,
-        'message'  => 'Semua metode request hapusresep gagal',
-        'error'    => $lastError?->getMessage() ?? 'Unknown error',
-        'metaData' => ['code' => '500', 'message' => 'Failed delete request'],
-    ];
-}
-
-private function attemptHapusResepFormWrapped(string $nosjp, string $refasalsjp, string $noresep)
-{
-    $ts        = $this->makeTimestampSecondsUTC();
-    $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
-
-    $headers = [
-        'X-cons-id'  => $this->consId,
-        'X-timestamp'=> $ts,
-        'X-signature'=> $signature,
-        'user_key'   => $this->userKey,
-        'Accept'     => 'application/json',
-        'Content-Type' => 'application/x-www-form-urlencoded',
-    ];
-
-    $payload = [
-        'nosjp'      => $nosjp,
-        'refasalsjp' => $refasalsjp,
-        'noresep'    => $noresep,
-    ];
-
-    // Kirim sebagai field form bernama "request" (JSON string)
-    $form = ['request' => json_encode($payload)];
-
-    Log::info('APOL HapusResep (DELETE asForm request=JSON)', ['payload' => $payload]);
-
-    $response = Http::withHeaders($headers)
-        ->timeout($this->timeout)
-        ->asForm()
-        ->delete($this->baseUrl . '/hapusresep', $form);
-
-    return $this->processResponse($response, $ts);
-}
-
-private function attemptHapusResepRawJsonAsUrlencoded(string $nosjp, string $refasalsjp, string $noresep)
-{
-    $ts        = $this->makeTimestampSecondsUTC();
-    $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
-
-    $headers = [
-        'X-cons-id'  => $this->consId,
-        'X-timestamp'=> $ts,
-        'X-signature'=> $signature,
-        'user_key'   => $this->userKey,
-        'Accept'     => 'application/json',
-        'Content-Type' => 'application/x-www-form-urlencoded',
-    ];
-
-    $rawJson = json_encode([
-        'nosjp'      => $nosjp,
-        'refasalsjp' => $refasalsjp,
-        'noresep'    => $noresep,
-    ]);
-
-    Log::info('APOL HapusResep (DELETE raw JSON body as urlencoded)', ['raw' => $rawJson]);
-
-    $response = Http::withHeaders($headers)
-        ->timeout($this->timeout)
-        ->withBody($rawJson, 'application/x-www-form-urlencoded')
-        ->delete($this->baseUrl . '/hapusresep');
-
-    return $this->processResponse($response, $ts);
-}
-public function getDaftarPelayananObat(string $noSep)
-{
-    $ts        = $this->makeTimestampSecondsUTC();
-    $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
-
-    $headers = [
-        'X-cons-id'   => $this->consId,
-        'X-timestamp' => $ts,
-        'X-signature' => $signature,
-        'user_key'    => $this->userKey,
-        'Accept'      => 'application/json',
-        // GET biasanya tidak perlu Content-Type
-    ];
-
-    $base = rtrim($this->baseUrl, '/');
-
-    // urutan percobaan (silakan sesuaikan jika perlu)
-    $candidates = [
-        "/pelayanan/obat/daftar/" . rawurlencode($noSep),
-        "/obat/daftar/" . rawurlencode($noSep),                  // fallback lama
-        "/pelayanan/obat/daftar?nosep=" . rawurlencode($noSep),  // fallback pakai query
-    ];
-
-    $lastResponse = null;
-
-    foreach ($candidates as $path) {
-        $url = $base . $path;
-        \Log::info('APOL getDaftarPelayananObat TRY', ['url' => $url]);
-
-        $resp = \Illuminate\Support\Facades\Http::withHeaders($headers)
-            ->timeout($this->timeout)
-            ->get($url);
-
-        // kalau 404, lanjut kandidat berikutnya
-        if ($resp->status() === 404) {
-            \Log::warning('APOL getDaftarPelayananObat 404 - try next candidate', ['url' => $url]);
-            $lastResponse = $resp;
-            continue;
-        }
-
-        // proses response (akan throw kalau non-2xx selain 404)
-        $data = $this->processResponse($resp, $ts);
-
-        // --- NORMALISASI: ambil list obat dari ROOT maupun DETAIL, lalu sinkronkan ---
-        $respArr    = $data['response'] ?? $data;
-
-        $rootList   = $respArr['listobat'] ?? [];
-        $detailList = $respArr['detailsep']['listobat'] ?? [];
-
-        $candidate  = [];
-
-        foreach ([$detailList, $rootList] as $lst) {
-            if (empty($lst)) continue;
-
-            // kalau server kadang kirim object tunggal
-            if (is_array($lst) && (
-                isset($lst['kodeobat']) || isset($lst['kdobat']) ||
-                isset($lst['KdObat'])   || isset($lst['KDOBAT']) ||
-                isset($lst['kd_obat'])
-            )) {
-                $lst = [$lst];
-            }
-
-            if (!is_array($lst)) continue;
-
-            foreach ($lst as $it) {
-                if (!is_array($it)) continue;
-
-                // normalisasi kunci penting
-                $kode = $it['kodeobat'] ?? $it['kdobat'] ?? $it['KdObat'] ?? $it['KDOBAT'] ?? $it['kd_obat'] ?? null;
-                $tipe = $it['tipeobat'] ?? $it['tipeObat'] ?? $it['tipe_obat'] ?? 'N';
-
-                $it['kodeobat'] = (string) $kode;
-                $it['tipeobat'] = strtoupper((string) $tipe);
-
-                $candidate[] = $it;
+            } catch (\Exception $e) {
+                $lastError = $e;
+                Log::warning("HapusResep: metode {$name} gagal: " . $e->getMessage());
             }
         }
 
-        // unik-kan by kodeobat
-        $candidate = array_values(array_reduce($candidate, function ($acc, $it) {
-            $acc[(string)($it['kodeobat'] ?? '')] = $it;
-            return $acc;
-        }, []));
-
-        // tulis balik ke dua lokasi agar downstream konsisten
-        $respArr['listobat'] = $candidate;
-        $respArr['detailsep'] = $respArr['detailsep'] ?? [];
-        $respArr['detailsep']['listobat'] = $candidate;
+        Log::error('HapusResep: semua metode gagal', [
+            'last_error' => $lastError?->getMessage(),
+            'params' => compact('nosjp', 'refasalsjp', 'noresep')
+        ]);
 
         return [
-            'metaData' => $data['metaData'] ?? null,
-            'response' => $respArr,
+            'success' => false,
+            'message' => 'Semua metode request hapusresep gagal',
+            'error' => $lastError?->getMessage() ?? 'Unknown error',
+            'metaData' => ['code' => '500', 'message' => 'Failed delete request'],
         ];
     }
 
-    // semua kandidat 404
-    if ($lastResponse && $lastResponse->status() === 404) {
-        throw new \Exception('HTTP request failed: 404 - Response: No Mapping Rule matched');
+    private function attemptHapusResepFormWrapped(string $nosjp, string $refasalsjp, string $noresep)
+    {
+        $ts = $this->makeTimestampSecondsUTC();
+        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+        $headers = [
+            'X-cons-id' => $this->consId,
+            'X-timestamp' => $ts,
+            'X-signature' => $signature,
+            'user_key' => $this->userKey,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ];
+
+        $payload = [
+            'nosjp' => $nosjp,
+            'refasalsjp' => $refasalsjp,
+            'noresep' => $noresep,
+        ];
+
+        // Kirim sebagai field form bernama "request" (JSON string)
+        $form = ['request' => json_encode($payload)];
+
+        Log::info('APOL HapusResep (DELETE asForm request=JSON)', ['payload' => $payload]);
+
+        $response = Http::withHeaders($headers)
+            ->timeout($this->timeout)
+            ->asForm()
+            ->delete($this->baseUrl . '/hapusresep', $form);
+
+        return $this->processResponse($response, $ts);
     }
 
-    // fallback umum
-    throw new \Exception('Gagal mengakses endpoint daftar pelayanan obat');
-}
+    private function attemptHapusResepRawJsonAsUrlencoded(string $nosjp, string $refasalsjp, string $noresep)
+    {
+        $ts = $this->makeTimestampSecondsUTC();
+        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
 
+        $headers = [
+            'X-cons-id' => $this->consId,
+            'X-timestamp' => $ts,
+            'X-signature' => $signature,
+            'user_key' => $this->userKey,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ];
 
+        $rawJson = json_encode([
+            'nosjp' => $nosjp,
+            'refasalsjp' => $refasalsjp,
+            'noresep' => $noresep,
+        ]);
 
-private function looksLikeHtmlError(Response $resp): bool
-{
-    $ctHeader = $resp->header('Content-Type');              // bisa string/null
-    $ct = is_array($ctHeader) ? implode(',', $ctHeader) : (string) $ctHeader;
-    $ct = strtolower($ct);
+        Log::info('APOL HapusResep (DELETE raw JSON body as urlencoded)', ['raw' => $rawJson]);
 
-    if ($ct !== '' && str_contains($ct, 'text/html')) {
-        return true;
+        $response = Http::withHeaders($headers)
+            ->timeout($this->timeout)
+            ->withBody($rawJson, 'application/x-www-form-urlencoded')
+            ->delete($this->baseUrl . '/hapusresep');
+
+        return $this->processResponse($response, $ts);
     }
+    public function getDaftarPelayananObat(string $noSep)
+    {
+        $ts = $this->makeTimestampSecondsUTC();
+        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
 
-    $body = (string) $resp->body();
-    if ($body === '') return false;
+        $headers = [
+            'X-cons-id' => $this->consId,
+            'X-timestamp' => $ts,
+            'X-signature' => $signature,
+            'user_key' => $this->userKey,
+            'Accept' => 'application/json',
+            // GET biasanya tidak perlu Content-Type
+        ];
 
-    $sample = substr($body, 0, 1024); // cukup cek sebagian awal
-    return stripos($sample, '<html') !== false
-        || stripos($sample, '<!doctype html') !== false
-        || stripos($sample, 'request error') !== false
-        || stripos($sample, '<title>service</title>') !== false;
-}
+        $base = rtrim($this->baseUrl, '/');
 
-public function hapusObat(string $noSepApotek, string $noResep, string $kodeObat, string $tipeObat = 'N')
-{
-    $ts        = $this->makeTimestampSecondsUTC();
-    $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
-    $base      = rtrim($this->baseUrl, '/');
+        // urutan percobaan (silakan sesuaikan jika perlu)
+        $candidates = [
+            "/pelayanan/obat/daftar/" . rawurlencode($noSep),
+            "/obat/daftar/" . rawurlencode($noSep),                  // fallback lama
+            "/pelayanan/obat/daftar?nosep=" . rawurlencode($noSep),  // fallback pakai query
+        ];
 
-    $payload = [
-        'nosepapotek' => trim($noSepApotek),
-        'noresep'     => trim($noResep),
-        'kodeobat'    => trim($kodeObat),
-        'tipeobat'    => strtoupper($tipeObat ?: 'N'),
-    ];
-    $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $lastResponse = null;
 
-    $headersBase = [
-        'X-cons-id'   => $this->consId,
-        'X-timestamp' => $ts,
-        'X-signature' => $signature,
-        'user_key'    => $this->userKey,
-        'Accept'      => 'application/json',
-    ];
+        foreach ($candidates as $path) {
+            $url = $base . $path;
+            \Log::info('APOL getDaftarPelayananObat TRY', ['url' => $url]);
 
-    // Beberapa instansi memetakan path yang berbeda; coba beberapa
-    $paths = [
-        '/pelayanan/obat/hapus',
-        '/obat/hapus',
-    ];
+            $resp = \Illuminate\Support\Facades\Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->get($url);
 
-    // Urutan attempt (yang paling sering sukses taruh di atas):
-    // 1) DELETE + x-www-form-urlencoded + request=<json>
-    // 2) DELETE + x-www-form-urlencoded + raw JSON (tanpa key)
-    // 3) DELETE + application/json + raw JSON
-    // 4) POST  + x-www-form-urlencoded + request=<json>  (beberapa gateway tidak menerima body pada DELETE)
-    $attempts = [
-        ['method' => 'DELETE', 'ctype' => 'xform_request_kv'],
-        ['method' => 'DELETE', 'ctype' => 'xform_raw_json'],
-        ['method' => 'DELETE', 'ctype' => 'app_json'],
-        ['method' => 'POST',   'ctype' => 'xform_request_kv'],
-    ];
-
-    foreach ($paths as $path) {
-        $url = $base . $path;
-
-        foreach ($attempts as $att) {
-            $client = \Http::withHeaders($headersBase)->timeout($this->timeout);
-            $method = $att['method'];
-            $ctype  = $att['ctype'];
-
-            try {
-                if ($ctype === 'xform_request_kv') {
-                    // Content-Type: x-www-form-urlencoded, body: request=<json>
-                    $body = http_build_query(['request' => $json]);
-                    $client = $client->withHeaders(['Content-Type' => 'application/x-www-form-urlencoded']);
-                    $resp = $method === 'DELETE'
-                        ? $client->withBody($body, 'application/x-www-form-urlencoded')->delete($url)
-                        : $client->withBody($body, 'application/x-www-form-urlencoded')->post($url);
-
-                } elseif ($ctype === 'xform_raw_json') {
-                    // Content-Type: x-www-form-urlencoded, body: <json>
-                    $client = $client->withHeaders(['Content-Type' => 'application/x-www-form-urlencoded']);
-                    $resp = $client->withBody($json, 'application/x-www-form-urlencoded')->delete($url);
-
-                } else { // app_json
-                    // Content-Type: application/json, body: <json>
-                    $client = $client->withHeaders(['Content-Type' => 'application/json']);
-                    $resp = $client->withBody($json, 'application/json')->delete($url);
-                }
-
-                \Log::info('APOL hapusObat attempt', [
-                    'url' => $url, 'method' => $method, 'ctype' => $ctype,
-                    'status' => $resp->status(), 'ct' => $resp->header('Content-Type'),
-                    'body_preview' => substr((string)$resp->body(), 0, 300) . '...'
-                ]);
-
-                // Kalau gateway balas HTML (Request Error page), itu tanda mapping mismatch — coba attempt berikutnya
-                $ct = strtolower((string)$resp->header('Content-Type'));
-                $looksHtml = (str_contains($ct, 'text/html') || stripos((string)$resp->body(), '<html') !== false);
-
-                if ($looksHtml || !$resp->successful()) {
-                    // 404/405/400 HTML => lanjut attempt berikutnya
-                    if (in_array($resp->status(), [400, 404, 405]) || $looksHtml) {
-                        continue;
-                    }
-                    // Untuk selain itu, coba parse error JSON kalau ada
-                    if ($parsed = $this->tryParseErrorBody($resp, $ts)) {
-                        return $parsed;
-                    }
-                    continue;
-                }
-
-                // Sukses HTTP 2xx — proses seperti biasa (decrypt jika perlu)
-                return $this->processResponse($resp, $ts);
-
-            } catch (\Throwable $e) {
-                \Log::warning('APOL hapusObat attempt exception: '.$e->getMessage(), compact('url','method','ctype'));
-                // lanjut attempt berikutnya
+            // kalau 404, lanjut kandidat berikutnya
+            if ($resp->status() === 404) {
+                \Log::warning('APOL getDaftarPelayananObat 404 - try next candidate', ['url' => $url]);
+                $lastResponse = $resp;
                 continue;
             }
+
+            // proses response (akan throw kalau non-2xx selain 404)
+            $data = $this->processResponse($resp, $ts);
+
+            // --- NORMALISASI: ambil list obat dari ROOT maupun DETAIL, lalu sinkronkan ---
+            $respArr = $data['response'] ?? $data;
+
+            $rootList = $respArr['listobat'] ?? [];
+            $detailList = $respArr['detailsep']['listobat'] ?? [];
+
+            $candidate = [];
+
+            foreach ([$detailList, $rootList] as $lst) {
+                if (empty($lst))
+                    continue;
+
+                // kalau server kadang kirim object tunggal
+                if (
+                    is_array($lst) && (
+                        isset($lst['kodeobat']) || isset($lst['kdobat']) ||
+                        isset($lst['KdObat']) || isset($lst['KDOBAT']) ||
+                        isset($lst['kd_obat'])
+                    )
+                ) {
+                    $lst = [$lst];
+                }
+
+                if (!is_array($lst))
+                    continue;
+
+                foreach ($lst as $it) {
+                    if (!is_array($it))
+                        continue;
+
+                    // normalisasi kunci penting
+                    $kode = $it['kodeobat'] ?? $it['kdobat'] ?? $it['KdObat'] ?? $it['KDOBAT'] ?? $it['kd_obat'] ?? null;
+                    $tipe = $it['tipeobat'] ?? $it['tipeObat'] ?? $it['tipe_obat'] ?? 'N';
+
+                    $it['kodeobat'] = (string) $kode;
+                    $it['tipeobat'] = strtoupper((string) $tipe);
+
+                    $candidate[] = $it;
+                }
+            }
+
+            // unik-kan by kodeobat
+            $candidate = array_values(array_reduce($candidate, function ($acc, $it) {
+                $acc[(string) ($it['kodeobat'] ?? '')] = $it;
+                return $acc;
+            }, []));
+
+            // tulis balik ke dua lokasi agar downstream konsisten
+            $respArr['listobat'] = $candidate;
+            $respArr['detailsep'] = $respArr['detailsep'] ?? [];
+            $respArr['detailsep']['listobat'] = $candidate;
+
+            return [
+                'metaData' => $data['metaData'] ?? null,
+                'response' => $respArr,
+            ];
         }
+
+        // semua kandidat 404
+        if ($lastResponse && $lastResponse->status() === 404) {
+            throw new \Exception('HTTP request failed: 404 - Response: No Mapping Rule matched');
+        }
+
+        // fallback umum
+        throw new \Exception('Gagal mengakses endpoint daftar pelayanan obat');
     }
 
-    \Log::error('APOL hapusObat: semua attempt gagal', ['payload' => $payload]);
-    return [
-        'success'  => false,
-        'metaData' => ['code' => '404', 'message' => 'No Mapping Rule matched untuk hapusObat'],
-        'response' => ['hint' => 'Cek mapping IGW: DELETE/POST, Content-Type, dan pola body (request=<json>).'],
-    ];
-}
 
-// helper opsional biar metaData.message 4xx tetap kebaca
-private function tryParseErrorBodyFromThrowable(\Throwable $e, $ts) {
-    if (method_exists($e, 'response') && $e->response()) {
+
+    private function looksLikeHtmlError(Response $resp): bool
+    {
+        $ctHeader = $resp->header('Content-Type');              // bisa string/null
+        $ct = is_array($ctHeader) ? implode(',', $ctHeader) : (string) $ctHeader;
+        $ct = strtolower($ct);
+
+        if ($ct !== '' && str_contains($ct, 'text/html')) {
+            return true;
+        }
+
+        $body = (string) $resp->body();
+        if ($body === '')
+            return false;
+
+        $sample = substr($body, 0, 1024); // cukup cek sebagian awal
+        return stripos($sample, '<html') !== false
+            || stripos($sample, '<!doctype html') !== false
+            || stripos($sample, 'request error') !== false
+            || stripos($sample, '<title>service</title>') !== false;
+    }
+
+    public function hapusObat(string $noSepApotek, string $noResep, string $kodeObat, string $tipeObat = 'N')
+    {
+        $ts = $this->makeTimestampSecondsUTC();
+        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+        $base = rtrim($this->baseUrl, '/');
+
+        $payload = [
+            'nosepapotek' => trim($noSepApotek),
+            'noresep' => trim($noResep),
+            'kodeobat' => trim($kodeObat),
+            'tipeobat' => strtoupper($tipeObat ?: 'N'),
+        ];
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        $headersBase = [
+            'X-cons-id' => $this->consId,
+            'X-timestamp' => $ts,
+            'X-signature' => $signature,
+            'user_key' => $this->userKey,
+            'Accept' => 'application/json',
+        ];
+
+        // Beberapa instansi memetakan path yang berbeda; coba beberapa
+        $paths = [
+            '/pelayanan/obat/hapus',
+            '/obat/hapus',
+        ];
+
+        // Urutan attempt (yang paling sering sukses taruh di atas):
+        // 1) DELETE + x-www-form-urlencoded + request=<json>
+        // 2) DELETE + x-www-form-urlencoded + raw JSON (tanpa key)
+        // 3) DELETE + application/json + raw JSON
+        // 4) POST  + x-www-form-urlencoded + request=<json>  (beberapa gateway tidak menerima body pada DELETE)
+        $attempts = [
+            ['method' => 'DELETE', 'ctype' => 'xform_request_kv'],
+            ['method' => 'DELETE', 'ctype' => 'xform_raw_json'],
+            ['method' => 'DELETE', 'ctype' => 'app_json'],
+            ['method' => 'POST', 'ctype' => 'xform_request_kv'],
+        ];
+
+        foreach ($paths as $path) {
+            $url = $base . $path;
+
+            foreach ($attempts as $att) {
+                $client = \Http::withHeaders($headersBase)->timeout($this->timeout);
+                $method = $att['method'];
+                $ctype = $att['ctype'];
+
+                try {
+                    if ($ctype === 'xform_request_kv') {
+                        // Content-Type: x-www-form-urlencoded, body: request=<json>
+                        $body = http_build_query(['request' => $json]);
+                        $client = $client->withHeaders(['Content-Type' => 'application/x-www-form-urlencoded']);
+                        $resp = $method === 'DELETE'
+                            ? $client->withBody($body, 'application/x-www-form-urlencoded')->delete($url)
+                            : $client->withBody($body, 'application/x-www-form-urlencoded')->post($url);
+
+                    } elseif ($ctype === 'xform_raw_json') {
+                        // Content-Type: x-www-form-urlencoded, body: <json>
+                        $client = $client->withHeaders(['Content-Type' => 'application/x-www-form-urlencoded']);
+                        $resp = $client->withBody($json, 'application/x-www-form-urlencoded')->delete($url);
+
+                    } else { // app_json
+                        // Content-Type: application/json, body: <json>
+                        $client = $client->withHeaders(['Content-Type' => 'application/json']);
+                        $resp = $client->withBody($json, 'application/json')->delete($url);
+                    }
+
+                    \Log::info('APOL hapusObat attempt', [
+                        'url' => $url,
+                        'method' => $method,
+                        'ctype' => $ctype,
+                        'status' => $resp->status(),
+                        'ct' => $resp->header('Content-Type'),
+                        'body_preview' => substr((string) $resp->body(), 0, 300) . '...'
+                    ]);
+
+                    // Kalau gateway balas HTML (Request Error page), itu tanda mapping mismatch — coba attempt berikutnya
+                    $ct = strtolower((string) $resp->header('Content-Type'));
+                    $looksHtml = (str_contains($ct, 'text/html') || stripos((string) $resp->body(), '<html') !== false);
+
+                    if ($looksHtml || !$resp->successful()) {
+                        // 404/405/400 HTML => lanjut attempt berikutnya
+                        if (in_array($resp->status(), [400, 404, 405]) || $looksHtml) {
+                            continue;
+                        }
+                        // Untuk selain itu, coba parse error JSON kalau ada
+                        if ($parsed = $this->tryParseErrorBody($resp, $ts)) {
+                            return $parsed;
+                        }
+                        continue;
+                    }
+
+                    // Sukses HTTP 2xx — proses seperti biasa (decrypt jika perlu)
+                    return $this->processResponse($resp, $ts);
+
+                } catch (\Throwable $e) {
+                    \Log::warning('APOL hapusObat attempt exception: ' . $e->getMessage(), compact('url', 'method', 'ctype'));
+                    // lanjut attempt berikutnya
+                    continue;
+                }
+            }
+        }
+
+        \Log::error('APOL hapusObat: semua attempt gagal', ['payload' => $payload]);
+        return [
+            'success' => false,
+            'metaData' => ['code' => '404', 'message' => 'No Mapping Rule matched untuk hapusObat'],
+            'response' => ['hint' => 'Cek mapping IGW: DELETE/POST, Content-Type, dan pola body (request=<json>).'],
+        ];
+    }
+
+    // helper opsional biar metaData.message 4xx tetap kebaca
+    private function tryParseErrorBodyFromThrowable(\Throwable $e, $ts)
+    {
+        if (method_exists($e, 'response') && $e->response()) {
+            try {
+                $resp = $e->response();
+                $data = $resp->json();
+                if (isset($data['response']) && is_string($data['response'])) {
+                    return [
+                        'metaData' => $data['metaData'] ?? null,
+                        'response' => $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts),
+                    ];
+                }
+                return $data;
+            } catch (\Throwable $x) {
+            }
+        }
+        return null;
+    }
+
+
+    // helper opsional: coba baca body JSON walau status 400 supaya kelihatan "metaData.message"
+    private function tryParseErrorBody(\Illuminate\Http\Client\Response $resp, $ts)
+    {
         try {
-            $resp = $e->response();
             $data = $resp->json();
-            if (isset($data['response']) && is_string($data['response'])) {
-                return [
-                    'metaData' => $data['metaData'] ?? null,
-                    'response' => $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts),
-                ];
+            if (is_array($data)) {
+                // kalau ada ciphertext 'response', tetap coba decrypt biar tahu alasan gagal
+                if (isset($data['response']) && is_string($data['response'])) {
+                    $decoded = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
+                    return ['metaData' => $data['metaData'] ?? null, 'response' => $decoded];
+                }
+                return $data;
             }
-            return $data;
-        } catch (\Throwable $x) {}
-    }
-    return null;
-}
-
-
-// helper opsional: coba baca body JSON walau status 400 supaya kelihatan "metaData.message"
-private function tryParseErrorBody(\Illuminate\Http\Client\Response $resp, $ts)
-{
-    try {
-        $data = $resp->json();
-        if (is_array($data)) {
-            // kalau ada ciphertext 'response', tetap coba decrypt biar tahu alasan gagal
-            if (isset($data['response']) && is_string($data['response'])) {
-                $decoded = $this->decryptAndDecompress($data['response'], $this->consId, $this->secretKey, $ts);
-                return ['metaData' => $data['metaData'] ?? null, 'response' => $decoded];
-            }
-            return $data;
+        } catch (\Throwable $e) {
+            // ignore, lanjut ke attempt berikutnya
         }
-    } catch (\Throwable $e) {
-        // ignore, lanjut ke attempt berikutnya
+        return null;
     }
-    return null;
-}
 
 
 

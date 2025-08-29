@@ -66,15 +66,14 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     Route::get('/apol', [ApolController::class, 'index'])->name('apol.index');
     Route::post('/apol/daftar-resep', [ApolController::class, 'getDaftarResep']);
     Route::post('/apol/ajax/daftar-resep', [ApolController::class, 'ajaxGetDaftarResep']);
-    Route::post('/apol/export-resep', [ApolController::class, 'exportDaftarResep']);
     Route::post('/apol/summary-resep', [ApolController::class, 'getSummaryResep']);
     Route::delete('/apol/hapus-resep', [ApolController::class, 'hapusResep'])->name('apol.hapus-resep');
     Route::post('/apol/hapus-obat', [ApolController::class, 'hapusObat']);
     Route::get('/apol/pelayanan/obat/daftar/{nosep?}', [ApolController::class, 'getDaftarPelayananObat'])
-    ->name('apol.obat.daftar');
-// Opsional: versi query param fallback ?nosep=...
-Route::get('/apol/pelayanan/obat/daftar', [ApolController::class, 'getDaftarPelayananObat']);
-    Route::post('/apol/hapus-resep',   [ApolController::class, 'hapusResep']); // alias untuk klien yg tidak support DELETE
+        ->name('apol.obat.daftar');
+    // Opsional: versi query param fallback ?nosep=...
+    Route::get('/apol/pelayanan/obat/daftar', [ApolController::class, 'getDaftarPelayananObat']);
+    Route::post('/apol/hapus-resep', [ApolController::class, 'hapusResep']); // alias untuk klien yg tidak support DELETE
     Route::get('/apol/debug/config', [ApolController::class, 'debugConfig'])->name('debug.config');
     Route::get('/apol/debug/endpoint', [ApolController::class, 'testEndpoint'])->name('debug.endpoint');
     Route::get('/apol/debug/auth', [ApolController::class, 'testAuthentication'])->name('debug.auth');
