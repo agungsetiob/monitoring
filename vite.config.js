@@ -6,7 +6,6 @@ export default defineConfig({
     plugins: [
         laravel({
             input: 'resources/js/app.js',
-            valetTls: false,
             refresh: true,
         }),
         vue({
