@@ -72,9 +72,9 @@ onUnmounted(() => {
     >
       <div v-if="selectedDokter" class="flex justify-between items-center">
         <div>
-          <div class="text-sm font-bold text-gray-900">{{ selectedDokter.namaDokter }}</div>
-          <div class="text-xs text-gray-600">
-            {{ selectedDokter.jadwalPraktek }} • Kapasitas: {{ selectedDokter.kapasitas }}
+          <div class="text-md">
+            <span class="text-semibold">{{ selectedDokter.namaDokter }}</span>
+            <!-- <span class="text-gray-500"> (Jadwal: {{ selectedDokter.jadwalPraktek }} • Kapasitas: {{ selectedDokter.kapasitas }})</span> -->
           </div>
         </div>
         <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
