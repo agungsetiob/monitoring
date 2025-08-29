@@ -6,6 +6,10 @@
       "resources/js/app.js"
     ]
   },
+  "__plugin-vue_export-helper-DlAUqK2U.js": {
+    "file": "assets/_plugin-vue_export-helper-DlAUqK2U.js",
+    "name": "_plugin-vue_export-helper"
+  },
   "_auto-0DX8mfB2.js": {
     "file": "assets/auto-0DX8mfB2.js",
     "name": "auto",
@@ -24,16 +28,30 @@
       "resources/js/app.js"
     ]
   },
-  "resources/js/Pages/AntreanFarmasi/Index.vue": {
+  "resources/js/Pages/AntreanFarmasi/Index.vue": {                    
     "file": "assets/Index-ZwYgy_vj.js",
     "name": "Index",
     "src": "resources/js/Pages/AntreanFarmasi/Index.vue",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.js"
+      "resources/js/app.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
     "css": [
       "assets/Index-UmbJDcDf.css"
+    ]
+  },
+  "resources/js/Pages/Apol/Index.vue": {
+    "file": "assets/Index-DNRZg_Yh.js",
+    "name": "Index",
+    "src": "resources/js/Pages/Apol/Index.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/Index-Deakiiit.css"
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
@@ -80,7 +98,7 @@
       "_chart-BOVB5OMx.js"
     ]
   },
-  "resources/js/Pages/Laporan/Index.vue": {
+  "resources/js/Pages/Laporan/Index.vue": { 
     "file": "assets/Index-Dz2uJ8ZU.js",
     "name": "Index",
     "src": "resources/js/Pages/Laporan/Index.vue",
@@ -129,7 +147,7 @@
     ]
   },
   "resources/js/Pages/Laporan/Partials/LosChart.vue": {
-    "file": "assets/LosChart-aIdFKZ4Z.js",
+    "file": "assets/LosChart-BpqPVeAe.js",
     "name": "LosChart",
     "src": "resources/js/Pages/Laporan/Partials/LosChart.vue",
     "isDynamicEntry": true,
@@ -203,7 +221,7 @@
     ]
   },
   "resources/js/Pages/Laporan/Triage.vue": {
-    "file": "assets/Triage-CsJW1ec9.js",
+    "file": "assets/Triage-Bgt8yNJm.js",
     "name": "Triage",
     "src": "resources/js/Pages/Laporan/Triage.vue",
     "isDynamicEntry": true,
@@ -245,12 +263,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DE8My1SR.js",
+    "file": "assets/app-2jVEC8Rh.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "dynamicImports": [
       "resources/js/Pages/AntreanFarmasi/Index.vue",
+      "resources/js/Pages/Apol/Index.vue",
       "resources/js/Pages/Auth/Login.vue",
       "resources/js/Pages/Blog/Index.vue",
       "resources/js/Pages/Landing.vue",
@@ -272,7 +291,7 @@
       "resources/js/Pages/RencanaKontrol/Update.vue"
     ],
     "css": [
-      "assets/app-C8NDoaBl.css"
+      "assets/app-Czk2ottO.css"
     ]
   }
 }

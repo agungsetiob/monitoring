@@ -52,5 +52,22 @@ return [
         'user_key' => env('RENCANA_KONTROL_USER_KEY'),
         'timeout' => env('RENCANA_KONTROL_TIMEOUT', 30),
     ],
+    /*
+    |--------------------------------------------------------------------------
+    | Apol API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for third party API integration for Apol
+    | features. This includes BPJS API endpoints and authentication.
+    |
+    */
+    'apol' => [
+        'base_url' => env('APOL_BASE_URL', ),
+        'cons_id' => env('BPJS_CONS_ID'),
+        'secret_key' => env('BPJS_SECRET'),
+        'user_key' => env('BPJS_USER_KEY'),
+        'apotek_ppk' => env('APOTEK_PPK', ''),
+        'timeout' => env('BPJS_TIMEOUT', 30),
+    ],
 
 ];
