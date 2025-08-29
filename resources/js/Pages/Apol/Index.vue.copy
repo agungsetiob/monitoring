@@ -3,9 +3,9 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { ref, reactive, onMounted, computed } from 'vue';
 import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
+import Modal from '@/Components/Modal.vue'
 import SuccessFlash from '@/Components/SuccessFlash.vue'
 import ErrorFlash from '@/Components/ErrorFlash.vue'
-import HapusResepModal from './Partials/HapusResepModal.vue';
 
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -41,29 +41,42 @@ const deleteStats = reactive({
     failures: [] // [{kodeobat, message}]
 });
 
-const openDelete = (item) => {
-  selectedItem.value = item;
-  showDeleteModal.value = true;
+// Prefill field dari row + load daftar obat
+const openDelete = async (item) => {
+    showDeleteModal.value = true;
+    selectedItem.value = item;
+
+    // noresep biasanya ada
+    deleteForm.noresep = item.NORESEP ?? item.noresep ?? '';
+
+    // no SEP Apotek (nosepapotek) biasanya = NOAPOTIK, beberapa data bisa NOSJP
+    deleteForm.nosjp =
+        item.NOSJP ?? item.nosjp ?? item.NOAPOTIK ?? item.noapotik ?? '';
+
+    // ref asal sjp: fallback
+    deleteForm.refasalsjp =
+        item.REFASALSJP ??
+        item.refasalsjp ??
+        item.NOSEP_KUNJUNGAN ??
+        item.ref_asal_sjp ??
+        '';
+
+    // reset audit/progress & load obat
+    resetDeleteProgress();
+    await loadObatList(deleteForm.nosjp);
+
+    
 };
 
-// Replace the closeDelete function with:
 const closeDelete = () => {
-  showDeleteModal.value = false;
-  isDeleting.value = false;
-  selectedItem.value = null;
-};
-
-// Add this new function to handle successful deletion:
-const handleResepDeleted = (noresep) => {
-  showMessage('Resep berhasil dihapus', 'success');
-  
-  // Hapus baris di tabel secara lokal (berdasarkan NORESEP)
-  const nr = String(noresep).toUpperCase();
-  searchResult.value = searchResult.value.filter(
-    r => String(r?.NORESEP ?? r?.noresep ?? '').toUpperCase() !== nr
-  );
-  
-  closeDelete();
+    showDeleteModal.value = false;
+    isDeleting.value = false;
+    selectedItem.value = null;
+    deleteForm.nosjp = '';
+    deleteForm.refasalsjp = '';
+    deleteForm.noresep = '';
+    obatList.value = [];
+    resetDeleteProgress();
 };
 
 const resetDeleteProgress = () => {
@@ -477,7 +490,7 @@ const getJenisObatClass = (kode) => {
                 </button>
             </div>
             <!-- Error Toast Alert -->
-            <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
+            <ErrorFlash   :flash="{ error:   errorMessage   }" @clearFlash="errorMessage   = ''" />
             <!-- Success Toast Alert -->
             <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
             <!-- Search Form -->
@@ -635,11 +648,11 @@ const getJenisObatClass = (kode) => {
                                         item.NOSEP_KUNJUNGAN || '-' }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NAMA || '-'
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLENTRY)
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b">{{
                                         formatTanggal(item.TGLPELRSP) }}</td>
                                     <td class="px-4 py-3 text-sm text-gray-900 border-b text-right font-medium">
@@ -698,9 +711,127 @@ const getJenisObatClass = (kode) => {
                         </tbody>
                     </table>
                 </div>
+                <!-- Modal Hapus Resep -->
+                <Modal :show="showDeleteModal" max-width="2xl" @close="closeDelete">
+                    <div class="flex items-center justify-between px-5 py-4 border-b">
+                        <h3 class="text-lg font-semibold">Hapus Resep</h3>
+                        <button @click="closeDelete" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="px-5 py-4 space-y-4">
+                        <div class="px-5 py-4 space-y-4">
+                            <p class="text-sm text-gray-600">
+                                Pastikan <b>No Resep</b>, <b>No SEP Apotek/SJP</b>, dan <b>Ref Asal SJP</b> sesuai.
+                                Centang opsi di bawah untuk menghapus <b>semua obat</b> lebih dulu (disarankan).
+                            </p>
+
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">No Resep</label>
+                                    <input v-model="deleteForm.noresep" type="text"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                        placeholder="Contoh: 0SI44" />
+                                </div>
+
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">No SEP
+                                        Apotek/SJP</label>
+                                    <input v-model="deleteForm.nosjp" type="text"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                        placeholder="Contoh: 1801A00104190000001" />
+                                </div>
+
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-sm font-medium text-gray-700">Ref Asal SJP</label>
+                                    <input v-model="deleteForm.refasalsjp" type="text"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                        placeholder="Contoh: 1801R0010419V000001" />
+                                </div>
+                            </div>
+
+                            <!-- Toggle purge-first -->
+                            <div class="flex items-center gap-3 mt-2">
+                                <input id="purgeFirst" type="checkbox" v-model="purgeObatFirst"
+                                    class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500" />
+                                <label for="purgeFirst" class="text-sm text-gray-700">
+                                    Hapus <b>semua obat</b> pada resep ini sebelum hapus resep
+                                </label>
+                            </div>
+
+                            <!-- Daftar obat -->
+                            <div class="border rounded-lg p-3">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-sm font-semibold text-gray-800">
+                                        Daftar Obat ({{ isLoadingObatList ? 'memuat...' : obatList.length + ' item'
+                                        }})
+                                    </h4>
+                                    <button class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
+                                        @click="loadObatList(deleteForm.nosjp)" :disabled="isLoadingObatList">
+                                        Muat Ulang
+                                    </button>
+                                </div>
+
+                                <div v-if="isLoadingObatList" class="text-xs text-gray-500 mt-2">Mengambil data...
+                                </div>
+                                <div v-else-if="obatList.length === 0" class="text-xs text-gray-500 mt-2">Tidak ada
+                                    obat.</div>
+                                <ul v-else class="mt-2 space-y-1 max-h-48 overflow-auto pr-1">
+                                    <li v-for="(o, idx) in obatList" :key="idx"
+                                        class="text-sm flex items-center justify-between border-b last:border-0 py-1">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="font-medium truncate">{{ o.namaobat }}</div>
+                                            <div class="text-xs text-gray-500">
+                                                Kode: <span class="font-mono">{{ o.kodeobat }}</span>
+                                                &middot; Tipe: {{ o.tipeobat || 'N' }}
+                                                <template v-if="o.jumlah"> &middot; Jml: {{ o.jumlah }}</template>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+
+                                <!-- Progress hapus obat -->
+                                <div v-if="isDeleting && purgeObatFirst" class="mt-3 text-xs">
+                                    <div class="mb-1">Menghapus obat: {{ deleteStats.done }}/{{ deleteStats.total }}
+                                        selesai,
+                                        gagal: {{ deleteStats.failed }}</div>
+                                    <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
+                                        <div class="h-2 bg-rose-600"
+                                            :style="{ width: (deleteStats.total ? (deleteStats.done / deleteStats.total * 100) : 0) + '%' }">
+                                        </div>
+                                    </div>
+                                    <div v-if="deleteStats.failed > 0" class="mt-2 text-rose-600">
+                                        Beberapa obat gagal dihapus. Resep tidak akan dihapus sampai semua obat
+                                        terhapus.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 px-5 py-4 border-t">
+                        <button @click="closeDelete"
+                            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                            Batal
+                        </button>
+                        <button :disabled="isDeleting || deleteDisabled" @click="submitDelete"
+                            class="inline-flex items-center gap-2 px-5 py-2 rounded-lg text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
+                            <svg v-if="isDeleting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
+                        </button>
+                    </div>
+                </Modal>
             </div>
         </div>
     </div>
-    <HapusResepModal :show="showDeleteModal" :selected-item="selectedItem" @close="closeDelete"
-        @deleted="handleResepDeleted" />
 </template>
