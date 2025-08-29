@@ -42,28 +42,28 @@ const deleteStats = reactive({
 });
 
 const openDelete = (item) => {
-  selectedItem.value = item;
-  showDeleteModal.value = true;
+    selectedItem.value = item;
+    showDeleteModal.value = true;
 };
 
 // Replace the closeDelete function with:
 const closeDelete = () => {
-  showDeleteModal.value = false;
-  isDeleting.value = false;
-  selectedItem.value = null;
+    showDeleteModal.value = false;
+    isDeleting.value = false;
+    selectedItem.value = null;
 };
 
 // Add this new function to handle successful deletion:
 const handleResepDeleted = (noresep) => {
-  showMessage('Resep berhasil dihapus', 'success');
-  
-  // Hapus baris di tabel secara lokal (berdasarkan NORESEP)
-  const nr = String(noresep).toUpperCase();
-  searchResult.value = searchResult.value.filter(
-    r => String(r?.NORESEP ?? r?.noresep ?? '').toUpperCase() !== nr
-  );
-  
-  closeDelete();
+    showMessage('Resep berhasil dihapus', 'success');
+
+    // Hapus baris di tabel secara lokal (berdasarkan NORESEP)
+    const nr = String(noresep).toUpperCase();
+    searchResult.value = searchResult.value.filter(
+        r => String(r?.NORESEP ?? r?.noresep ?? '').toUpperCase() !== nr
+    );
+
+    closeDelete();
 };
 
 const resetDeleteProgress = () => {
@@ -562,7 +562,7 @@ const getJenisObatClass = (kode) => {
                 <h3 class="mb-3 text-lg font-bold text-gray-800">Export Data</h3>
                 <div class="flex gap-3">
                     <button @click="exportData('excel')" :disabled="isExporting"
-                        class="flex gap-2 items-center px-4 py-2 font-semibold text-white bg-emerald-600 rounded-lg transition duration-300 hover:bg-emerald-700 disabled:bg-emerald-400">
+                        class="flex gap-2 items-center px-3 py-2 font-semibold text-white bg-emerald-600 rounded-lg transition duration-300 hover:bg-emerald-700 disabled:bg-emerald-400">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                                 d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
@@ -572,7 +572,7 @@ const getJenisObatClass = (kode) => {
                     </button>
 
                     <button @click="exportData('csv')" :disabled="isExporting"
-                        class="flex gap-2 items-center px-4 py-2 font-semibold text-white bg-orange-600 rounded-lg transition duration-300 hover:bg-orange-700 disabled:bg-orange-400">
+                        class="flex gap-2 items-center px-3 py-2 font-semibold text-white bg-orange-600 rounded-lg transition duration-300 hover:bg-orange-700 disabled:bg-orange-400">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                                 d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
@@ -592,97 +592,81 @@ const getJenisObatClass = (kode) => {
                 <div class="overflow-x-auto">
                     <table class="min-w-full bg-white rounded-lg border border-gray-200">
                         <thead class="bg-gray-100">
-                            <tr>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No</th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. Resep
+                            <tr class="text-center">
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No</th>
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. Resep
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. Apotek
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. Apotek
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. SEP
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. SEP
                                     Kunjungan</th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">No. Kartu
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. Kartu
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Nama Peserta
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Nama Peserta
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Tgl. Entry
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Tgl. Entry
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Tgl. Resep
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Tgl. Resep
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Tgl.
-                                    Pelayanan</th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Biaya Tagih
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Biaya Tagih
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Biaya
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Biaya
                                     Verifikasi</th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Jenis Obat
+                                <!-- <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Jenis Obat
+                                </th> -->
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Flag Iter
                                 </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Faskes Asal
-                                </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Flag Iter
-                                </th>
-                                <th class="px-4 py-3 text-sm font-medium text-left text-gray-700 border-b">Aksi</th>
+                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Aksi</th>
 
                             </tr>
                         </thead>
                         <tbody>
                             <template v-if="searchResult && searchResult.length > 0">
-                                <tr v-for="(item, index) in searchResult" :key="index" class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ index + 1 }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NORESEP ||
+                                <tr v-for="(item, index) in searchResult" :key="index" class="hover:bg-gray-50 text-center">
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ index + 1 }}</td>
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NORESEP ||
                                         '-' }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.NOAPOTIK || '-' }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b font-medium text-blue-600">{{
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ item.NOAPOTIK || '-' }}</td>
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b font-medium text-blue-600">{{
                                         item.NOSEP_KUNJUNGAN || '-' }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NAMA || '-'
-                                    }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLENTRY)
-                                    }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
-                                    }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">{{
-                                        formatTanggal(item.TGLPELRSP) }}</td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b text-right font-medium">
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}</td>
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NAMA || '-'
+                                        }}</td>
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLENTRY)
+                                        }}</td>
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
+                                        }}</td>
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b text-right font-medium">
                                         {{ formatCurrency(item.BYTAGRSP) }}
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b text-right">
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b text-right">
                                         {{ formatCurrency(item.BYVERRSP) }}
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">
+                                    <!-- <td class="px-3 py-3 text-sm text-gray-900 border-b">
                                         <span class="px-2 py-1 text-xs rounded-full"
                                             :class="getJenisObatClass(item.KDJNSOBAT)">
                                             {{ getJenisObatText(item.KDJNSOBAT) }}
                                         </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">{{ item.FASKESASAL || '-' }}
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">
+                                    </td> -->
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">
                                         <span class="px-2 py-1 text-xs rounded-full"
                                             :class="item.FLAGITER === 'True' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'">
                                             {{ item.FLAGITER === 'True' ? 'Ya' : 'Tidak' }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-sm text-gray-900 border-b">
-                                        <button type="button" @click="openDelete(item)"
-                                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-rose-600 text-white hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500/40"
-                                            title="Hapus resep ini dari APOL">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
-                                                fill="none" stroke="currentColor" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round">
-                                                <polyline points="3 6 5 6 21 6"></polyline>
-                                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                                                <path d="M10 11v6"></path>
-                                                <path d="M14 11v6"></path>
-                                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                                            </svg>
-                                            Hapus
-                                        </button>
+                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">
+                                        <Tooltip text="Hapus Klaim" bgColor="bg-red-600">
+                                            <button @click="openDelete(item)"
+                                                class="px-2 py-1 text-xs font-medium text-red-600 border border-red-600 rounded transition duration-300 hover:bg-red-200">
+                                                <font-awesome-icon icon="trash" />
+                                            </button>
+                                        </Tooltip>
                                     </td>
 
                                 </tr>
                             </template>
                             <tr v-else>
-                                <td colspan="14" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="14" class="px-3 py-8 text-center text-gray-500">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-12 h-12 mb-2 text-gray-300" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
