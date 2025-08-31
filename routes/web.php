@@ -7,6 +7,7 @@ use App\Http\Controllers\PatientMonitoringController;
 use App\Http\Controllers\RencanaKontrolController;
 use App\Http\Controllers\ApolController;
 use App\Http\Controllers\TriageReportController;
+use App\Http\Controllers\TesApolController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -74,9 +75,9 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     // Opsional: versi query param fallback ?nosep=...
     Route::get('/apol/pelayanan/obat/daftar', [ApolController::class, 'getDaftarPelayananObat']);
     Route::post('/apol/hapus-resep', [ApolController::class, 'hapusResep']); // alias untuk klien yg tidak support DELETE
-    Route::get('/apol/debug/config', [ApolController::class, 'debugConfig'])->name('debug.config');
-    Route::get('/apol/debug/endpoint', [ApolController::class, 'testEndpoint'])->name('debug.endpoint');
-    Route::get('/apol/debug/auth', [ApolController::class, 'testAuthentication'])->name('debug.auth');
-    Route::get('/apol/debug/doc-format', [ApolController::class, 'testDocumentationFormat'])->name('debug.doc-format');
-    Route::get('/apol/debug/connection', [ApolController::class, 'testConnection'])->name('debug.connection');
+    Route::get('/apol/debug/config', [TesApolController::class, 'debugConfig'])->name('debug.config');
+    Route::get('/apol/debug/endpoint', [TesApolController::class, 'testEndpoint'])->name('debug.endpoint');
+    Route::get('/apol/debug/auth', [TesApolController::class, 'testAuthentication'])->name('debug.auth');
+    Route::get('/apol/debug/doc-format', [TesApolController::class, 'testDocumentationFormat'])->name('debug.doc-format');
+    Route::get('/apol/debug/connection', [TesApolController::class, 'testConnection'])->name('debug.connection');
 });

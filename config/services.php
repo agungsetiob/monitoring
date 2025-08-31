@@ -63,11 +63,11 @@ return [
     */
     'apol' => [
         'base_url' => env('APOL_BASE_URL', ),
-        'cons_id' => env('BPJS_CONS_ID'),
-        'secret_key' => env('BPJS_SECRET'),
-        'user_key' => env('BPJS_USER_KEY'),
+        'cons_id' => env('APOL_CONS_ID'),
+        'secret_key' => env('APOL_SECRET'),
+        'user_key' => env('APOL_USER_KEY'),
         'apotek_ppk' => env('APOTEK_PPK', ''),
-        'timeout' => env('BPJS_TIMEOUT', 30),
+        'timeout' => env('APOL_TIMEOUT', 30),
     ],
 
 ];

@@ -1,72 +1,46 @@
 <template>
-  <Modal :show="show" max-width="2xl" @close="close">
+  <Modal :show="show" max-width="4xl" @close="close">
     <div class="flex items-center justify-between px-5 py-4 border-b">
       <h3 class="text-lg font-semibold">Hapus Resep</h3>
-      <button @click="close" class="text-gray-500 hover:text-gray-700">
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fill-rule="evenodd"
-            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-            clip-rule="evenodd"
-          ></path>
-        </svg>
-      </button>
     </div>
 
     <div class="px-5 py-4 space-y-4">
       <div v-if="isLoading" class="flex justify-center py-8">
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-rose-600"></div>
       </div>
-      
+
       <template v-else>
         <p class="text-sm text-gray-600">
-          Pastikan <b>No Resep</b>, <b>No SEP Apotek/SJP</b>, dan <b>Ref Asal SJP</b> sesuai.
-          Centang opsi di bawah untuk menghapus <b>semua obat</b> lebih dulu (disarankan).
+          Pastikan <b class="text-red-600">No Resep</b>, <b class="text-red-600">No SEP Apotek/SJP</b>, dan <b
+            class="text-red-600">Ref Asal SJP</b> sesuai.
         </p>
 
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
           <div class="md:col-span-1">
             <label class="block mb-1 text-sm font-medium text-gray-700">No Resep</label>
-            <input
-              v-model="form.noresep"
-              type="text"
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-              placeholder="Contoh: 0SI44"
-              readonly
-            />
+            <p class="font-semibold text-green-600">{{ form.noresep }}</p>
+          </div>
+
+          <div class="md:col-span-1">
+            <label class="block mb-1 text-sm font-medium text-gray-700">Nama</label>
+            <p class="font-semibold text-green-600">{{ form.nama }}</p>
           </div>
 
           <div class="md:col-span-1">
             <label class="block mb-1 text-sm font-medium text-gray-700">No SEP Apotek/SJP</label>
-            <input
-              v-model="form.nosjp"
-              type="text"
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-              placeholder="Contoh: 1801A00104190000001"
-              readonly
-            />
+            <p class="font-semibold text-green-600">{{ form.nosjp }}</p>
           </div>
 
           <div class="md:col-span-1">
             <label class="block mb-1 text-sm font-medium text-gray-700">Ref Asal SJP</label>
-            <input
-              v-model="form.refasalsjp"
-              type="text"
-              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-              placeholder="Contoh: 1801R0010419V000001"
-              readonly
-            />
+            <p class="font-semibold text-green-600">{{ form.refasalsjp }}</p>
           </div>
         </div>
 
         <!-- Toggle purge-first -->
         <div class="flex items-center gap-3 mt-2">
-          <input
-            id="purgeFirst"
-            type="checkbox"
-            v-model="purgeObatFirst"
-            class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
-          />
+          <input id="purgeFirst" type="checkbox" v-model="purgeObatFirst"
+            class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500" />
           <label for="purgeFirst" class="text-sm text-gray-700">
             Hapus <b>semua obat</b> pada resep ini sebelum hapus resep
           </label>
@@ -78,31 +52,31 @@
             <h4 class="text-sm font-semibold text-gray-800">
               Daftar Obat ({{ isLoadingObatList ? 'memuat...' : obatList.length + ' item' }})
             </h4>
-            <button
-              class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
-              @click="loadObatList"
-              :disabled="isLoadingObatList"
-            >
-              Muat Ulang
+            <button class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50" @click="loadObatList"
+              :disabled="isLoadingObatList">
+              reload
             </button>
           </div>
 
           <div v-if="isLoadingObatList" class="text-xs text-gray-500 mt-2">Mengambil data...</div>
-          <div v-else-if="obatList.length === 0" class="text-xs text-gray-500 mt-2">Tidak ada obat.</div>
           <ul v-else class="mt-2 space-y-1 max-h-48 overflow-auto pr-1">
-            <li
-              v-for="(o, idx) in obatList"
-              :key="idx"
-              class="text-sm flex items-center justify-between border-b last:border-0 py-1"
-            >
+            <li v-for="(o, idx) in obatList" :key="idx"
+              class="text-sm flex items-center justify-between border-b last:border-0 py-1">
               <div class="flex-1 min-w-0">
                 <div class="font-medium truncate">{{ o.namaobat }}</div>
                 <div class="text-xs text-gray-500">
-                  Kode: <span class="font-mono">{{ o.kodeobat }}</span>
-                  &middot; Tipe: {{ o.tipeobat || 'N' }}
-                  <template v-if="o.jumlah"> &middot; Jml: {{ o.jumlah }}</template>
+                  Kode: <span class="font-mono text-blue-500">{{ o.kodeobat }}</span>
+                  &middot; Tipe Obat: <span class="text-purple-500">{{ o.tipeobat }}</span>
+                  &middot; Harga: <span class="text-teal-500">{{ o.harga }}</span>
+                  &middot; Jumlah: <span class="text-cyan-500">{{ o.jumlah }}</span>
+                  &middot; Signa 1 x 2: <span class="text-amber-500">{{ o.signa1 }} x {{ o.signa2 }}</span>
                 </div>
               </div>
+              <button @click="deleteSingleObat(o, idx)"
+                class="ml-2 px-2 py-1 rounded text-sm text-rose-600 hover:bg-rose-100 disabled:opacity-50"
+                :disabled="isDeleting">
+                <font-awesome-icon icon="times" />
+              </button>
             </li>
           </ul>
 
@@ -113,12 +87,9 @@
               {{ deleteStats.failed }}
             </div>
             <div class="w-full bg-gray-200 rounded h-2 overflow-hidden">
-              <div
-                class="h-2 bg-rose-600"
-                :style="{
-                  width: (deleteStats.total ? (deleteStats.done / deleteStats.total) * 100 : 0) + '%'
-                }"
-              ></div>
+              <div class="h-2 bg-rose-600" :style="{
+                width: (deleteStats.total ? (deleteStats.done / deleteStats.total) * 100 : 0) + '%'
+              }"></div>
             </div>
             <div v-if="deleteStats.failed > 0" class="mt-2 text-rose-600">
               Beberapa obat gagal dihapus. Resep tidak akan dihapus sampai semua obat terhapus.
@@ -128,19 +99,13 @@
       </template>
     </div>
 
-    <div v-if="!isLoading" class="flex items-center justify-end gap-3 px-4 py-4 border-t">
-      <button
-        @click="close"
-        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-      >
+    <div v-if="!isLoading" class="flex items-center justify-end gap-3 px-4 py-4">
+      <button @click="close" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
         Batal
       </button>
-      <button
-        :disabled="isDeleting || deleteDisabled || isLoadingObatList"
-        @click="submitDelete"
-        class="px-4 py-2 border border-rose-600 rounded-lg text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400"
-      >
-        <font-awesome-icon v-if="isDeleting" icon="spinner" spin/>
+      <button :disabled="isDeleting || deleteDisabled || isLoadingObatList" @click="submitDelete"
+        class="px-4 py-2 border border-rose-600 rounded-lg text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
+        <font-awesome-icon v-if="isDeleting" icon="spinner" spin />
         {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
       </button>
     </div>
@@ -199,21 +164,21 @@ watch(
     if (isShowing) {
       // Set loading state while preparing modal
       isLoading.value = true
-      
+
       // Prefill form data from selected item
       if (props.selectedItem) {
-        form.noresep = props.selectedItem.NORESEP ?? props.selectedItem.noresep ?? ''
-        form.nosjp = props.selectedItem.NOSJP ?? props.selectedItem.nosjp ?? props.selectedItem.NOAPOTIK ?? props.selectedItem.noapotik ?? ''
-        form.refasalsjp = props.selectedItem.REFASALSJP ?? props.selectedItem.refasalsjp ?? 
-                          props.selectedItem.NOSEP_KUNJUNGAN ?? props.selectedItem.ref_asal_sjp ?? ''
+        form.noresep = props.selectedItem.NORESEP
+        form.nosjp = props.selectedItem.NOAPOTIK
+        form.refasalsjp = props.selectedItem.NOSEP_KUNJUNGAN
+        form.nama = props.selectedItem.NAMA
       }
-      
+
       // Reset stats
       resetDeleteProgress()
-      
+
       // Wait for modal to fully render before loading data
       await nextTick()
-      
+
       // Load obat list after a short delay to ensure modal is visible
       setTimeout(() => {
         loadObatList().finally(() => {
@@ -259,7 +224,7 @@ const loadObatList = async () => {
         timeout: 10000 // 10 second timeout
       })
     } catch {
-      res = await axios.get('/apol/pelayanan/obat/daftar', { 
+      res = await axios.get('/apol/pelayanan/obat/daftar', {
         params: { nosep: form.nosjp },
         timeout: 10000
       })
@@ -270,12 +235,8 @@ const loadObatList = async () => {
     // Cari listobat di berbagai bentuk payload
     let list = []
     const candidates = [
-      payload?.listobat,
-      payload?.detailsep?.listobat,
       payload?.data?.listobat,
       payload?.data?.detailsep?.listobat,
-      payload?.response?.listobat,
-      payload?.response?.detailsep?.listobat
     ]
     for (const cand of candidates) {
       const norm = normalizeListObat(cand)
@@ -288,7 +249,8 @@ const loadObatList = async () => {
     obatList.value = list.map((o) => ({
       kodeobat: String(o.kodeobat ?? o.kdobat ?? '').trim(),
       namaobat: o.namaobat ?? o.nmobat ?? '-',
-      tipeobat: (o.tipeobat ?? o.tipeObat ?? 'N').toString().toUpperCase(),
+      tipeobat: (o.tipeobat ?? 'N').toString().toUpperCase(),
+      harga: (o.harga ?? 'N').toString(),
       signa1: o.signa1 ?? o.signa ?? null,
       signa2: o.signa2 ?? null,
       jumlah: o.jumlah ?? o.qty ?? null,
@@ -331,7 +293,7 @@ const deleteAllObatBeforeResep = async () => {
 
   // Refresh list untuk bukti final
   await loadObatList()
-  
+
   // Return true if all deletions succeeded
   return deleteStats.failed === 0
 }
@@ -343,7 +305,6 @@ const submitDelete = async () => {
 
   isDeleting.value = true
   try {
-    // 1) Opsional: hapus semua obat dulu
     let obatDeletedSuccessfully = true
     if (purgeObatFirst.value) {
       obatDeletedSuccessfully = await deleteAllObatBeforeResep()
@@ -356,17 +317,16 @@ const submitDelete = async () => {
       }
     }
 
-    // 2) Hapus resep
     const { data } = await axios.post('/apol/hapus-resep', {
       nosjp: String(form.nosjp).trim(),
       refasalsjp: String(form.refasalsjp).trim(),
       noresep: String(form.noresep).trim()
     }, {
-      timeout: 20000 // 20 second timeout for resep deletion
+      timeout: 20000
     })
 
     if (data.success) {
-      emit('deleted', form.noresep)
+      emit('deleted', form.nosjp)
       close()
     } else {
       console.error(data.message || 'Gagal menghapus resep')
@@ -375,6 +335,31 @@ const submitDelete = async () => {
     }
   } catch (e) {
     console.error('Terjadi kesalahan saat menghapus resep:', e)
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+const deleteSingleObat = async (obat, index) => {
+  if (!form.nosjp || !form.noresep || !obat?.kodeobat) return
+
+  isDeleting.value = true
+  try {
+    await axios.post('/apol/hapus-obat', {
+      nosepapotek: String(form.nosjp).trim(),
+      noresep: String(form.noresep).trim(),
+      kodeobat: String(obat.kodeobat).trim(),
+      tipeobat: obat.tipeobat || 'N',
+      verify: true
+    }, {
+      timeout: 15000
+    })
+
+    // Kalau sukses, hapus dari array obatList
+    obatList.value.splice(index, 1)
+    console.log(`Obat ${obat.namaobat} berhasil dihapus`)
+  } catch (err) {
+    console.error('Gagal hapus obat:', err?.response?.data?.message || err.message)
   } finally {
     isDeleting.value = false
   }

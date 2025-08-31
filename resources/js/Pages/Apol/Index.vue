@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router, usePage } from '@inertiajs/vue3';
-import { ref, reactive, onMounted, computed } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
 import SuccessFlash from '@/Components/SuccessFlash.vue'
@@ -24,22 +24,6 @@ const searchForm = reactive({
 const showDeleteModal = ref(false);
 const isDeleting = ref(false);
 const selectedItem = ref(null);
-const deleteForm = reactive({
-    nosjp: '',       // <- ini dipakai sebagai no SEP Apotek/nosepapotek
-    refasalsjp: '',
-    noresep: ''
-});
-
-// --- Obat list & purge-first toggle ---
-const isLoadingObatList = ref(false);
-const obatList = ref([]); // [{kodeobat, namaobat, tipeobat, ...}]
-const purgeObatFirst = ref(true); // default: hapus semua obat dulu
-const deleteStats = reactive({
-    total: 0,
-    done: 0,
-    failed: 0,
-    failures: [] // [{kodeobat, message}]
-});
 
 const openDelete = (item) => {
     selectedItem.value = item;
@@ -53,166 +37,16 @@ const closeDelete = () => {
     selectedItem.value = null;
 };
 
-// Add this new function to handle successful deletion:
-const handleResepDeleted = (noresep) => {
+const handleResepDeleted = (nosjp) => {
     showMessage('Resep berhasil dihapus', 'success');
 
-    // Hapus baris di tabel secara lokal (berdasarkan NORESEP)
-    const nr = String(noresep).toUpperCase();
+    // Hapus baris di tabel secara lokal (berdasarkan nosjp)
+    const nr = String(nosjp).toUpperCase();
     searchResult.value = searchResult.value.filter(
-        r => String(r?.NORESEP ?? r?.noresep ?? '').toUpperCase() !== nr
+        r => String(r?.NOAPOTIK ?? r?.nosjp ?? '').toUpperCase() !== nr
     );
 
     closeDelete();
-};
-
-const resetDeleteProgress = () => {
-    deleteStats.total = 0;
-    deleteStats.done = 0;
-    deleteStats.failed = 0;
-    deleteStats.failures = [];
-};
-
-const deleteDisabled = computed(
-    () => !deleteForm.nosjp || !deleteForm.refasalsjp || !deleteForm.noresep
-);
-
-// --- Helpers ---
-const normalizeListObat = (list) => {
-    if (!list) return [];
-    if (Array.isArray(list)) return list;
-    if (typeof list === 'object' && list.kodeobat) return [list];
-    return [];
-};
-
-const loadObatList = async (nosepApotek) => {
-    obatList.value = [];
-    if (!nosepApotek) return;
-
-    isLoadingObatList.value = true;
-    try {
-        // prefer RESTful: /apol/pelayanan/obat/daftar/{nosep}
-        let res;
-        try {
-            res = await axios.get(`/apol/pelayanan/obat/daftar/${encodeURIComponent(nosepApotek)}`);
-        } catch {
-            // fallback query param: /apol/pelayanan/obat/daftar?nosep=...
-            res = await axios.get('/apol/pelayanan/obat/daftar', { params: { nosep: nosepApotek } });
-        }
-
-        const payload = res?.data || {};
-
-        // Cari listobat di berbagai bentuk payload
-        let list = [];
-        const candidates = [
-            payload?.listobat,
-            payload?.detailsep?.listobat,
-            payload?.data?.listobat,
-            payload?.data?.detailsep?.listobat,
-            payload?.response?.listobat,
-            payload?.response?.detailsep?.listobat,
-        ];
-        for (const cand of candidates) {
-            const norm = normalizeListObat(cand);
-            if (norm.length) { list = norm; break; }
-        }
-
-        obatList.value = list.map(o => ({
-            kodeobat: String(o.kodeobat ?? o.kdobat ?? '').trim(),
-            namaobat: o.namaobat ?? o.nmobat ?? '-',
-            tipeobat: (o.tipeobat ?? o.tipeObat ?? 'N').toString().toUpperCase(),
-            signa1: o.signa1 ?? o.signa ?? null,
-            signa2: o.signa2 ?? null,
-            jumlah: o.jumlah ?? o.qty ?? null,
-            hari: o.hari ?? null,
-            harga: o.harga ?? null,
-        }));
-    } catch (e) {
-        showMessage(e?.response?.data?.message || 'Gagal memuat daftar obat');
-    } finally {
-        isLoadingObatList.value = false;
-    }
-};
-
-
-// Hapus semua obat dulu (progress)
-const deleteAllObatBeforeResep = async () => {
-    resetDeleteProgress();
-    deleteStats.total = obatList.value.length;
-    if (deleteStats.total === 0) return;
-
-    for (const ob of obatList.value) {
-        try {
-            await axios.post('/apol/hapus-obat', {
-                nosepapotek: String(deleteForm.nosjp).trim(),     // penting: nama field backend
-                noresep: String(deleteForm.noresep).trim(),
-                kodeobat: String(ob.kodeobat).trim(),
-                tipeobat: ob.tipeobat || 'N',
-                verify: true // minta controller verifikasi before/after
-            });
-            deleteStats.done += 1;
-        } catch (err) {
-            deleteStats.failed += 1;
-            deleteStats.failures.push({
-                kodeobat: ob.kodeobat,
-                message: err?.response?.data?.message || err.message || 'Gagal hapus obat'
-            });
-        }
-    }
-
-    // refresh list untuk bukti final
-    await loadObatList(deleteForm.nosjp);
-};
-
-const submitDelete = async () => {
-    if (deleteDisabled.value) {
-        showMessage('Lengkapi No SJP/SEP Apotek, Ref Asal SJP, dan No Resep terlebih dahulu');
-        return;
-    }
-
-    isDeleting.value = true;
-    try {
-        // 1) Opsional: hapus semua obat dulu
-        if (purgeObatFirst.value) {
-            await deleteAllObatBeforeResep();
-
-            // kalau masih ada obat sisa, jangan lanjut hapus resep
-            if ((obatList.value?.length ?? 0) > 0) {
-                showMessage(
-                    `Masih ada ${obatList.value.length} obat di resep ini. Resep belum dihapus.`,
-                );
-                return;
-            }
-        }
-
-        // 2) Hapus resep
-        const { data } = await axios.post('/apol/hapus-resep', {
-            nosjp: String(deleteForm.nosjp).trim(),
-            refasalsjp: String(deleteForm.refasalsjp).trim(),
-            noresep: String(deleteForm.noresep).trim()
-        });
-
-        if (data.success) {
-            showMessage('Resep berhasil dihapus', 'success');
-
-            // Hapus baris di tabel secara lokal (berdasarkan NORESEP)
-            const nr = String(deleteForm.noresep).toUpperCase();
-            searchResult.value = searchResult.value.filter(
-                r => String(r?.NORESEP ?? r?.noresep ?? '').toUpperCase() !== nr
-            );
-
-            closeDelete();
-        } else {
-            // bisa jadi backend mengembalikan 409 jika obat belum terhapus
-            showMessage(data.message || 'Gagal menghapus resep');
-            // refresh obat untuk bukti
-            await loadObatList(deleteForm.nosjp);
-        }
-    } catch (e) {
-        showMessage(e?.response?.data?.message || e.message || 'Terjadi kesalahan saat menghapus resep');
-    } finally {
-        isDeleting.value = false;
-    }
 };
 
 const resetForm = () => {
@@ -228,14 +62,11 @@ const resetForm = () => {
 
 const searchResult = ref([]);
 
-// Set default dates (current month)
 onMounted(async () => {
-    // set kdppk dari props (ENV APOTEK_PPK)
     if (!searchForm.kdppk) {
         searchForm.kdppk = page.props.defaultKdppk || '';
     }
 
-    // set tanggal default (format untuk input datetime-local)
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -325,40 +156,25 @@ const formatTanggal = (tanggal) => {
     if (!tanggal) return '-';
     return dayjs(tanggal).format('DD-MM-YYYY');
 };
-
-const getJenisObatText = (kode) => {
-    switch (String(kode)) {
-        case '0': return 'Semua';
-        case '1': return 'Obat PRB';
-        case '2': return 'Obat Kronis Belum Stabil';
-        case '3': return 'Obat Kemoterapi';
-        default: return kode ?? '-';
-    }
-};
-
-const getJenisObatClass = (kode) => {
-    switch (String(kode)) {
-        case '1': return 'bg-green-100 text-green-800';   // PRB
-        case '2': return 'bg-amber-100 text-amber-800';   // Kronis blm stabil
-        case '3': return 'bg-purple-100 text-purple-800'; // Kemoterapi
-        case '0': return 'bg-gray-100 text-gray-800';     // Semua
-        default: return 'bg-gray-100 text-gray-800';
-    }
-};
+const isBack = ref(false);
+document.addEventListener('inertia:start', () => {
+  isBack.value = true;
+});
+document.addEventListener('inertia:finish', () => {
+  isBack.value = false;
+});
 </script>
-
 
 <template>
 
-    <Head title="APOL - Daftar Resep" />
+    <Head title="Daftar Resep" />
 
     <div class="p-4 min-h-screen bg-gradient-to-br from-blue-100 to-green-100 md:p-6">
         <div class="mx-auto max-w-8xl">
-            <!-- Header -->
             <div
                 class="flex flex-col px-6 py-4 mb-6 text-white bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl md:flex-row md:items-center md:justify-between">
                 <h1 class="mb-2 text-2xl font-extrabold md:text-3xl md:mb-0">
-                    APOL - Daftar Resep
+                    Apotek Online
                 </h1>
 
                 <button @click="router.visit('/')"
@@ -371,9 +187,7 @@ const getJenisObatClass = (kode) => {
                     Kembali
                 </button>
             </div>
-            <!-- Error Toast Alert -->
             <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
-            <!-- Success Toast Alert -->
             <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
             <!-- Search Form -->
             <div class="p-6 mb-6 bg-white rounded-xl shadow-lg">
@@ -409,7 +223,7 @@ const getJenisObatClass = (kode) => {
 
                         <div>
                             <label for="TglMulai" class="block mb-2 text-sm font-medium text-gray-700">
-                                Tanggal Mulai *
+                                Tanggal Mulai <span class="text-red-600">*</span>
                             </label>
                             <input id="TglMulai" v-model="searchForm.TglMulai" type="datetime-local"
                                 class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -418,7 +232,7 @@ const getJenisObatClass = (kode) => {
 
                         <div>
                             <label for="TglAkhir" class="block mb-2 text-sm font-medium text-gray-700">
-                                Tanggal Akhir *
+                                Tanggal Akhir <span class="text-red-600">*</span>
                             </label>
                             <input id="TglAkhir" v-model="searchForm.TglAkhir" type="datetime-local"
                                 class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
@@ -455,75 +269,68 @@ const getJenisObatClass = (kode) => {
             <!-- Search Result -->
             <div class="p-6 mb-6 bg-white rounded-xl shadow-lg">
                 <h3 class="mb-4 text-lg font-bold text-gray-800">
-                    Daftar Resep Ditemukan ({{ searchResult.length }} data)
+                    Daftar Klaim Resep (<span class="text-green-500">{{ searchResult.length }} data</span>)
                 </h3>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                <div class="w-full overflow-x-auto sm:overflow-visible">
+                    <table class="min-w-full table-fixed bg-white rounded-lg border border-gray-200">
                         <thead class="bg-gray-100">
                             <tr class="text-center">
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No</th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. Resep
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No</th>
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. Resep
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. Apotek
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. SJP
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. SEP
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. SEP
                                     Kunjungan</th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">No. Kartu
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. Kartu
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Nama Peserta
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Nama Peserta
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Tgl. Entry
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl. Entry
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Tgl. Resep
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl. Resep
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Biaya Tagih
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Biaya Tagih
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Biaya
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Biaya
                                     Verifikasi</th>
-                                <!-- <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Jenis Obat
-                                </th> -->
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Flag Iter
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Flag Iter
                                 </th>
-                                <th class="px-3 py-3 text-sm font-medium text-gray-700 border-b">Aksi</th>
+                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Aksi</th>
 
                             </tr>
                         </thead>
                         <tbody>
                             <template v-if="searchResult && searchResult.length > 0">
-                                <tr v-for="(item, index) in searchResult" :key="index" class="hover:bg-gray-50 text-center">
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ index + 1 }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NORESEP ||
+                                <tr v-for="(item, index) in searchResult" :key="index"
+                                    class="hover:bg-gray-50 text-center">
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ index + 1 }}</td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">{{ item.NORESEP ||
                                         '-' }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ item.NOAPOTIK || '-' }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b font-medium text-blue-600">{{
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOAPOTIK || '-' }}</td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium text-blue-600">{{
                                         item.NOSEP_KUNJUNGAN || '-' }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b font-medium">{{ item.NAMA || '-'
-                                        }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLENTRY)
-                                        }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
-                                        }}</td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b text-right font-medium">
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}</td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">{{ item.NAMA || '-'
+                                    }}</td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLENTRY)
+                                    }}</td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
+                                    }}</td>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">
                                         {{ formatCurrency(item.BYTAGRSP) }}
                                     </td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b text-right">
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
                                         {{ formatCurrency(item.BYVERRSP) }}
                                     </td>
-                                    <!-- <td class="px-3 py-3 text-sm text-gray-900 border-b">
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
                                         <span class="px-2 py-1 text-xs rounded-full"
-                                            :class="getJenisObatClass(item.KDJNSOBAT)">
-                                            {{ getJenisObatText(item.KDJNSOBAT) }}
-                                        </span>
-                                    </td> -->
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">
-                                        <span class="px-2 py-1 text-xs rounded-full"
-                                            :class="item.FLAGITER === 'True' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'">
+                                            :class="item.FLAGITER === 'True' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'">
                                             {{ item.FLAGITER === 'True' ? 'Ya' : 'Tidak' }}
                                         </span>
                                     </td>
-                                    <td class="px-3 py-3 text-sm text-gray-900 border-b">
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
                                         <Tooltip text="Hapus Klaim" bgColor="bg-red-600">
                                             <button @click="openDelete(item)"
                                                 class="px-2 py-1 text-xs font-medium text-red-600 border border-red-600 rounded transition duration-300 hover:bg-red-200">
@@ -531,7 +338,6 @@ const getJenisObatClass = (kode) => {
                                             </button>
                                         </Tooltip>
                                     </td>
-
                                 </tr>
                             </template>
                             <tr v-else>
@@ -544,7 +350,6 @@ const getJenisObatClass = (kode) => {
                                             </path>
                                         </svg>
                                         <p class="text-lg font-medium">Tidak ada data resep</p>
-                                        <p class="text-sm">Silakan lakukan pencarian untuk menampilkan data</p>
                                     </div>
                                 </td>
                             </tr>
@@ -556,4 +361,7 @@ const getJenisObatClass = (kode) => {
     </div>
     <HapusResepModal :show="showDeleteModal" :selected-item="selectedItem" @close="closeDelete"
         @deleted="handleResepDeleted" />
+    <div v-if="isBack" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+        <video src="/img/loading.webm" autoplay loop muted playsinline />
+    </div>
 </template>

@@ -14,8 +14,7 @@ import FeatureCard from '@/Components/FeatureCard.vue';
       icon="bed-pulse"
       color="blue"
     >
-      Monitor pasien yang sedang ditangani di IGD.
-      <span class="font-semibold text-red-500">(Khusus petugas IGD)</span>
+      Monitor pasien gawat darurat.
     </FeatureCard>
 
     <FeatureCard
@@ -24,7 +23,7 @@ import FeatureCard from '@/Components/FeatureCard.vue';
       icon="prescription-bottle-medical"
       color="teal"
     >
-      Pantau status antrean resep obat di Depo Farmasi.
+      Pantau status antrean resep Farmasi.
     </FeatureCard>
 
     <FeatureCard
@@ -45,12 +44,20 @@ import FeatureCard from '@/Components/FeatureCard.vue';
       Kelola dan pantau rencana kontrol pasien.
     </FeatureCard>
     <FeatureCard
-      title="Daftar Resep"
+      title="Apotek Online"
       :link="route('apol.index')"
       icon="pills"
       color="purple"
     >
-      Kelola Daftar Resep pasien.
+      Kelola Klaim Resep pasien BPJS.
+    </FeatureCard>
+    <FeatureCard
+      title="Halo Farmasi"
+      :link="route('apol.index')"
+      icon="user-doctor"
+      color="cyan"
+    >
+      Konsultasi farmasi pasien kronis.
     </FeatureCard>
   </LandingSection>
 </template>

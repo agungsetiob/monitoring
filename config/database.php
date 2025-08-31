@@ -76,6 +76,21 @@ return [
             'engine' => null,
         ],
 
+        'apol' => [
+            'driver' => 'mysql',
+            'host' => env('DB_APOL_HOST'),
+            'port' => env('DB_APOL_PORT'),
+            'database' => env('DB_APOL_DATABASE'),
+            'username' => env('DB_APOL_USERNAME'),
+            'password' => env('DB_APOL_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+            'prefix_indexes' => true,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
@@ -161,7 +176,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

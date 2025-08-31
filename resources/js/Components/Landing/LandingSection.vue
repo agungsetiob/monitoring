@@ -35,9 +35,9 @@ document.addEventListener('inertia:finish', () => {
 
     <div class="mb-12 text-center">
       <img src="/img/sigap-obatin.png" alt="RSUD Logo" class="mx-auto mb-4 w-auto h-32">
-      <h1 class="mb-4 text-4xl font-extrabold leading-tight text-gray-800 drop-shadow-md md:text-6xl">
+      <!-- <h1 class="mb-4 text-4xl font-extrabold leading-tight text-gray-800 drop-shadow-md md:text-6xl">
         Selamat Datang di
-      </h1>
+      </h1> -->
       <p class="text-3xl font-bold text-teal-600 drop-shadow-sm md:text-5xl">
         RSUD dr. H. Andi Abdurrahman Noor
       </p>
@@ -46,7 +46,7 @@ document.addEventListener('inertia:finish', () => {
       </p>
     </div>
 
-    <div class="grid grid-cols-1 gap-8 w-full max-w-7xl md:grid-cols-4">
+    <div class="grid grid-cols-1 gap-8 w-full max-w-7xl md:grid-cols-3">
       <slot />
     </div>
   </div>

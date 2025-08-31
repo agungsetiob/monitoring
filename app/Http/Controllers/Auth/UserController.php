@@ -1,13 +1,14 @@
 <?php
 // app/Http/Controllers/UserController.php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {

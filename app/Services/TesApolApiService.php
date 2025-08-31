@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\LogKirimResep;
-use App\Models\LogKirimResepDetil;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Client\Response;
 
-class ApolApiService
+class TesApolApiService
 {
     private $baseUrl;
     private $consId;
@@ -18,6 +17,7 @@ class ApolApiService
 
     public function __construct()
     {
+        // Konfigurasi API dari config/services.php
         $this->baseUrl = config('services.apol.base_url');
         $this->consId = config('services.apol.cons_id');
         $this->secretKey = config('services.apol.secret_key');
@@ -37,6 +37,7 @@ class ApolApiService
 
     /**
      * Generate X-signature: base64(HMAC-SHA256(consumerID&timestamp, consumerSecret))
+     * Sesuai dokumentasi BPJS.
      *
      * @param string $consId
      * @param string $timestamp
@@ -209,7 +210,7 @@ class ApolApiService
     }
 
     /**
-     * Method 5: Format seperti dokumentasi
+     * Method 5: Format seperti dokumentasi example
      */
     public function attemptDocumentationFormat($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
     {
@@ -225,6 +226,7 @@ class ApolApiService
             'Accept' => 'application/json',
         ];
 
+        // Persis seperti contoh di dokumentasi
         $requestData = json_encode([
             "kdppk" => $kdppk,
             "KdJnsObat" => $kdJnsObat,
@@ -348,25 +350,108 @@ class ApolApiService
         return false;
     }
 
-    protected function markResepAsBatal(string $nosjp): void
+    /**
+     * Test method untuk debugging endpoint dengan proper authentication
+     */
+    public function testEndpoint()
     {
         try {
-            $updated = LogKirimResep::where('NOSJP', $nosjp)
-                ->update([
-                    'STATUS' => 9,
-                    'RESPONSE' => 'batal',
-                ]);
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
 
-            \Log::info("Update log_kirim_resep batal: NOSJP=$nosjp, updated=$updated");
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ];
 
-        } catch (\Throwable $e) {
-            \Log::error("Exception saat update log_kirim_resep batal: " . $e->getMessage(), [
-                'nosjp' => $nosjp,
+            Log::info('Testing APOL Endpoint with Authentication', [
+                'base_url' => $this->baseUrl,
+                'full_endpoint' => $this->baseUrl . '/daftarresep',
+                'headers' => array_merge($headers, [
+                    'X-signature' => substr($signature, 0, 20) . '...',
+                    'user_key' => substr($this->userKey, 0, 10) . '...',
+                ])
             ]);
+
+            // Test dengan proper authentication headers
+            $response = Http::withHeaders($headers)
+                ->timeout(10)
+                ->get($this->baseUrl . '/daftarresep');
+
+            return [
+                'status' => $response->status(),
+                'headers' => $response->headers(),
+                'body_preview' => substr($response->body(), 0, 500),
+                'is_html' => strpos($response->body(), '<html') !== false,
+                'authentication_test' => 'with_headers'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'error' => $e->getMessage()
+            ];
         }
     }
 
+    /**
+     * Test authentication dengan sample data
+     */
+    public function testAuthentication()
+    {
+        try {
+            $ts = $this->makeTimestampSecondsUTC();
+            $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
 
+            $headers = [
+                'X-cons-id' => $this->consId,
+                'X-timestamp' => $ts,
+                'X-signature' => $signature,
+                'user_key' => $this->userKey,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ];
+
+            // Test dengan sample request data
+            $sampleData = [
+                'kdppk' => '0112A017',
+                'KdJnsObat' => '0',
+                'JnsTgl' => 'TGLPELSJP',
+                'TglMulai' => '2025-08-01 00:00:00',
+                'TglAkhir' => '2025-08-31 23:59:59',
+            ];
+
+            Log::info('Testing Authentication with Sample Data', [
+                'timestamp' => $ts,
+                'cons_id' => $this->consId,
+                'signature_preview' => substr($signature, 0, 20) . '...',
+                'user_key_preview' => substr($this->userKey, 0, 10) . '...',
+                'sample_data' => $sampleData
+            ]);
+
+            $response = Http::withHeaders($headers)
+                ->timeout(15)
+                ->post($this->baseUrl . '/daftarresep', $sampleData);
+
+            return [
+                'status' => $response->status(),
+                'headers' => $response->headers(),
+                'body' => $response->body(),
+                'is_html' => strpos($response->body(), '<html') !== false,
+                'test_type' => 'authentication_with_sample_data',
+                'request_headers' => array_merge($headers, ['X-signature' => '***masked***']),
+                'request_data' => $sampleData
+            ];
+        } catch (\Exception $e) {
+            Log::error('Authentication test error: ' . $e->getMessage());
+            return [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ];
+        }
+    }
     public function hapusResep(string $nosjp, string $refasalsjp, string $noresep)
     {
         $attempts = [
@@ -384,7 +469,6 @@ class ApolApiService
 
                 if ($this->isSuccessfulResponse($result)) {
                     Log::info("HapusResep: SUKSES dengan metode {$name}");
-                    $this->markResepAsBatal($nosjp);
                     return $result;
                 }
 
@@ -545,35 +629,7 @@ class ApolApiService
             || stripos($sample, '<title>service</title>') !== false;
     }
 
-    protected function markResepDetilAsBatal(string $noSepApotek, string $kodeObat): void
-    {
-        try {
-            $resep = LogKirimResep::where('NOSJP', $noSepApotek)->first();
-
-            if (!$resep || !$resep->KUNJUNGAN) {
-                \Log::warning("Gagal update resep_detil: KUNJUNGAN tidak ditemukan untuk NOSJP $noSepApotek");
-                return;
-            }
-
-            $updated = LogKirimResepDetil::where('KUNJUNGAN', $resep->KUNJUNGAN)
-                ->where('KDOBT', $kodeObat)
-                ->update([
-                    'STATUS' => 9,
-                    'RESPONSE' => 'batal',
-                ]);
-
-            \Log::info("Update resep_detil batal: KUNJUNGAN={$resep->KUNJUNGAN}, KDBAT=$kodeObat, updated=$updated");
-
-        } catch (\Throwable $e) {
-            \Log::error("Exception saat update resep_detil batal: " . $e->getMessage(), [
-                'nosjp' => $noSepApotek,
-                'kodeobat' => $kodeObat,
-            ]);
-        }
-    }
-
-
-    public function hapusObat(string $noSepApotek, string $noResep, string $kodeObat, string $tipeObat = 'N')
+    public function hapusObat(string $noSepApotek, string $noResep, string $kodeObat, string $tipeObat = 'N') 
     {
         $ts = $this->makeTimestampSecondsUTC();
         $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
@@ -627,9 +683,7 @@ class ApolApiService
                 }
 
                 if ($resp->successful()) {
-                    $result = $this->processResponse($resp, $ts);
-                    $this->markResepDetilAsBatal($noSepApotek, $kodeObat);
-                    return $result;
+                    return $this->processResponse($resp, $ts);
                 }
 
                 if ($parsed = $this->tryParseErrorBody($resp, $ts)) {

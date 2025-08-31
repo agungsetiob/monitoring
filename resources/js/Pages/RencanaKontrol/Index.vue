@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/vue3';
 import { ref, reactive, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
+import ErrorFlash from '@/Components/ErrorFlash.vue';
 
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -27,10 +28,6 @@ const searchResult = ref([]);
 const cariData = async () => {
   if (!searchForm.no_kartu || !searchForm.bulan || !searchForm.tahun) {
     errorMessage.value = 'Nomor kartu, bulan, dan tahun harus diisi';
-    // Auto-hide error message after 5 seconds
-    setTimeout(() => {
-      errorMessage.value = '';
-    }, 5000);
     return;
   }
 
@@ -47,40 +44,38 @@ const cariData = async () => {
     } else {
       searchResult.value = [];
       errorMessage.value = response.data.message;
-      // Auto-hide error message after 5 seconds
-      setTimeout(() => {
-        errorMessage.value = '';
-      }, 5000);
     }
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Terjadi kesalahan saat mencari data';
     searchResult.value = [];
-    // Auto-hide error message after 5 seconds
-    setTimeout(() => {
-      errorMessage.value = '';
-    }, 5000);
   } finally {
     isLoading.value = false;
   }
 };
 
 const editRencanaKontrol = (item) => {
-  // Redirect to update page with only noSuratKontrol
   router.visit(`/rencana-kontrol/update?noSuratKontrol=${item.noSuratKontrol}`);
 };
+const isBack = ref(false);
+document.addEventListener('inertia:start', () => {
+  isBack.value = true;
+});
+document.addEventListener('inertia:finish', () => {
+  isBack.value = false;
+});
 </script>
 
 <template>
 
   <Head title="Update Rencana Kontrol" />
 
-  <div class="p-4 min-h-screen bg-pattern md:p-6">
+  <div class="p-4 min-h-screen bg-gradient-to-br from-blue-100 to-green-100 md:p-6">
     <div class="mx-auto max-w-8xl">
       <!-- Header -->
       <div
         class="flex flex-col px-6 py-4 mb-6 text-white bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl md:flex-row md:items-center md:justify-between">
         <h1 class="mb-2 text-2xl font-extrabold md:text-3xl md:mb-0">
-          Update Rencana Kontrol
+          Rencana Kontrol
         </h1>
 
         <button @click="router.visit('/')"
@@ -94,36 +89,7 @@ const editRencanaKontrol = (item) => {
         </button>
       </div>
 
-      <!-- Error Toast Alert -->
-      <Transition name="toast">
-        <div v-if="errorMessage" class="fixed top-4 right-4 z-50 w-full max-w-sm">
-          <div class="p-4 bg-red-50 rounded-lg border border-red-200 shadow-lg">
-            <div class="flex items-start">
-              <div class="flex-shrink-0">
-                <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clip-rule="evenodd"></path>
-                </svg>
-              </div>
-              <div class="flex-1 ml-3">
-                <h3 class="text-sm font-medium text-red-800">Error!</h3>
-                <p class="mt-1 text-sm text-red-700">{{ errorMessage }}</p>
-              </div>
-              <div class="flex-shrink-0 ml-4">
-                <button @click="errorMessage = ''"
-                  class="inline-flex text-red-400 hover:text-red-600 focus:outline-none">
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clip-rule="evenodd"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Transition>
+      <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
 
       <!-- Search Form -->
       <div class="p-6 mb-6 bg-white rounded-xl shadow-lg">
@@ -187,12 +153,7 @@ const editRencanaKontrol = (item) => {
           <div class="flex gap-3">
             <button type="submit" :disabled="isLoading"
               class="flex gap-2 items-center px-6 py-2 font-semibold text-white bg-blue-600 rounded-lg transition duration-300 hover:bg-blue-700 disabled:bg-blue-400">
-              <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                </path>
-              </svg>
+              <font-awesome-icon v-if="isLoading" icon="spinner" spin />
               {{ isLoading ? 'Mencari...' : 'Cari Data' }}
             </button>
 
@@ -256,7 +217,9 @@ const editRencanaKontrol = (item) => {
           </table>
         </div>
       </div>
-
     </div>
+  </div>
+  <div v-if="isBack" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+    <video src="/img/loading.webm" autoplay loop muted playsinline />
   </div>
 </template>
