@@ -73,6 +73,11 @@ onMounted(async () => {
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     searchForm.TglMulai = dayjs(firstDay).format('YYYY-MM-DDTHH:mm');
     searchForm.TglAkhir = dayjs(lastDay).format('YYYY-MM-DDTHH:mm');
+
+    // auto panggil cariData kalau form lengkap
+    if (searchForm.kdppk && searchForm.TglMulai && searchForm.TglAkhir) {
+        await cariData();
+    }
 });
 
 const showMessage = (message, type = 'error') => {
@@ -102,7 +107,7 @@ const cariData = async () => {
     searchResult.value = [];
 
     try {
-        const response = await axios.post('/apol/daftar-resep', searchForm);
+        const response = await axios.post('/apol/ajax/daftar-resep', searchForm);
 
         if (response.data.success) {
             searchResult.value = response.data.data || [];
@@ -152,6 +157,13 @@ const formatTanggal = (tanggal) => {
     if (!tanggal) return '-';
     return dayjs(tanggal).format('DD-MM-YYYY');
 };
+const isBack = ref(false);
+document.addEventListener('inertia:start', () => {
+    isBack.value = true;
+});
+document.addEventListener('inertia:finish', () => {
+    isBack.value = false;
+});
 </script>
 
 <template>
@@ -160,12 +172,6 @@ const formatTanggal = (tanggal) => {
     <ApolLayout>
         <div class="p-4 min-h-screen bg-gradient-to-br from-blue-100 to-green-100 md:p-6">
             <div class="mx-auto max-w-8xl pt-6 sm:pt-20">
-                <div
-                    class="flex flex-col px-6 py-4 mb-6 text-white bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl shadow-2xl md:flex-row md:items-center md:justify-between">
-                    <h1 class="mb-2 text-2xl font-extrabold md:text-3xl md:mb-0">
-                        Apotek Online
-                    </h1>
-                </div>
                 <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
                 <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
                 <!-- Search Form -->
@@ -175,7 +181,6 @@ const formatTanggal = (tanggal) => {
                     <form @submit.prevent="cariData" class="space-y-4">
                         <input type="hidden" v-model="searchForm.kdppk" />
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-
 
                             <div>
                                 <label for="KdJnsObat" class="block mb-2 text-sm font-medium text-gray-700">
@@ -347,5 +352,8 @@ const formatTanggal = (tanggal) => {
         </div>
         <HapusResepModal :show="showDeleteModal" :selected-item="selectedItem" @close="closeDelete"
             @deleted="handleResepDeleted" />
+        <div v-if="isBack" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-80">
+            <video src="/img/loading.webm" autoplay loop muted playsinline />
+        </div>
     </ApolLayout>
 </template>

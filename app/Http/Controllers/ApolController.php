@@ -137,7 +137,7 @@ class ApolController extends Controller
     /**
      * Handle AJAX request untuk mendapatkan daftar resep.
      */
-    public function ajaxGetDaftarResep(Request $request)
+    public function daftarResep(Request $request)
     {
         $request->merge([
             'kdppk' => $request->kdppk ?: config('services.apol.apotek_ppk')
@@ -299,14 +299,6 @@ class ApolController extends Controller
             default:
                 return 400;
         }
-    }
-
-    /**
-     * Get daftar resep dari BPJS APOL API (alias untuk ajaxGetDaftarResep).
-     */
-    public function getDaftarResep(Request $request)
-    {
-        return $this->ajaxGetDaftarResep($request);
     }
 
     /**

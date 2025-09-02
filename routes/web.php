@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\LosReportController;
+use App\Http\Controllers\PelayananApolController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AntreanResepController;
 use App\Http\Controllers\Auth\LoginController;
@@ -65,13 +66,20 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
 });
 Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(function () {
     Route::get('/apol', [ApolController::class, 'index'])->name('apol.index');
-    Route::post('/apol/daftar-resep', [ApolController::class, 'getDaftarResep']);
-    Route::post('/apol/ajax/daftar-resep', [ApolController::class, 'ajaxGetDaftarResep']);
+    Route::post('/apol/daftar-resep', [ApolController::class, 'daftarResep']);
     Route::post('/apol/summary-resep', [ApolController::class, 'getSummaryResep']);
     Route::delete('/apol/hapus-resep', [ApolController::class, 'hapusResep'])->name('apol.hapus-resep');
     Route::post('/apol/hapus-obat', [ApolController::class, 'hapusObat']);
     Route::get('/apol/pelayanan/obat/daftar/{nosep?}', [ApolController::class, 'getDaftarPelayananObat'])
         ->name('apol.obat.daftar');
+
+    //route from ws simgos
+    Route::get('/resep-klaim-terpisah', function () {
+        return inertia('Apol/ResepSimgos');
+    })->name('resep-klaim-terpisah');
+    Route::get('/resep-simgos', [PelayananApolController::class, 'resepKlaimTerpisah']);
+
+
     // Opsional: versi query param fallback ?nosep=...
     Route::get('/apol/pelayanan/obat/daftar', [ApolController::class, 'getDaftarPelayananObat']);
     Route::post('/apol/hapus-resep', [ApolController::class, 'hapusResep']); // alias untuk klien yg tidak support DELETE

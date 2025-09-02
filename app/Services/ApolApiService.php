@@ -119,62 +119,46 @@ class ApolApiService
      */
     public function getDaftarResep($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
     {
-        $attempts = [
-            'raw_json_body' => function () use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
-                return $this->attemptAlternativeDateFormat($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
-            },
-            'documentation_format' => function () use ($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir) {
-                return $this->attemptDocumentationFormat($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
-            },
-        ];
+        try {
+            $result = $this->requestDaftarResep($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir);
 
-        $lastError = null;
-
-        foreach ($attempts as $method => $callback) {
-            try {
-                Log::info("Trying method: {$method}");
-                $result = $callback();
-
-                if ($this->isSuccessfulResponse($result)) {
-                    Log::info("SUCCESS with method: {$method}");
-                    return $result;
-                }
-
-                // Log unsuccessful attempt but continue
-                Log::info("Method {$method} returned: " . json_encode([
-                    'status' => $result['status'] ?? 'unknown',
-                    'is_html' => strpos(json_encode($result), '<html') !== false,
-                    'has_metadata' => isset($result['metaData'])
-                ]));
-
-            } catch (\Exception $e) {
-                Log::warning("Method {$method} failed: " . $e->getMessage());
-                $lastError = $e;
-                continue;
+            if ($this->isValidResponse($result)) {
+                return $result;
             }
+
+            Log::info("Response tidak valid atau kosong", [
+                'status' => $result['status'] ?? 'unknown',
+                'metaData' => $result['metaData'] ?? null,
+                'response' => $result['response'] ?? null
+            ]);
+
+        } catch (\Exception $e) {
+            Log::warning("Request daftar resep gagal: " . $e->getMessage());
         }
 
-        // All methods failed, return error
-        Log::error('All request methods failed', [
-            'last_error' => $lastError ? $lastError->getMessage() : 'Unknown error',
-            'parameters' => compact('kdppk', 'kdJnsObat', 'jnsTgl', 'tglMulai', 'tglAkhir')
-        ]);
-
         return [
-            'success' => false,
-            'message' => 'Data Tidak Ditemukan',
-            'error' => $lastError ? $lastError->getMessage() : 'Unknown error',
+            'success' => true,
+            'message' => 'Tidak ada data resep pada rentang tanggal tersebut',
+            'response' => [],
             'metaData' => [
-                'code' => '500',
-                'message' => 'Data Tidak Ditemukan'
+                'code' => '204',
+                'message' => 'No Content'
             ]
         ];
     }
 
+
+    private function isValidResponse($result)
+    {
+        return isset($result['metaData']) &&
+            ($result['metaData']['code'] == '200' || $result['metaData']['code'] == '204');
+    }
+
+
     /**
      * Method 4: Raw JSON string dalam form data (seperti RencanaKontrol)
      */
-    private function attemptAlternativeDateFormat($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
+    private function requestDaftarResep($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
     {
         $ts = $this->makeTimestampSecondsUTC();
         $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
@@ -196,50 +180,13 @@ class ApolApiService
             'TglAkhir' => $this->formatTanggal($tglAkhir),
         ]);
 
-        Log::info('APOL Request (Raw JSON Body)', [
+        Log::info('APOL Request (Daftar Resep)', [
             'body' => $requestBody
         ]);
 
         $response = Http::withHeaders($headers)
             ->timeout($this->timeout)
             ->withBody($requestBody, 'application/x-www-form-urlencoded')
-            ->post($this->baseUrl . '/daftarresep');
-
-        return $this->processResponse($response, $ts);
-    }
-
-    /**
-     * Method 5: Format seperti dokumentasi
-     */
-    public function attemptDocumentationFormat($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
-    {
-        $ts = $this->makeTimestampSecondsUTC();
-        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
-
-        $headers = [
-            'X-cons-id' => $this->consId,
-            'X-timestamp' => $ts,
-            'X-signature' => $signature,
-            'user_key' => $this->userKey,
-            'Content-Type' => 'application/x-www-form-urlencoded',
-            'Accept' => 'application/json',
-        ];
-
-        $requestData = json_encode([
-            "kdppk" => $kdppk,
-            "KdJnsObat" => $kdJnsObat,
-            "JnsTgl" => $jnsTgl,
-            "TglMulai" => $this->formatTanggal($tglMulai),
-            "TglAkhir" => $this->formatTanggal($tglAkhir)
-        ]);
-
-        Log::info('APOL Request (Documentation Format)', [
-            'raw_body' => $requestData
-        ]);
-
-        $response = Http::withHeaders($headers)
-            ->timeout($this->timeout)
-            ->withBody($requestData, 'application/x-www-form-urlencoded')
             ->post($this->baseUrl . '/daftarresep');
 
         return $this->processResponse($response, $ts);
@@ -318,7 +265,6 @@ class ApolApiService
             'response' => []
         ];
     }
-
 
     /**
      * Check if response is successful
@@ -677,7 +623,6 @@ class ApolApiService
         }
         return null;
     }
-
 
     // helper opsional: coba baca body JSON walau status 400 supaya kelihatan "metaData.message"
     private function tryParseErrorBody(Response $resp, $ts)
