@@ -76,6 +76,7 @@
                             <div class="flex gap-2">
                                 <button type="submit" :disabled="isLoading"
                                     class="px-4 py-2 font-semibold text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700 disabled:bg-green-400 w-full">
+                                    <font-awesome-icon v-if="isLoading" icon="spinner" spin />
                                     {{ isLoading ? 'Mencari...' : 'Cari Data' }}
                                 </button>
 
@@ -94,8 +95,8 @@
                         Hasil Resep (<span class="text-green-500">{{ resepList.length }} data</span>)
                     </h3>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <div class="w-full overflow-x-auto sm:overflow-visible">
+                        <table class="min-w-full table-fixed bg-white rounded-lg border border-gray-200">
                             <thead class="bg-gray-100">
                                 <tr class="text-center">
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No</th>
@@ -109,7 +110,6 @@
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Dokter</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Asal Resep</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl Resep</th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Jenis Resep</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Aksi</th>
                                 </tr>
                             </thead>
@@ -117,7 +117,7 @@
                                 <template v-if="resepList.length > 0">
                                     <tr v-for="(item, index) in resepList" :key="index"
                                         class="text-center hover:bg-gray-50" :class="{
-                                            'bg-green-100 hover:bg-green-200': item.STATUSKLAIM == 1
+                                            'bg-teal-100 hover:bg-teal-200': item.STATUSKLAIM == 1
                                         }" :data-idusersjp="item.IDUSERSJP"
                                         :data-kddokter="item.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN"
                                         :data-noresep="item.REFERENSI?.NOMORRESEP?.NOMOR">
@@ -132,15 +132,16 @@
                                         <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
                                             {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
-                                            }})</span>
+                                                }})</span>
                                         </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
-                                        <td class="px-2 py-2 text-sm border-b">{{ getJenisResep(item) || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
-                                            <button v-if="!item.STATUSKLAIM" @click="openModalSimpan(item)"
-                                                class="px-2 py-1 text-xs rounded hover:bg-green-100 text-green-700 hover:bg-green-200">
-                                                <font-awesome-icon icon="notes-medical"/>
-                                            </button>
+                                            <Tooltip text="Kirim Resep ke BPJS" bgColor="bg-green-600">
+                                                <button @click="openModalSimpan(item)"
+                                                    class="px-2 py-1 text-xs rounded hover:bg-green-100 text-green-700 hover:bg-green-200">
+                                                    <font-awesome-icon icon="notes-medical" />
+                                                </button>
+                                            </Tooltip>
                                         </td>
                                     </tr>
                                 </template>
@@ -168,6 +169,7 @@ import ErrorFlash from "@/Components/ErrorFlash.vue";
 import SuccessFlash from "@/Components/SuccessFlash.vue";
 import ApolLayout from "../Layout/ApolLayout.vue";
 import CreateResepModal from "./Partials/CreateResepModal.vue";
+import Tooltip from "@/Components/Tooltip.vue";
 
 const isLoading = ref(false);
 const errorMessage = ref("");
@@ -177,15 +179,15 @@ const selectedResep = ref(null)
 const showModalSimpan = ref(false)
 
 const openModalSimpan = (item) => {
-  selectedResep.value = item
-  showModalSimpan.value = true
+    selectedResep.value = item
+    showModalSimpan.value = true
 }
 
 const handleResepSaved = (data) => {
-  const message = data?.metaData?.message || 'Resep berhasil disimpan'
-  console.log('Resep berhasil disimpan:', data)
-  showMessage(message, 'success')
-  showModalSimpan.value = false
+    const message = data?.metaData?.message || 'Resep berhasil disimpan'
+    console.log('Resep berhasil disimpan:', data)
+    showMessage(message, 'success')
+    showModalSimpan.value = false
 }
 
 const searchForm = reactive({
@@ -263,21 +265,6 @@ const cariData = async () => {
 // Helper functions to extract nested data
 const getDokterNama = (item) => {
     return item.REFERENSI?.DPJP_PENJAMIN_RS?.REFERENSI?.DOKTER?.NAMA || '-';
-};
-
-const getJenisResep = (item) => {
-    const jenis = item.JENISRESEP;
-
-    switch (jenis) {
-        case '1':
-            return 'PRB';
-        case '2':
-            return 'Kronis';
-        case '3':
-            return 'Kemo';
-        default:
-            return jenis || '-';
-    }
 };
 
 const getAsalResep = (item) => {

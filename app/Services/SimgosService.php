@@ -7,7 +7,12 @@ use Illuminate\Support\Facades\Http;
 
 class SimgosService
 {
-    protected string $baseUrl = 'http://192.168.0.10/webservice';
+    protected string $baseUrl;
+
+    public function __construct()
+    {
+        $this->baseUrl = env('SIMGOS_API_URL');
+    }
 
     /**
      * Login ke SIMGOS dan simpan cookies ke cache

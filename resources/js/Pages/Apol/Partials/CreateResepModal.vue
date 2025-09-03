@@ -59,6 +59,7 @@ import { ref, reactive, watch } from 'vue'
 import axios from 'axios'
 import Modal from '@/Components/Modal.vue'
 import FormField from '@/Components/FormField.vue'
+import dayjs from 'dayjs'
 
 const emit = defineEmits(['close', 'saved'])
 
@@ -92,7 +93,7 @@ watch(() => props.show, async (isOpen) => {
             idusersjp: props.selectedItem.IDUSERSJP ?? '',
             polirsp: getPoliRsp(props.selectedItem) ?? '',
             refasalsjp: props.selectedItem.REFASALSJP ?? '',
-            tglsjp: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            tglsjp : dayjs().format('YYYY-MM-DD HH:mm:ss'),
             tglrsp: props.selectedItem.MASUK ?? '',
             tglpelrsp: props.selectedItem.TGLPELRSP ?? '',
             kddokter: props.selectedItem.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN ?? '',
