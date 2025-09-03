@@ -115,7 +115,6 @@ class ApolApiService
 
     /**
      * Daftar Resep - BPJS APOL API
-     * Mencoba berbagai format request sesuai dokumentasi BPJS
      */
     public function getDaftarResep($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
     {
@@ -156,7 +155,7 @@ class ApolApiService
 
 
     /**
-     * Method 4: Raw JSON string dalam form data (seperti RencanaKontrol)
+     * Raw JSON string dalam form data
      */
     private function requestDaftarResep($kdppk, $kdJnsObat, $jnsTgl, $tglMulai, $tglAkhir)
     {
@@ -641,5 +640,57 @@ class ApolApiService
             // ignore, lanjut ke attempt berikutnya
         }
         return null;
+    }
+
+    /**
+     * Simpan resep baru ke BPJS APOL
+     */
+    public function simpanResep(array $data)
+    {
+        $ts = $this->makeTimestampSecondsUTC();
+        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+        $headers = [
+            'X-cons-id' => $this->consId,
+            'X-timestamp' => $ts,
+            'X-signature' => $signature,
+            'user_key' => $this->userKey,
+            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Accept' => 'application/json',
+        ];
+
+        // Validasi dan format data
+        $payload = [
+            'TGLSJP' => $this->formatTanggal($data['TGLSJP'] ?? now()),
+            'REFASALSJP' => $data['REFASALSJP'] ?? '',
+            'POLIRSP' => $data['POLIRSP'] ?? '',
+            'KDJNSOBAT' => $data['KDJNSOBAT'] ?? '1',
+            'NORESEP' => $data['NORESEP'] ?? '',
+            'IDUSERSJP' => $data['IDUSERSJP'] ?? '',
+            'TGLRSP' => $this->formatTanggal($data['TGLRSP'] ?? now()),
+            'TGLPELRSP' => $this->formatTanggal($data['TGLPELRSP'] ?? now()),
+            'KdDokter' => $data['KdDokter'] ?? '0',
+            'iterasi' => $data['iterasi'] ?? '0'
+        ];
+
+        Log::info('APOL Simpan Resep Request', ['payload' => $payload]);
+
+        $requestBody = json_encode($payload);
+
+        try {
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->withBody($requestBody, 'application/x-www-form-urlencoded')
+                ->post($this->baseUrl . '/sjpresep/v3/insert');
+
+            return $this->processResponse($response, $ts);
+        } catch (\Exception $e) {
+            Log::error('Error simpan resep: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Gagal menyimpan resep: ' . $e->getMessage(),
+                'metaData' => ['code' => '500', 'message' => $e->getMessage()]
+            ];
+        }
     }
 }

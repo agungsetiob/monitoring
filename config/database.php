@@ -78,11 +78,11 @@ return [
 
         'apol' => [
             'driver' => 'mysql',
-            'host' => env('DB_APOL_HOST'),
-            'port' => env('DB_APOL_PORT'),
+            'host' => env('DB_MR_HOST'),
+            'port' => env('DB_MR_PORT'),
             'database' => env('DB_APOL_DATABASE'),
-            'username' => env('DB_APOL_USERNAME'),
-            'password' => env('DB_APOL_PASSWORD'),
+            'username' => env('DB_MR_USERNAME'),
+            'password' => env('DB_MR_PASSWORD'),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',

@@ -458,4 +458,76 @@ class ApolController extends Controller
     {
         return Inertia::render('Apol/FilterResep');
     }
+
+    /**
+     * Simpan resep baru ke BPJS APOL
+     */
+    public function simpanResep(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'TGLSJP' => 'required|string',
+            'REFASALSJP' => 'required|string|max:50',
+            'POLIRSP' => 'required|string|max:10',
+            'KDJNSOBAT' => 'required|string|in:1,2,3',
+            'NORESEP' => 'required|string|max:50',
+            'IDUSERSJP' => 'required|string|max:50',
+            'TGLRSP' => 'required|string',
+            'TGLPELRSP' => 'required|string',
+            'KdDokter' => 'required|string|max:20',
+            'iterasi' => 'required|string|in:0,1,2'
+        ], [
+            'TGLSJP.required' => 'Tanggal SJP harus diisi',
+            'REFASALSJP.required' => 'Referensi Asal SJP harus diisi',
+            'POLIRSP.required' => 'Poli Resep harus diisi',
+            'KDJNSOBAT.required' => 'Jenis Obat harus dipilih',
+            'KDJNSOBAT.in' => 'Jenis Obat harus 1, 2, atau 3',
+            'NORESEP.required' => 'Nomor Resep harus diisi',
+            'IDUSERSJP.required' => 'ID User SJP harus diisi',
+            'TGLRSP.required' => 'Tanggal Resep harus diisi',
+            'TGLPELRSP.required' => 'Tanggal Pelayanan Resep harus diisi',
+            'KdDokter.required' => 'Kode Dokter harus diisi',
+            'iterasi.required' => 'Iterasi harus dipilih',
+            'iterasi.in' => 'Iterasi harus 0, 1, atau 2'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal: ' . $validator->errors()->first(),
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            Log::info('APOL Simpan Resep Controller Input', $request->all());
+
+            $response = $this->apiService->simpanResep($request->all());
+
+            // Log response untuk debugging
+            Log::info('APOL Simpan Resep Response', [
+                'success' => $response['success'] ?? false,
+                'metaData' => $response['metaData'] ?? null,
+                'response' => isset($response['response']) ? 'DATA_RECEIVED' : 'NO_RESPONSE_DATA'
+            ]);
+
+            return $this->handleApiResponse($response);
+
+        } catch (\Exception $e) {
+            Log::error('Error saat simpan resep via Controller: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan resep',
+                'error' => $e->getMessage(),
+                'debug_info' => [
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]
+            ], 500);
+        }
+    }
+
 }

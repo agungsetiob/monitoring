@@ -100,11 +100,11 @@
     </div>
 
     <div v-if="!isLoading" class="flex items-center justify-end gap-3 px-4 py-4">
-      <button @click="close" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+      <button @click="close" class="px-2 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
         Batal
       </button>
       <button :disabled="isDeleting || deleteDisabled || isLoadingObatList" @click="submitDelete"
-        class="px-4 py-2 border border-rose-600 rounded-lg text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
+        class="px-2 py-1 border border-rose-600 rounded-md text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
         <font-awesome-icon v-if="isDeleting" icon="spinner" spin />
         {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
       </button>

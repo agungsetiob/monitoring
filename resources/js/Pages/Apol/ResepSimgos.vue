@@ -110,6 +110,7 @@
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Asal Resep</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl Resep</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Jenis Resep</th>
+                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -117,7 +118,9 @@
                                     <tr v-for="(item, index) in resepList" :key="index"
                                         class="text-center hover:bg-gray-50" :class="{
                                             'bg-green-100 hover:bg-green-200': item.STATUSKLAIM == 1
-                                        }">
+                                        }" :data-idusersjp="item.IDUSERSJP"
+                                        :data-kddokter="item.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN"
+                                        :data-noresep="item.REFERENSI?.NOMORRESEP?.NOMOR">
                                         <td class="px-2 py-2 text-sm border-b">{{ index + 1 }}</td>
                                         <td class="px-2 py-2 text-sm font-medium border-b">{{ item.NOMOR || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.MASUK) }}</td>
@@ -127,9 +130,18 @@
                                         <td class="px-2 py-2 text-sm border-b">{{ item.NAMA || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">{{ item.NOKARTU || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
-                                        <td class="px-2 py-2 text-sm border-b">{{ getAsalResep(item) || '-' }}</td>
+                                        <td class="px-2 py-2 text-sm border-b">
+                                            {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
+                                            }})</span>
+                                        </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
                                         <td class="px-2 py-2 text-sm border-b">{{ getJenisResep(item) || '-' }}</td>
+                                        <td class="px-2 py-2 text-sm border-b">
+                                            <button v-if="!item.STATUSKLAIM" @click="openModalSimpan(item)"
+                                                class="px-2 py-1 text-xs rounded hover:bg-green-100 text-green-700 hover:bg-green-200">
+                                                <font-awesome-icon icon="notes-medical"/>
+                                            </button>
+                                        </td>
                                     </tr>
                                 </template>
                                 <tr v-else>
@@ -144,6 +156,8 @@
             </div>
         </div>
     </ApolLayout>
+    <CreateResepModal :show="showModalSimpan" :selected-item="selectedResep" @close="showModalSimpan = false"
+        @saved="handleResepSaved" />
 </template>
 
 <script setup>
@@ -153,11 +167,26 @@ import dayjs from "dayjs";
 import ErrorFlash from "@/Components/ErrorFlash.vue";
 import SuccessFlash from "@/Components/SuccessFlash.vue";
 import ApolLayout from "../Layout/ApolLayout.vue";
+import CreateResepModal from "./Partials/CreateResepModal.vue";
 
 const isLoading = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
 const resepList = ref([]);
+const selectedResep = ref(null)
+const showModalSimpan = ref(false)
+
+const openModalSimpan = (item) => {
+  selectedResep.value = item
+  showModalSimpan.value = true
+}
+
+const handleResepSaved = (data) => {
+  const message = data?.metaData?.message || 'Resep berhasil disimpan'
+  console.log('Resep berhasil disimpan:', data)
+  showMessage(message, 'success')
+  showModalSimpan.value = false
+}
 
 const searchForm = reactive({
     PAWAL: "",
@@ -210,12 +239,16 @@ const cariData = async () => {
 
     try {
         const response = await axios.get("/resep-simgos", { params: searchForm });
-        if (response.data && response.data.data) {
-            resepList.value = response.data.data;
-            if (resepList.value.length > 0) {
-                showMessage(`Berhasil menemukan ${resepList.value.length} data`, "success");
-            } else {
-                showMessage("Tidak ada data ditemukan");
+
+        if (response.data && typeof response.data === "object") {
+            const { data, total, detail, status } = response.data;
+
+            if (Array.isArray(data) && data.length > 0) {
+                resepList.value = data;
+                showMessage(`Berhasil menemukan ${data.length} data`, "success");
+            } else if (data === null || total === 0) {
+                resepList.value = [];
+                showMessage(status + detail);
             }
         } else {
             showMessage("Format response tidak sesuai");
@@ -234,8 +267,8 @@ const getDokterNama = (item) => {
 
 const getJenisResep = (item) => {
     const jenis = item.JENISRESEP;
-    
-    switch(jenis) {
+
+    switch (jenis) {
         case '1':
             return 'PRB';
         case '2':
@@ -249,6 +282,11 @@ const getJenisResep = (item) => {
 
 const getAsalResep = (item) => {
     return item.REFERENSI?.ASAL_RESEP?.DESKRIPSI || '-';
+};
+
+const getPoliRsp = (item) => {
+    const penjaminRuangan = item.REFERENSI?.ASAL_RESEP?.REFERENSI?.PENJAMIN_RUANGAN;
+    return Array.isArray(penjaminRuangan) ? penjaminRuangan[0]?.RUANGAN_PENJAMIN || '' : '';
 };
 
 const formatDateTime = (datetime) => {
