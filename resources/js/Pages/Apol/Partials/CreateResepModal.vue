@@ -92,13 +92,14 @@
             </template>
         </div>
 
-        <div class="flex items-center justify-end gap-3 px-4 py-4">
+        <div class="flex items-center justify-end gap-2 px-4 py-4">
             <button @click="close" class="px-2 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
                 Batal
             </button>
             <button :disabled="isSubmitting" @click="submitResep"
                 class="px-2 py-1 border border-green-600 rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400">
-                {{ isSubmitting ? 'Memproses...' : 'Simpan Resep' }}
+                <font-awesome-icon v-if="isSubmitting" icon="spinner" spin/>
+                {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online BPJS' }}
             </button>
         </div>
     </Modal>

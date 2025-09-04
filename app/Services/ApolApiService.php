@@ -651,75 +651,6 @@ class ApolApiService
     /**
      * Simpan resep baru ke BPJS APOL
      */
-    // public function simpanResep(array $data)
-    // {
-    //     $ts = $this->makeTimestampSecondsUTC();
-    //     $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
-
-    //     $headers = [
-    //         'X-cons-id' => $this->consId,
-    //         'X-timestamp' => $ts,
-    //         'X-signature' => $signature,
-    //         'user_key' => $this->userKey,
-    //         'Content-Type' => 'application/x-www-form-urlencoded',
-    //         'Accept' => 'application/json',
-    //     ];
-
-    //     // Validasi dan format data
-    //     $payload = [
-    //         'TGLSJP' => $this->formatTanggal($data['TGLSJP'] ?? now()),
-    //         'REFASALSJP' => $data['REFASALSJP'] ?? '',
-    //         'POLIRSP' => $data['POLIRSP'] ?? '',
-    //         'KDJNSOBAT' => $data['KDJNSOBAT'] ?? '1',
-    //         'NORESEP' => $data['NORESEP'] ?? '',
-    //         'IDUSERSJP' => $data['IDUSERSJP'] ?? '',
-    //         'TGLRSP' => $this->formatTanggal($data['TGLRSP'] ?? now()),
-    //         'TGLPELRSP' => $this->formatTanggal($data['TGLPELRSP'] ?? now()),
-    //         'KdDokter' => $data['KdDokter'] ?? '0',
-    //         'iterasi' => $data['iterasi'] ?? '0'
-    //     ];
-
-    //     Log::info('APOL Simpan Resep Request', ['payload' => $payload]);
-
-    //     $requestBody = json_encode($payload);
-
-    //     try {
-    //         $response = Http::withHeaders($headers)
-    //             ->timeout($this->timeout)
-    //             ->withBody($requestBody, 'application/x-www-form-urlencoded')
-    //             ->post($this->baseUrl . '/sjpresep/v3/insert');
-
-    //         $result = $this->processResponse($response, $ts);
-
-    //         $meta = $result['metaData'] ?? [];
-    //         $bpjsResponse = $result['response'] ?? [];
-
-    //         $logData = array_merge($payload, [
-    //             'KUNJUNGAN' => $data['KUNJUNGAN'] ?? null,
-    //             'NOSJP' => $bpjsResponse['noApotik'] ?? null,
-    //             'STATUS' => ($meta['code'] ?? null) == '200' ? 1 : 9,
-    //             'RESPONSE' => $meta['message'] ?? 'Unknown',
-    //         ]);
-
-    //         // panggil repository
-    //         $this->logRepo->upsert($logData);
-
-    //         return $result;
-    //     } catch (\Exception $e) {
-    //         $logData = $payload;
-    //         $logData['STATUS'] = 9;
-    //         $logData['RESPONSE'] = $e->getMessage();
-    //         $logData['NOSJP'] = null;
-
-    //         $this->logRepo->upsert($logData);
-
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Gagal menyimpan resep: ' . $e->getMessage(),
-    //             'metaData' => ['code' => '500', 'message' => $e->getMessage()]
-    //         ];
-    //     }
-    // }
     public function simpanResep(array $data)
     {
         $ts = $this->makeTimestampSecondsUTC();
@@ -835,7 +766,7 @@ class ApolApiService
             'Accept' => 'application/json',
         ];
 
-        $requestBody = json_encode($data); // ⬅️ sama seperti simpanResep
+        $requestBody = json_encode($data);
 
         try {
             $response = Http::withHeaders($headers)
