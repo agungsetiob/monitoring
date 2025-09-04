@@ -10,10 +10,7 @@ class LogKirimResepDetil extends Model
 
     public $timestamps = false;
 
-    protected $fillable = [
-        'RESPONSE',
-        'STATUS',
-    ];
+    protected $guarded = [];
 
     public function resep()
     {

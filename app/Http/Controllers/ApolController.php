@@ -505,7 +505,7 @@ class ApolController extends Controller
 
             // Log response untuk debugging
             Log::info('APOL Simpan Resep Response', [
-                'success' => $response['success'] ?? false,
+                'success' => ($response['metaData']['code'] ?? null) == '200',
                 'metaData' => $response['metaData'] ?? null,
                 'response' => isset($response['response']) ? 'DATA_RECEIVED' : 'NO_RESPONSE_DATA'
             ]);

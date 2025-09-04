@@ -7,6 +7,8 @@ use App\Models\LogKirimResepDetil;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Response;
+use App\Repositories\LogKirimResepRepository;
+use App\Repositories\LogKirimResepDetilRepository;
 
 class ApolApiService
 {
@@ -15,6 +17,8 @@ class ApolApiService
     private $secretKey;
     private $userKey;
     private $timeout;
+    protected LogKirimResepRepository $logRepo;
+    protected LogKirimResepDetilRepository $logKirimResepDetil;
 
     public function __construct()
     {
@@ -23,6 +27,8 @@ class ApolApiService
         $this->secretKey = config('services.apol.secret_key');
         $this->userKey = config('services.apol.user_key');
         $this->timeout = config('services.apol.timeout', 30);
+        $this->logRepo = app(LogKirimResepRepository::class);
+        $this->logKirimResepDetil = app(LogKirimResepDetilRepository::class);
     }
 
     /**
@@ -645,6 +651,75 @@ class ApolApiService
     /**
      * Simpan resep baru ke BPJS APOL
      */
+    // public function simpanResep(array $data)
+    // {
+    //     $ts = $this->makeTimestampSecondsUTC();
+    //     $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+    //     $headers = [
+    //         'X-cons-id' => $this->consId,
+    //         'X-timestamp' => $ts,
+    //         'X-signature' => $signature,
+    //         'user_key' => $this->userKey,
+    //         'Content-Type' => 'application/x-www-form-urlencoded',
+    //         'Accept' => 'application/json',
+    //     ];
+
+    //     // Validasi dan format data
+    //     $payload = [
+    //         'TGLSJP' => $this->formatTanggal($data['TGLSJP'] ?? now()),
+    //         'REFASALSJP' => $data['REFASALSJP'] ?? '',
+    //         'POLIRSP' => $data['POLIRSP'] ?? '',
+    //         'KDJNSOBAT' => $data['KDJNSOBAT'] ?? '1',
+    //         'NORESEP' => $data['NORESEP'] ?? '',
+    //         'IDUSERSJP' => $data['IDUSERSJP'] ?? '',
+    //         'TGLRSP' => $this->formatTanggal($data['TGLRSP'] ?? now()),
+    //         'TGLPELRSP' => $this->formatTanggal($data['TGLPELRSP'] ?? now()),
+    //         'KdDokter' => $data['KdDokter'] ?? '0',
+    //         'iterasi' => $data['iterasi'] ?? '0'
+    //     ];
+
+    //     Log::info('APOL Simpan Resep Request', ['payload' => $payload]);
+
+    //     $requestBody = json_encode($payload);
+
+    //     try {
+    //         $response = Http::withHeaders($headers)
+    //             ->timeout($this->timeout)
+    //             ->withBody($requestBody, 'application/x-www-form-urlencoded')
+    //             ->post($this->baseUrl . '/sjpresep/v3/insert');
+
+    //         $result = $this->processResponse($response, $ts);
+
+    //         $meta = $result['metaData'] ?? [];
+    //         $bpjsResponse = $result['response'] ?? [];
+
+    //         $logData = array_merge($payload, [
+    //             'KUNJUNGAN' => $data['KUNJUNGAN'] ?? null,
+    //             'NOSJP' => $bpjsResponse['noApotik'] ?? null,
+    //             'STATUS' => ($meta['code'] ?? null) == '200' ? 1 : 9,
+    //             'RESPONSE' => $meta['message'] ?? 'Unknown',
+    //         ]);
+
+    //         // panggil repository
+    //         $this->logRepo->upsert($logData);
+
+    //         return $result;
+    //     } catch (\Exception $e) {
+    //         $logData = $payload;
+    //         $logData['STATUS'] = 9;
+    //         $logData['RESPONSE'] = $e->getMessage();
+    //         $logData['NOSJP'] = null;
+
+    //         $this->logRepo->upsert($logData);
+
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Gagal menyimpan resep: ' . $e->getMessage(),
+    //             'metaData' => ['code' => '500', 'message' => $e->getMessage()]
+    //         ];
+    //     }
+    // }
     public function simpanResep(array $data)
     {
         $ts = $this->makeTimestampSecondsUTC();
@@ -659,7 +734,6 @@ class ApolApiService
             'Accept' => 'application/json',
         ];
 
-        // Validasi dan format data
         $payload = [
             'TGLSJP' => $this->formatTanggal($data['TGLSJP'] ?? now()),
             'REFASALSJP' => $data['REFASALSJP'] ?? '',
@@ -683,9 +757,62 @@ class ApolApiService
                 ->withBody($requestBody, 'application/x-www-form-urlencoded')
                 ->post($this->baseUrl . '/sjpresep/v3/insert');
 
-            return $this->processResponse($response, $ts);
+            $result = $this->processResponse($response, $ts);
+
+            $meta = $result['metaData'] ?? [];
+            $bpjsResponse = $result['response'] ?? [];
+
+            $logData = array_merge($payload, [
+                'KUNJUNGAN' => $data['KUNJUNGAN'] ?? null,
+                'NOSJP' => $bpjsResponse['noApotik'] ?? null,
+                'STATUS' => ($meta['code'] ?? null) == '200' ? 1 : 9,
+                'RESPONSE' => $meta['message'] ?? 'Unknown',
+            ]);
+
+            $this->logRepo->upsert($logData);
+
+            // Jika sukses, kirim detail obat
+            if (($meta['code'] ?? null) == '200' && isset($data['DETAIL']) && is_array($data['DETAIL'])) {
+                foreach ($data['DETAIL'] as $item) {
+                    $detailPayload = [
+                        'NOSJP' => $bpjsResponse['noApotik'] ?? '',
+                        'NORESEP' => $payload['NORESEP'],
+                        'KDOBT' => $item['REFERENSI']['DPHO']['kodeobat'] ?? '',
+                        'NMOBAT' => $item['REFERENSI']['DPHO']['namaobat'] ?? '',
+                        'SIGNA1OBT' => $item['SIGNA1'] ?? $item['REFERENSI']['FREKUENSIATURAN']['SIGNA1'] ?? 1,
+                        'SIGNA2OBT' => $item['SIGNA2'] ?? $item['REFERENSI']['FREKUENSIATURAN']['SIGNA2'] ?? 1,
+                        'JMLOBT' => $item['JUMLAH'] ?? 1,
+                        'JHO' => 1,
+                        'CatKhsObt' => $item['RACIKAN'] == 1 ? 'Racikan' : 'Non Racikan',
+                        'KUNJUNGAN' => $data['KUNJUNGAN'] ?? null,
+                        'REF_FARMASI' => $item['ID'] ?? null,
+                    ];
+
+                    if ($item['RACIKAN'] == 1) {
+                        $detailPayload['JNSROBT'] = $item['REFERENSI']['JNSROBT'] ?? 'R.01';
+                        $detailPayload['PERMINTAAN'] = $item['PERMINTAAN'] ?? 1;
+
+                        $res = $this->insertResepRacik($detailPayload);
+                    } else {
+                        $res = $this->insertResepNonRacik($detailPayload);
+                    }
+
+                    // Simpan log detail
+                    $detailPayload['RESPONSE'] = $res['message'] ?? 'Unknown';
+                    $detailPayload['STATUS'] = $res['success'] ? 1 : 0;
+                    $this->logKirimResepDetil->simpan($detailPayload);
+                }
+            }
+
+            return $result;
         } catch (\Exception $e) {
-            Log::error('Error simpan resep: ' . $e->getMessage());
+            $logData = $payload;
+            $logData['STATUS'] = 9;
+            $logData['RESPONSE'] = $e->getMessage();
+            $logData['NOSJP'] = null;
+
+            $this->logRepo->upsert($logData);
+
             return [
                 'success' => false,
                 'message' => 'Gagal menyimpan resep: ' . $e->getMessage(),
@@ -693,4 +820,89 @@ class ApolApiService
             ];
         }
     }
+
+    public function insertResepRacik(array $data): array
+    {
+        $ts = $this->makeTimestampSecondsUTC();
+        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+        $headers = [
+            'X-cons-id' => $this->consId,
+            'X-timestamp' => $ts,
+            'X-signature' => $signature,
+            'user_key' => $this->userKey,
+            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Accept' => 'application/json',
+        ];
+
+        $requestBody = json_encode($data); // ⬅️ sama seperti simpanResep
+
+        try {
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->withBody($requestBody, 'application/x-www-form-urlencoded')
+                ->post($this->baseUrl . '/obatracikan/v3/insert');
+
+            $result = $this->processResponse($response, $ts);
+            $meta = $result['metaData'] ?? [];
+
+            return [
+                'success' => ($meta['code'] ?? null) == '200',
+                'code' => $meta['code'] ?? '500',
+                'message' => $meta['message'] ?? 'Unknown'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Gagal insert resep racikan', ['error' => $e->getMessage(), 'data' => $data]);
+
+            return [
+                'success' => false,
+                'code' => '500',
+                'message' => 'HTTP request failed: ' . $e->getMessage()
+            ];
+        }
+    }
+
+
+    public function insertResepNonRacik(array $data): array
+    {
+        $ts = $this->makeTimestampSecondsUTC();
+        $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
+
+        $headers = [
+            'X-cons-id' => $this->consId,
+            'X-timestamp' => $ts,
+            'X-signature' => $signature,
+            'user_key' => $this->userKey,
+            'Content-Type' => 'application/x-www-form-urlencoded',
+            'Accept' => 'application/json',
+        ];
+
+        $requestBody = json_encode($data);
+
+        try {
+            $response = Http::withHeaders($headers)
+                ->timeout($this->timeout)
+                ->withBody($requestBody, 'application/x-www-form-urlencoded')
+                ->post($this->baseUrl . '/obatnonracikan/v3/insert');
+
+            $result = $this->processResponse($response, $ts);
+            $meta = $result['metaData'] ?? [];
+
+            return [
+                'success' => ($meta['code'] ?? null) == '200',
+                'code' => $meta['code'] ?? '500',
+                'message' => $meta['message'] ?? 'Unknown'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Gagal insert resep non-racikan', ['error' => $e->getMessage(), 'data' => $data]);
+
+            return [
+                'success' => false,
+                'code' => '500',
+                'message' => 'HTTP request failed: ' . $e->getMessage()
+            ];
+        }
+    }
+
+
 }

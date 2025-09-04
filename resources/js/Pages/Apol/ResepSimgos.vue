@@ -4,22 +4,11 @@
     <ApolLayout>
         <div class="p-4 min-h-screen bg-gradient-to-br from-blue-100 to-green-100 md:p-6">
             <div class="mx-auto max-w-8xl pt-6 sm:pt-20">
-                <!-- Header -->
                 <div
                     class="flex flex-col px-6 py-4 mb-6 text-white bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl shadow-2xl md:flex-row md:items-center md:justify-between">
                     <h1 class="mb-2 text-2xl font-extrabold md:text-3xl md:mb-0">
                         Resep Klaim Terpisah (SIMGOS)
                     </h1>
-
-                    <button @click="router.visit('/')"
-                        class="inline-flex gap-2 items-center px-5 py-2 font-semibold text-white bg-indigo-600 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:bg-indigo-700 hover:scale-105">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M19 12H5"></path>
-                            <path d="M12 19l-7-7 7-7"></path>
-                        </svg>
-                        Kembali
-                    </button>
                 </div>
 
                 <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
@@ -31,7 +20,6 @@
 
                     <form @submit.prevent="cariData" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                            <!-- Periode Awal -->
                             <div>
                                 <label for="PAWAL" class="block mb-1 text-sm font-medium text-gray-700">Periode
                                     Awal</label>
@@ -40,7 +28,6 @@
                                     required />
                             </div>
 
-                            <!-- Periode Akhir -->
                             <div>
                                 <label for="PAKHIR" class="block mb-1 text-sm font-medium text-gray-700">Periode
                                     Akhir</label>
@@ -48,8 +35,6 @@
                                     class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     required />
                             </div>
-
-                            <!-- Jenis Pelayanan -->
                             <div>
                                 <label for="JENIS" class="block mb-1 text-sm font-medium text-gray-700">Jenis</label>
                                 <select id="JENIS" v-model="searchForm.JENIS"
@@ -60,7 +45,6 @@
                                 </select>
                             </div>
 
-                            <!-- Jenis Resep -->
                             <div>
                                 <label for="JENIS_RESEP" class="block mb-1 text-sm font-medium text-gray-700">Jenis
                                     Resep</label>
@@ -72,7 +56,6 @@
                                 </select>
                             </div>
 
-                            <!-- Tombol -->
                             <div class="flex gap-2">
                                 <button type="submit" :disabled="isLoading"
                                     class="px-4 py-2 font-semibold text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700 disabled:bg-green-400 w-full">

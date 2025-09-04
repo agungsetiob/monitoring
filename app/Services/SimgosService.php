@@ -82,9 +82,9 @@ class SimgosService
         $defaultParams = [
             'PAWAL' => now()->startOfMonth()->toDateString(),
             'PAKHIR' => now()->endOfMonth()->toDateString(),
-            'page'   => 1,
-            'start'  => 0,
-            'limit'  => 10,
+            'page' => 1,
+            'start' => 0,
+            'limit' => 10,
         ];
 
         $response = $this->request('apotekonline/resep', array_merge($defaultParams, $filters));
@@ -99,4 +99,29 @@ class SimgosService
 
         return $response->json();
     }
+
+    public function getResepDetil(array $filters): array
+    {
+        try {
+            $endpoint = 'apotekonline/resepdetil';
+            $response = $this->request($endpoint, $filters);
+
+            if (!$response || !$response->successful()) {
+                return [
+                    'error' => 'Gagal mengambil detail resep',
+                    'status' => $response?->status() ?? 500,
+                    'body' => $response?->body() ?? 'Tidak ada response dari server',
+                ];
+            }
+
+            return $response->json();
+        } catch (\Throwable $e) {
+            return [
+                'error' => 'Exception saat mengambil resep detil',
+                'status' => 500,
+                'body' => $e->getMessage(),
+            ];
+        }
+    }
+
 }

@@ -14,6 +14,9 @@ class PelayananApolController extends Controller
         $this->simgos = $simgos;
     }
 
+    /**
+     * Ambil data resep klaim terpisah dari SIMGOS
+     */
     public function resepKlaimTerpisah(Request $request)
     {
         $filters = $request->only([
@@ -27,6 +30,25 @@ class PelayananApolController extends Controller
         ]);
 
         $data = $this->simgos->getResep($filters);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Ambil detail resep (list obat) dari SIMGOS
+     */
+    public function resepDetil(Request $request)
+    {
+        $resepId = $request->get('RESEP');
+
+        if (!$resepId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Parameter RESEP wajib diisi'
+            ], 422);
+        }
+
+        $data = $this->simgos->getResepDetil(['RESEP' => $resepId]);
 
         return response()->json($data);
     }

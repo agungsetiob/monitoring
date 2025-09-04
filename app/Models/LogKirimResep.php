@@ -7,13 +7,11 @@ class LogKirimResep extends Model
 {
     protected $connection = 'apol';
     protected $table = 'log_kirim_resep';
+    protected $primaryKey = 'ID';
 
     public $timestamps = false;
 
-    protected $fillable = [
-        'RESPONSE',
-        'STATUS',
-    ];
+    protected $guarded = [];
 
     public function detil()
     {

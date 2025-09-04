@@ -73,14 +73,13 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     Route::get('/apol/pelayanan/obat/daftar/{nosep?}', [ApolController::class, 'getDaftarPelayananObat'])
         ->name('apol.obat.daftar');
     Route::post('/apol/simpan-resep', [ApolController::class, 'simpanResep'])->name('apol.simpan-resep');
-    // Untuk API calls (jika diperlukan)
-    Route::post('/api/apol/simpan-resep', [ApolController::class, 'simpanResep'])
-        ->name('api.apol.simpan-resep');
+    
     //route from ws simgos
     Route::get('/resep-klaim-terpisah', function () {
         return inertia('Apol/ResepSimgos');
     })->name('resep-klaim-terpisah');
     Route::get('/resep-simgos', [PelayananApolController::class, 'resepKlaimTerpisah']);
+    Route::get('/resep-detil', [PelayananApolController::class, 'resepDetil']);
 
 
     // Opsional: versi query param fallback ?nosep=...
