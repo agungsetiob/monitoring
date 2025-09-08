@@ -14,30 +14,22 @@ class LogKirimResepRepository
     {
         $kunjungan = $data['KUNJUNGAN'] ?? '0';
 
-        $existing = LogKirimResep::where('KUNJUNGAN', $kunjungan)->get();
-        if($existing->count() > 0) {
-            Log::warning('LogKirimResep records found for KUNJUNGAN', ['kunjungan' => $kunjungan, 'count' => $existing->count()]);
-        }
+        $record = LogKirimResep::updateOrCreate(
+            ['KUNJUNGAN' => $kunjungan],
+            $data
+        );
 
-        if ($existing->count() > 0) {
-            $record = $existing->first();
-            foreach ($data as $key => $value) {
-                $record->$key = $value;
-            }
-            $record->save();
-
-            Log::info('LogKirimResep updated', [
-                'kunjungan' => $kunjungan,
-                'id' => $record->id,
-                'updated_fields' => array_keys($data)
-            ]);
-        } else {
-            $record = LogKirimResep::create($data);
-
+        if ($record->wasRecentlyCreated) {
             Log::info('LogKirimResep inserted', [
                 'kunjungan' => $kunjungan,
                 'id' => $record->id,
                 'inserted_fields' => array_keys($data)
+            ]);
+        } else {
+            Log::info('LogKirimResep updated', [
+                'kunjungan' => $kunjungan,
+                'id' => $record->id,
+                'updated_fields' => array_keys($data)
             ]);
         }
 

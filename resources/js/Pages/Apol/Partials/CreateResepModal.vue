@@ -269,7 +269,7 @@ const submitResep = async () => {
 
             setTimeout(() => {
                 showError.value = false
-            }, 5000)
+            }, 9000)
 
         }
     } catch (err) {
