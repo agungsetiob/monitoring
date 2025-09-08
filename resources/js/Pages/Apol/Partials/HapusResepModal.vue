@@ -81,7 +81,7 @@
           </ul>
 
           <!-- Progress hapus obat -->
-          <div v-if="isDeleting && purgeObatFirst" class="mt-3 text-xs">
+          <div v-if="showProgress && purgeObatFirst" class="mt-3 text-xs">
             <div class="mb-1">
               Menghapus obat: {{ deleteStats.done }}/{{ deleteStats.total }} selesai, gagal:
               {{ deleteStats.failed }}
@@ -143,6 +143,7 @@ const isLoadingObatList = ref(false)
 const isDeleting = ref(false)
 const purgeObatFirst = ref(true)
 const obatList = ref([])
+const showProgress = ref(false)
 
 // Delete statistics
 const deleteStats = reactive({
@@ -267,6 +268,7 @@ const loadObatList = async () => {
 
 const deleteAllObatBeforeResep = async () => {
   resetDeleteProgress()
+  showProgress.value = true
   deleteStats.total = obatList.value.length
   if (deleteStats.total === 0) return true
 
@@ -293,6 +295,9 @@ const deleteAllObatBeforeResep = async () => {
 
   // Refresh list untuk bukti final
   await loadObatList()
+  setTimeout(() => {
+    showProgress.value = false
+  }, 5000)
 
   // Return true if all deletions succeeded
   return deleteStats.failed === 0
@@ -312,6 +317,10 @@ const submitDelete = async () => {
       // Kalau masih ada obat sisa, jangan lanjut hapus resep
       if (!obatDeletedSuccessfully || (obatList.value?.length ?? 0) > 0) {
         console.error(`Masih ada ${obatList.value.length} obat di resep ini. Resep belum dihapus.`)
+        showProgress.value = true
+        setTimeout(() => {
+          showProgress.value = false
+        }, 5000)
         isDeleting.value = false
         return
       }
@@ -343,6 +352,12 @@ const submitDelete = async () => {
 const deleteSingleObat = async (obat, index) => {
   if (!form.nosjp || !form.noresep || !obat?.kodeobat) return
 
+  showProgress.value = true
+  deleteStats.total = 1
+  deleteStats.done = 0
+  deleteStats.failed = 0
+  deleteStats.failures = []
+
   isDeleting.value = true
   try {
     await axios.post('/apol/hapus-obat', {
@@ -355,13 +370,22 @@ const deleteSingleObat = async (obat, index) => {
       timeout: 15000
     })
 
-    // Kalau sukses, hapus dari array obatList
     obatList.value.splice(index, 1)
+    deleteStats.done = 1
     console.log(`Obat ${obat.namaobat} berhasil dihapus`)
   } catch (err) {
+    deleteStats.failed = 1
+    deleteStats.failures.push({
+      kodeobat: obat.kodeobat,
+      message: err?.response?.data?.message || err.message || 'Gagal hapus obat'
+    })
     console.error('Gagal hapus obat:', err?.response?.data?.message || err.message)
   } finally {
     isDeleting.value = false
+
+    setTimeout(() => {
+      showProgress.value = false
+    }, 5000)
   }
 }
 </script>

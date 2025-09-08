@@ -546,7 +546,7 @@ class ApolApiService
 
         // Path yang biasanya dipakai, sesuaikan kalau ada variasi IGW
         $paths = [
-            '/obat/hapus',
+            //'/obat/hapus',
             '/pelayanan/obat/hapus',
         ];
 

@@ -66,17 +66,17 @@
                         <label class="block mb-1 text-sm font-medium text-gray-700">Jenis Obat</label>
                         <select v-model="form.kdjnsobat"
                             class="w-full border rounded px-3 py-2 text-sm border-gray-300">
-                            <option value="1">1. Obat PRB</option>
-                            <option value="2">2. Obat Kronis Belum Stabil</option>
-                            <option value="3">3. Obat Kemoterapi</option>
+                            <option value="1">PRB</option>
+                            <option value="2">Kronis</option>
+                            <option value="3">Kemoterapi</option>
                         </select>
                     </div>
                     <div>
                         <label class="block mb-1 text-sm font-medium text-gray-700">Iterasi</label>
                         <select v-model="form.iterasi" class="w-full border rounded px-3 py-2 text-sm border-gray-300">
-                            <option value="0">0. Non Iterasi</option>
-                            <option value="1">1. Iterasi</option>
-                            <option value="2">2. Iterasi Lanjutan</option>
+                            <option value="0">Non Iterasi/iterasi lanjutan</option>
+                            <option value="1">Iterasi 1</option>
+                            <option value="2">Iterasi 2</option>
                         </select>
                     </div>
                 </div>
@@ -138,6 +138,12 @@
                                     <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI }}</span>
                                     &middot; Permintaan:
                                     <span class="text-orange-500">{{ o.PERMINTAAN }}</span>
+                                </div>
+                                <div>
+                                    Status:
+                                    <span :class="o.REFERENSI?.LOG?.STATUS == 0 ? 'text-rose-600' : 'text-green-600'">
+                                        {{ o.REFERENSI?.LOG?.STATUS == undefined ? 'Belum kirim' : o.REFERENSI?.LOG?.RESPONSE }}
+                                    </span>
                                 </div>
                             </div>
                         </div>

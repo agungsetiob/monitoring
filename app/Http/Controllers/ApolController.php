@@ -39,7 +39,7 @@ class ApolController extends Controller
             'nosepapotek' => 'required|string',
             'noresep' => 'required|string',
             'kodeobat' => 'required|string',
-            'tipeobat' => 'in:N,K',
+            'tipeobat' => 'required',
         ]);
         if ($v->fails()) {
             return response()->json(['success' => false, 'message' => 'Validasi gagal: ' . $v->errors()->first(), 'errors' => $v->errors()], 422);

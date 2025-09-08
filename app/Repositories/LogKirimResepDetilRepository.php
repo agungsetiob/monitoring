@@ -8,24 +8,29 @@ class LogKirimResepDetilRepository
 {
     public function simpan(array $data): LogKirimResepDetil
     {
-        $record = new LogKirimResepDetil();
+        $kunjungan = $data['KUNJUNGAN'] ?? '0';
+        $refFarmasi = $data['REF_FARMASI'] ?? null;
 
-        $record->KUNJUNGAN   = $data['KUNJUNGAN'] ?? '0';
-        $record->REF_FARMASI = $data['REF_FARMASI'] ?? null;
-        $record->JNSROBT     = $data['JNSROBT'] ?? null;
-        $record->KDOBT       = $data['KDOBT'] ?? null;
-        $record->SIGNA1OBT   = $data['SIGNA1OBT'] ?? 1;
-        $record->SIGNA2OBT   = $data['SIGNA2OBT'] ?? 1;
-        $record->PERMINTAAN  = $data['PERMINTAAN'] ?? null;
-        $record->JMLOBT      = $data['JMLOBT'] ?? 1;
-        $record->JHO         = $data['JHO'] ?? 1;
-        $record->CatKhsObt   = $data['CatKhsObt'] ?? 'Non Racikan';
-        $record->RESPONSE    = $data['RESPONSE'] ?? 'Unknown';
-        $record->STATUS      = $data['STATUS'] ?? 0;
+        $record = LogKirimResepDetil::updateOrCreate(
+            [
+                'KUNJUNGAN' => $kunjungan,
+                'REF_FARMASI' => $refFarmasi,
+            ],
+            [
+                'JNSROBT' => $data['JNSROBT'] ?? null,
+                'KDOBT' => $data['KDOBT'] ?? null,
+                'SIGNA1OBT' => $data['SIGNA1OBT'] ?? 1,
+                'SIGNA2OBT' => $data['SIGNA2OBT'] ?? 1,
+                'PERMINTAAN' => $data['PERMINTAAN'] ?? null,
+                'JMLOBT' => $data['JMLOBT'] ?? 1,
+                'JHO' => $data['JHO'] ?? 1,
+                'CatKhsObt' => $data['CatKhsObt'] ?? 'Non Racikan',
+                'RESPONSE' => $data['RESPONSE'] ?? 'Unknown',
+                'STATUS' => $data['STATUS'] ?? 0,
+            ]
+        );
 
-        $record->save();
-
-        Log::info('LogResepDetil saved', [
+        Log::info('LogResepDetil ' . ($record->wasRecentlyCreated ? 'inserted' : 'updated'), [
             'kunjungan' => $record->KUNJUNGAN,
             'ref_farmasi' => $record->REF_FARMASI,
             'status' => $record->STATUS,

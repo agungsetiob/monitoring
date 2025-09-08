@@ -171,6 +171,7 @@ const handleResepSaved = (data) => {
     console.log('Resep berhasil disimpan:', data)
     showMessage(message, 'success')
     showModalSimpan.value = false
+    cariData()
 }
 
 const searchForm = reactive({

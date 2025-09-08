@@ -7,6 +7,7 @@ class LogKirimResepDetil extends Model
 {
     protected $connection = 'apol';
     protected $table = 'log_kirim_resep_detil';
+    protected $primaryKey = 'ID';
 
     public $timestamps = false;
 
