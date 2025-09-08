@@ -157,7 +157,7 @@
                 Batal
             </button>
             <button :disabled="isSubmitting" @click="submitResep"
-                class="px-2 py-1 border border-green-600 rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400">
+                class="px-2 py-1 border rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400">
                 <font-awesome-icon v-if="isSubmitting" icon="spinner" spin />
                 {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online BPJS' }}
             </button>

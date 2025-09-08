@@ -1,5 +1,5 @@
 <script setup>
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { ref, reactive, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
@@ -21,7 +21,6 @@ const searchForm = reactive({
     TglAkhir: ''
 });
 
-// --- Hapus Resep state ---
 const showDeleteModal = ref(false);
 const isDeleting = ref(false);
 const selectedItem = ref(null);
@@ -31,7 +30,6 @@ const openDelete = (item) => {
     showDeleteModal.value = true;
 };
 
-// Replace the closeDelete function with:
 const closeDelete = () => {
     showDeleteModal.value = false;
     isDeleting.value = false;
@@ -40,8 +38,7 @@ const closeDelete = () => {
 
 const handleResepDeleted = (nosjp) => {
     showMessage('Resep berhasil dihapus', 'success');
-
-    // Hapus baris di tabel secara lokal (berdasarkan nosjp)
+    // Hapus baris di tabel (berdasarkan nosjp)
     const nr = String(nosjp).toUpperCase();
     searchResult.value = searchResult.value.filter(
         r => String(r?.NOAPOTIK ?? r?.nosjp ?? '').toUpperCase() !== nr
@@ -150,7 +147,7 @@ const formatCurrency = (value) => {
 
 const formatTanggal = (tanggal) => {
     if (!tanggal) return '-';
-    return dayjs(tanggal).format('DD-MM-YYYYTHH:mm:ss');
+    return dayjs(tanggal).format('DD-MM-YYYY');
 };
 </script>
 
@@ -313,7 +310,7 @@ const formatTanggal = (tanggal) => {
                                         <td class="px-2 py-2 text-sm text-gray-900 border-b">
                                             <Tooltip text="Hapus Klaim" bgColor="bg-red-600">
                                                 <button @click="openDelete(item)"
-                                                    class="px-2 py-1 text-xs font-medium text-red-600 border border-red-600 rounded transition duration-300 hover:bg-red-200">
+                                                    class="px-2 py-1 text-xs font-medium text-red-600 rounded transition duration-300 hover:bg-red-200 hover:text-green-600">
                                                     <font-awesome-icon icon="trash" />
                                                 </button>
                                             </Tooltip>

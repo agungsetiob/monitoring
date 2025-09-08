@@ -37,7 +37,6 @@
           </div>
         </div>
 
-        <!-- Toggle purge-first -->
         <div class="flex items-center gap-3 mt-2">
           <input id="purgeFirst" type="checkbox" v-model="purgeObatFirst"
             class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500" />
@@ -48,6 +47,15 @@
 
         <!-- Daftar obat -->
         <div class="border rounded-lg p-3">
+          <div v-if="successMessage" class="mb-4 p-4 bg-green-50 border-l-4 border-green-500">
+            <div class="flex">
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-green-800">
+                  {{ successMessage }}
+                </h3>
+              </div>
+            </div>
+          </div>
           <div class="flex items-center justify-between">
             <h4 class="text-sm font-semibold text-gray-800">
               Daftar Obat ({{ isLoadingObatList ? 'memuat...' : obatList.length + ' item' }})
@@ -81,7 +89,7 @@
           </ul>
 
           <!-- Progress hapus obat -->
-          <div v-if="showProgress && purgeObatFirst" class="mt-3 text-xs">
+          <div v-if="isDeleting && purgeObatFirst" class="mt-3 text-xs">
             <div class="mb-1">
               Menghapus obat: {{ deleteStats.done }}/{{ deleteStats.total }} selesai, gagal:
               {{ deleteStats.failed }}
@@ -104,7 +112,7 @@
         Batal
       </button>
       <button :disabled="isDeleting || deleteDisabled || isLoadingObatList" @click="submitDelete"
-        class="px-2 py-1 border border-rose-600 rounded-md text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
+        class="px-2 py-1 rounded-md text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
         <font-awesome-icon v-if="isDeleting" icon="spinner" spin />
         {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
       </button>
@@ -130,22 +138,19 @@ const props = defineProps({
   }
 })
 
-// Form data
 const form = reactive({
   nosjp: '',
   refasalsjp: '',
   noresep: ''
 })
 
-// State variables
 const isLoading = ref(false)
 const isLoadingObatList = ref(false)
 const isDeleting = ref(false)
 const purgeObatFirst = ref(true)
 const obatList = ref([])
-const showProgress = ref(false)
+const successMessage = ref('')
 
-// Delete statistics
 const deleteStats = reactive({
   total: 0,
   done: 0,
@@ -153,20 +158,16 @@ const deleteStats = reactive({
   failures: []
 })
 
-// Computed properties
 const deleteDisabled = computed(
   () => !form.nosjp || !form.refasalsjp || !form.noresep
 )
 
-// Watch for modal show changes
 watch(
   () => props.show,
   async (isShowing) => {
     if (isShowing) {
-      // Set loading state while preparing modal
       isLoading.value = true
 
-      // Prefill form data from selected item
       if (props.selectedItem) {
         form.noresep = props.selectedItem.NORESEP
         form.nosjp = props.selectedItem.NOAPOTIK
@@ -174,20 +175,16 @@ watch(
         form.nama = props.selectedItem.NAMA
       }
 
-      // Reset stats
       resetDeleteProgress()
 
-      // Wait for modal to fully render before loading data
       await nextTick()
 
-      // Load obat list after a short delay to ensure modal is visible
       setTimeout(() => {
         loadObatList().finally(() => {
           isLoading.value = false
         })
       }, 100)
     } else {
-      // Reset when modal closes
       isLoading.value = false
       obatList.value = []
     }
@@ -260,7 +257,6 @@ const loadObatList = async () => {
     }))
   } catch (e) {
     console.error('Gagal memuat daftar obat:', e)
-    // Tetap lanjut meskipun gagal load obat list
   } finally {
     isLoadingObatList.value = false
   }
@@ -268,7 +264,6 @@ const loadObatList = async () => {
 
 const deleteAllObatBeforeResep = async () => {
   resetDeleteProgress()
-  showProgress.value = true
   deleteStats.total = obatList.value.length
   if (deleteStats.total === 0) return true
 
@@ -293,13 +288,8 @@ const deleteAllObatBeforeResep = async () => {
     }
   }
 
-  // Refresh list untuk bukti final
   await loadObatList()
-  setTimeout(() => {
-    showProgress.value = false
-  }, 5000)
 
-  // Return true if all deletions succeeded
   return deleteStats.failed === 0
 }
 
@@ -317,10 +307,6 @@ const submitDelete = async () => {
       // Kalau masih ada obat sisa, jangan lanjut hapus resep
       if (!obatDeletedSuccessfully || (obatList.value?.length ?? 0) > 0) {
         console.error(`Masih ada ${obatList.value.length} obat di resep ini. Resep belum dihapus.`)
-        showProgress.value = true
-        setTimeout(() => {
-          showProgress.value = false
-        }, 5000)
         isDeleting.value = false
         return
       }
@@ -352,12 +338,6 @@ const submitDelete = async () => {
 const deleteSingleObat = async (obat, index) => {
   if (!form.nosjp || !form.noresep || !obat?.kodeobat) return
 
-  showProgress.value = true
-  deleteStats.total = 1
-  deleteStats.done = 0
-  deleteStats.failed = 0
-  deleteStats.failures = []
-
   isDeleting.value = true
   try {
     await axios.post('/apol/hapus-obat', {
@@ -369,23 +349,16 @@ const deleteSingleObat = async (obat, index) => {
     }, {
       timeout: 15000
     })
-
+    // Kalau sukses, hapus dari array obatList
     obatList.value.splice(index, 1)
-    deleteStats.done = 1
-    console.log(`Obat ${obat.namaobat} berhasil dihapus`)
+    successMessage.value = `Obat '${obat.namaobat}' berhasil dihapus.`
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 5000)
   } catch (err) {
-    deleteStats.failed = 1
-    deleteStats.failures.push({
-      kodeobat: obat.kodeobat,
-      message: err?.response?.data?.message || err.message || 'Gagal hapus obat'
-    })
     console.error('Gagal hapus obat:', err?.response?.data?.message || err.message)
   } finally {
     isDeleting.value = false
-
-    setTimeout(() => {
-      showProgress.value = false
-    }, 5000)
   }
 }
 </script>

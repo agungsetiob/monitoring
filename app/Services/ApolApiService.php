@@ -493,7 +493,7 @@ class ApolApiService
             || stripos($sample, '<title>service</title>') !== false;
     }
 
-    protected function markResepDetilAsBatal(string $noSepApotek, string $kodeObat): void
+    protected function markObatAsBatal(string $noSepApotek, string $kodeObat): void
     {
         try {
             $resep = LogKirimResep::where('NOSJP', $noSepApotek)->first();
@@ -576,7 +576,7 @@ class ApolApiService
 
                 if ($resp->successful()) {
                     $result = $this->processResponse($resp, $ts);
-                    $this->markResepDetilAsBatal($noSepApotek, $kodeObat);
+                    $this->markObatAsBatal($noSepApotek, $kodeObat);
                     return $result;
                 }
 
