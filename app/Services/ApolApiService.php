@@ -510,7 +510,7 @@ class ApolApiService
                     'RESPONSE' => 'batal',
                 ]);
 
-            \Log::info("Update resep_detil batal: KUNJUNGAN={$resep->KUNJUNGAN}, KDBAT=$kodeObat, updated=$updated");
+            \Log::info("Update resep_detil batal: KUNJUNGAN={$resep->KUNJUNGAN}, KDOBT=$kodeObat, updated=$updated");
 
         } catch (\Throwable $e) {
             \Log::error("Exception saat update resep_detil batal: " . $e->getMessage(), [
