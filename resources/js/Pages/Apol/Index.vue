@@ -71,8 +71,8 @@ onMounted(async () => {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    searchForm.TglMulai = dayjs(firstDay).format('YYYY-MM-DDTHH:mm');
-    searchForm.TglAkhir = dayjs(lastDay).format('YYYY-MM-DDTHH:mm');
+    searchForm.TglMulai = dayjs(firstDay).format('YYYY-MM-DD');
+    searchForm.TglAkhir = dayjs(lastDay).format('YYYY-MM-DD');
 });
 
 const showMessage = (message, type = 'error') => {
@@ -150,7 +150,7 @@ const formatCurrency = (value) => {
 
 const formatTanggal = (tanggal) => {
     if (!tanggal) return '-';
-    return dayjs(tanggal).format('DD-MM-YYYY');
+    return dayjs(tanggal).format('DD-MM-YYYYTHH:mm:ss');
 };
 </script>
 
@@ -204,7 +204,7 @@ const formatTanggal = (tanggal) => {
                                 <label for="TglMulai" class="block mb-2 text-sm font-medium text-gray-700">
                                     Tanggal Mulai <span class="text-red-600">*</span>
                                 </label>
-                                <input id="TglMulai" v-model="searchForm.TglMulai" type="datetime-local"
+                                <input id="TglMulai" v-model="searchForm.TglMulai" type="date"
                                     class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     required>
                             </div>
@@ -213,19 +213,13 @@ const formatTanggal = (tanggal) => {
                                 <label for="TglAkhir" class="block mb-2 text-sm font-medium text-gray-700">
                                     Tanggal Akhir <span class="text-red-600">*</span>
                                 </label>
-                                <input id="TglAkhir" v-model="searchForm.TglAkhir" type="datetime-local"
+                                <input id="TglAkhir" v-model="searchForm.TglAkhir" type="date"
                                     class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     required>
                             </div>
                         </div>
 
-                        <div class="flex gap-3 flex-wrap">
-                            <button type="submit" :disabled="isLoading"
-                                class="flex gap-2 items-center px-6 py-2 font-semibold text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700 disabled:bg-green-400">
-                                <font-awesome-icon v-if="isLoading" icon="spinner" spin />
-                                {{ isLoading ? 'Mencari...' : 'Cari Data' }}
-                            </button>
-
+                        <div class="flex gap-3 flex-wrap justify-end">
                             <button type="button" @click="resetForm"
                                 class="px-6 py-2 font-semibold text-white bg-gray-500 rounded-lg transition duration-300 hover:bg-gray-600">
                                 Reset
@@ -234,6 +228,12 @@ const formatTanggal = (tanggal) => {
                             <button type="button" @click="getSummary" :disabled="isLoading"
                                 class="px-6 py-2 font-semibold text-white bg-blue-500 rounded-lg transition duration-300 hover:bg-blue-600 disabled:bg-blue-400">
                                 Summary
+                            </button>
+
+                            <button type="submit" :disabled="isLoading"
+                                class="flex gap-2 items-center px-6 py-2 font-semibold text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700 disabled:bg-green-400">
+                                <font-awesome-icon v-if="isLoading" icon="spinner" spin />
+                                {{ isLoading ? 'Mencari...' : 'Cari Data' }}
                             </button>
                         </div>
                     </form>
@@ -291,13 +291,13 @@ const formatTanggal = (tanggal) => {
                                         </td>
                                         <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">{{ item.NAMA ||
                                             '-'
-                                            }}</td>
+                                        }}</td>
                                         <td class="px-2 py-2 text-sm text-gray-900 border-b">{{
                                             formatTanggal(item.TGLENTRY)
-                                            }}</td>
+                                        }}</td>
                                         <td class="px-2 py-2 text-sm text-gray-900 border-b">{{
                                             formatTanggal(item.TGLRESEP)
-                                            }}</td>
+                                        }}</td>
                                         <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">
                                             {{ formatCurrency(item.BYTAGRSP) }}
                                         </td>

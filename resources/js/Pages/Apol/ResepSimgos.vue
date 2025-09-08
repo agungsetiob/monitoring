@@ -119,9 +119,9 @@
                                         </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
-                                            <Tooltip text="Kirim Resep ke BPJS" bgColor="bg-green-600">
+                                            <Tooltip text="Kirim Resep ke BPJS" bgColor="bg-rose-600">
                                                 <button @click="openModalSimpan(item)"
-                                                    class="px-2 py-1 text-xs rounded hover:bg-green-100 text-green-700 hover:bg-green-200">
+                                                    class="text-lg rounded hover:text-green-600 text-rose-700">
                                                     <font-awesome-icon icon="notes-medical" />
                                                 </button>
                                             </Tooltip>

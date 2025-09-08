@@ -101,21 +101,18 @@ class ApolApiService
     private function formatTanggal($tanggal)
     {
         try {
-            // Convert dari format frontend ke format BPJS
             if (strpos($tanggal, 'T') !== false) {
-                // Format: 2025-01-01T00:00 -> 2025-01-01 00:00:00
                 $tanggal = str_replace('T', ' ', $tanggal);
                 if (strlen($tanggal) == 16) { // 2025-01-01 00:00
                     $tanggal .= ':00';
                 }
             }
 
-            // Pastikan format datetime lengkap
             $date = \Carbon\Carbon::parse($tanggal);
             return $date->format('Y-m-d H:i:s');
         } catch (\Exception $e) {
             Log::warning('Error formatting date: ' . $e->getMessage() . ' for input: ' . $tanggal);
-            return $tanggal; // Return original if parsing fails
+            return $tanggal;
         }
     }
 
@@ -834,6 +831,4 @@ class ApolApiService
             ];
         }
     }
-
-
 }
