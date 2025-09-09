@@ -100,7 +100,8 @@
                                 <template v-if="resepList.length > 0">
                                     <tr v-for="(item, index) in resepList" :key="index"
                                         class="text-center hover:bg-gray-50" :class="{
-                                            'bg-teal-100 hover:bg-teal-200': item.STATUSKLAIM == 1
+                                            'bg-teal-100 hover:bg-teal-200': item.STATUSKLAIM == 1,
+                                            'bg-green-100 hover:bg-green-200': submittedKunjungan.includes(String(item.NOMOR))
                                         }" :data-idusersjp="item.IDUSERSJP"
                                         :data-kddokter="item.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN"
                                         :data-noresep="item.REFERENSI?.NOMORRESEP?.NOMOR">
@@ -115,13 +116,14 @@
                                         <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
                                             {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
-                                                }})</span>
+                                            }})</span>
                                         </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
                                             <Tooltip text="Kirim Resep ke BPJS" bgColor="bg-rose-600">
                                                 <button @click="openModalSimpan(item)"
-                                                    class="text-lg rounded hover:text-green-600 text-rose-700">
+                                                    class="text-lg rounded hover:text-green-600 text-rose-700"
+                                                    :disabled="submittedKunjungan.includes(String(item.NOMOR))">
                                                     <font-awesome-icon icon="notes-medical" />
                                                 </button>
                                             </Tooltip>
@@ -160,6 +162,7 @@ const successMessage = ref("");
 const resepList = ref([]);
 const selectedResep = ref(null)
 const showModalSimpan = ref(false)
+const submittedKunjungan = ref([])
 
 const openModalSimpan = (item) => {
     selectedResep.value = item
@@ -168,10 +171,14 @@ const openModalSimpan = (item) => {
 
 const handleResepSaved = (data) => {
     const message = data?.metaData?.message || 'Resep berhasil disimpan'
-    console.log('Resep berhasil disimpan:', data)
     showMessage(message, 'success')
     showModalSimpan.value = false
-    cariData()
+
+    const nomorStr = String(data.NOMOR)
+    if (!submittedKunjungan.value.includes(nomorStr)) {
+        submittedKunjungan.value.push(nomorStr)
+    }
+    console.log('KUNJUNGAN dikirim:', data.NOMOR)
 }
 
 const searchForm = reactive({
@@ -208,10 +215,6 @@ const showMessage = (msg, type = "error") => {
         successMessage.value = msg;
         errorMessage.value = "";
     }
-    setTimeout(() => {
-        errorMessage.value = "";
-        successMessage.value = "";
-    }, 4000);
 };
 
 const cariData = async () => {
@@ -262,6 +265,6 @@ const getPoliRsp = (item) => {
 
 const formatDateTime = (datetime) => {
     if (!datetime) return '-';
-    return dayjs(datetime).format("DD-MM-YYYY HH:mm:ss");
+    return dayjs(datetime).format("DD-MM-YYYY");
 };
 </script>

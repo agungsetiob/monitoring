@@ -1,7 +1,7 @@
 <template>
     <Modal :show="show" max-width="4xl" @close="close">
         <div class="flex items-center justify-between px-5 py-4 border-b">
-            <h3 class="text-lg font-semibold">Buat Resep Klaim Obat Kronis</h3>
+            <h3 class="text-lg font-semibold">Buat Resep Klaim Obat Kronis {{ props.selectedItem.NOMOR }}</h3>
         </div>
 
         <div class="px-5 py-4 space-y-4">
@@ -43,7 +43,7 @@
                             class="cursor-pointer block text-sm font-semibold text-green-600">
                             {{ form.tglrsp }}
                         </span>
-                        <input v-else type="datetime-local" v-model="form.tglrsp" @blur="editTanggal.tglrsp = false"
+                        <input v-else type="date" v-model="form.tglrsp" @blur="editTanggal.tglrsp = false"
                             class="w-full border rounded px-3 py-2 text-sm border-gray-300" />
                     </div>
 
@@ -53,8 +53,7 @@
                             class="cursor-pointer block text-sm font-semibold text-green-600">
                             {{ form.tglpelrsp }}
                         </span>
-                        <input v-else type="datetime-local" v-model="form.tglpelrsp"
-                            @blur="editTanggal.tglpelrsp = false"
+                        <input v-else type="date" v-model="form.tglpelrsp" @blur="editTanggal.tglpelrsp = false"
                             class="w-full border rounded px-3 py-2 text-sm border-gray-300" />
                     </div>
 
@@ -74,7 +73,7 @@
                     <div>
                         <label class="block mb-1 text-sm font-medium text-gray-700">Iterasi</label>
                         <select v-model="form.iterasi" class="w-full border rounded px-3 py-2 text-sm border-gray-300">
-                            <option value="0">Non Iterasi/iterasi lanjutan</option>
+                            <option value="0">Non Iterasi/Iterasi Lanjutan</option>
                             <option value="1">Iterasi 1</option>
                             <option value="2">Iterasi 2</option>
                         </select>
@@ -142,7 +141,8 @@
                                 <div>
                                     Status:
                                     <span :class="o.REFERENSI?.LOG?.STATUS == 0 ? 'text-rose-600' : 'text-green-600'">
-                                        {{ o.REFERENSI?.LOG?.STATUS == undefined ? 'Belum kirim' : o.REFERENSI?.LOG?.RESPONSE }}
+                                        {{ o.REFERENSI?.LOG?.STATUS == undefined ? 'Belum kirim' :
+                                        o.REFERENSI?.LOG?.RESPONSE }}
                                     </span>
                                 </div>
                             </div>
@@ -182,7 +182,6 @@ const props = defineProps({
 const isLoading = ref(false)
 const isSubmitting = ref(false)
 const showError = ref(false)
-let errorTimer = null
 
 const form = reactive({
     noresep: '',
@@ -236,11 +235,9 @@ watch(() => props.show, async (isOpen) => {
     }
 })
 
-
 const close = () => {
     form.errors = {}
     showError.value = false
-    clearTimeout(errorTimer)
     emit('close')
 }
 
@@ -267,15 +264,14 @@ const submitResep = async () => {
         const { data } = await axios.post('/apol/simpan-resep', payload)
 
         if (data.success) {
-            emit('saved', data)
+            emit('saved', {
+                ...data,
+                NOMOR: props.selectedItem.NOMOR ?? ''
+            })
             close()
-        } else {
+        }else {
             form.errors = { general: data.message || 'Gagal simpan resep' }
             showError.value = true
-
-            setTimeout(() => {
-                showError.value = false
-            }, 9000)
 
         }
     } catch (err) {
@@ -284,10 +280,6 @@ const submitResep = async () => {
         } else {
             form.errors = { general: err.response?.data?.message || 'Error saat simpan resep' }
             showError.value = true
-
-            setTimeout(() => {
-                showError.value = false
-            }, 9000)
 
         }
     } finally {

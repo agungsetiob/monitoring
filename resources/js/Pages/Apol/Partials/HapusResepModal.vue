@@ -325,7 +325,6 @@ const submitDelete = async () => {
       close()
     } else {
       console.error(data.message || 'Gagal menghapus resep')
-      // Refresh obat untuk bukti
       await loadObatList()
     }
   } catch (e) {
@@ -354,7 +353,7 @@ const deleteSingleObat = async (obat, index) => {
     successMessage.value = `Obat '${obat.namaobat}' berhasil dihapus.`
     setTimeout(() => {
       successMessage.value = ''
-    }, 5000)
+    }, 7000)
   } catch (err) {
     console.error('Gagal hapus obat:', err?.response?.data?.message || err.message)
   } finally {
