@@ -147,7 +147,7 @@
 </template>
 
 <script setup>
-import { Head, router } from "@inertiajs/vue3";
+import { Head } from "@inertiajs/vue3";
 import { ref, reactive, onMounted } from "vue";
 import dayjs from "dayjs";
 import ErrorFlash from "@/Components/ErrorFlash.vue";
