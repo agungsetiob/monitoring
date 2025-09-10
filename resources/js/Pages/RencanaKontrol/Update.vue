@@ -1,6 +1,6 @@
 <script setup>
-import { Head, router } from '@inertiajs/vue3';
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import dayjs from 'dayjs';
 import DokterDropdown from '@/Components/DokterDropdown.vue';
 import ErrorFlash from '@/Components/ErrorFlash.vue';
@@ -209,22 +209,21 @@ document.addEventListener('inertia:finish', () => {
 
   <div class="p-4 min-h-screen bg-gradient-to-br from-blue-100 to-green-100 md:p-6">
     <div class="mx-auto max-w-8xl">
-      <!-- Header -->
       <div
         class="flex flex-col px-6 py-4 mb-6 text-white bg-gradient-to-r from-teal-500 to-blue-500 rounded-xl shadow-2xl md:flex-row md:items-center md:justify-between">
         <h1 class="mb-2 text-2xl font-extrabold md:text-3xl md:mb-0">
           Update Tanggal Rencana Kontrol
         </h1>
 
-        <button @click="router.visit('/rencana-kontrol')"
-          class="inline-flex gap-2 items-center px-5 py-2 font-semibold text-white bg-indigo-600 rounded-xl shadow-lg transition duration-300 ease-in-out transform hover:bg-indigo-700 hover:scale-105">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5"></path>
-            <path d="M12 19l-7-7 7-7"></path>
-          </svg>
-          Kembali
-        </button>
+        <Link :href="route('landing-page')"
+          class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition duration-300 ease-in-out transform hover:scale-105">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5"></path>
+          <path d="M12 19l-7-7 7-7"></path>
+        </svg>
+        Kembali
+        </Link>
       </div>
       <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
       <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
