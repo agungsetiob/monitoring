@@ -18,10 +18,8 @@ class LoginController extends Controller
     public function login(LoginRequest $request)
     {
         $request->authenticate();
-
         $request->session()->regenerate();
-
-        return redirect()->intended('/');
+        return redirect()->intended(route('landing-page'));
     }
 
     public function logout(Request $request)
