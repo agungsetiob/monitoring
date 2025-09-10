@@ -1,6 +1,6 @@
 <template>
 
-    <Head title="Daftar Resep SIMGOS" />
+    <Head title="Resep SIMGOS" />
     <ApolLayout>
         <div class="p-4 min-h-screen bg-gradient-to-br from-blue-100 to-green-100 md:p-6">
             <div class="mx-auto max-w-8xl pt-6 sm:pt-20">
@@ -35,15 +35,6 @@
                                     class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     required />
                             </div>
-                            <div>
-                                <label for="JENIS" class="block mb-1 text-sm font-medium text-gray-700">Jenis</label>
-                                <select id="JENIS" v-model="searchForm.JENIS"
-                                    class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    <option value="">Semua</option>
-                                    <option value="1">Rawat Jalan</option>
-                                    <option value="3">Rawat Inap</option>
-                                </select>
-                            </div>
 
                             <div>
                                 <label for="JENIS_RESEP" class="block mb-1 text-sm font-medium text-gray-700">Jenis
@@ -54,6 +45,12 @@
                                     <option value="1">Kronis</option>
                                     <option value="2">Kemoterapi</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label for="NORM" class="block mb-1 text-sm font-medium text-gray-700">No RM</label>
+                                <input id="NORM" v-model="searchForm.NORM" type="text" placeholder="Masukkan No RM"
+                                    class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                             </div>
 
                             <div class="flex gap-2">
@@ -116,7 +113,7 @@
                                         <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
                                             {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
-                                            }})</span>
+                                                }})</span>
                                         </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
@@ -178,7 +175,6 @@ const handleResepSaved = (data) => {
     if (!submittedKunjungan.value.includes(nomorStr)) {
         submittedKunjungan.value.push(nomorStr)
     }
-    console.log('KUNJUNGAN dikirim:', data.NOMOR)
 }
 
 const searchForm = reactive({
@@ -186,8 +182,9 @@ const searchForm = reactive({
     PAKHIR: "",
     page: 1,
     start: 0,
-    limit: 20,
+    limit: 25,
     JENIS_RESEP: "",
+    NORM: ""
 });
 
 onMounted(() => {
@@ -249,7 +246,6 @@ const cariData = async () => {
     }
 };
 
-// Helper functions to extract nested data
 const getDokterNama = (item) => {
     return item.REFERENSI?.DPJP_PENJAMIN_RS?.REFERENSI?.DOKTER?.NAMA || '-';
 };

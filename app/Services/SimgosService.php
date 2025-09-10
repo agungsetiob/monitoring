@@ -84,10 +84,16 @@ class SimgosService
             'PAKHIR' => now()->endOfMonth()->toDateString(),
             'page' => 1,
             'start' => 0,
-            'limit' => 10,
+            'limit' => 25,
         ];
+        
+        $finalParams = array_merge($defaultParams, $filters);
 
-        $response = $this->request('apotekonline/resep', array_merge($defaultParams, $filters));
+        if (isset($filters['NORM'])) {
+            $finalParams['NORM'] = $filters['NORM'];
+        }
+
+        $response = $this->request('apotekonline/resep', $finalParams);
 
         if (!$response->successful()) {
             return [

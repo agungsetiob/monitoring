@@ -25,8 +25,8 @@ class PelayananApolController extends Controller
             'page',
             'start',
             'limit',
-            'JENIS',
-            'JENIS_RESEP'
+            'JENIS_RESEP',
+            'NORM'
         ]);
 
         $data = $this->simgos->getResep($filters);
