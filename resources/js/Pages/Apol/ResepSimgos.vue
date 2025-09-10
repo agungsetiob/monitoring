@@ -57,7 +57,7 @@
                                 <button type="submit" :disabled="isLoading"
                                     class="px-4 py-2 font-semibold text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700 disabled:bg-green-400 w-full">
                                     <font-awesome-icon v-if="isLoading" icon="spinner" spin />
-                                    {{ isLoading ? 'Mencari...' : 'Cari Data' }}
+                                    {{ isLoading ? '' : 'Cari Data' }}
                                 </button>
 
                                 <button type="button" @click="resetForm"
