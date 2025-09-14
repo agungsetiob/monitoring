@@ -13,14 +13,15 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import { faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, 
     faFaceSadCry, faPills, faChartBar, faSearch,
-    faChevronLeft, faChevronRight, faEdit, faNotesMedical, faTrash,
+    faChevronLeft, faChevronRight, faEdit, faNotesMedical,
     faSpinner, faTimes, faUserDoctor,
-    faList
+    faList,
+    faCheck
  } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, 
     faFaceSadCry, faPills, faChartBar, faSearch, faList,
-    faChevronLeft, faChevronRight, faEdit, faNotesMedical, faTrash, faSpinner,
+    faChevronLeft, faChevronRight, faEdit, faNotesMedical, faCheck, faSpinner,
     faTimes, faUserDoctor);
 
 dayjs.extend(relativeTime);

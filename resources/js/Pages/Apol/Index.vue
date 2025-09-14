@@ -246,28 +246,28 @@ const formatTanggal = (tanggal) => {
                         <table class="min-w-full table-fixed bg-white rounded-lg border border-gray-200">
                             <thead class="bg-gray-100">
                                 <tr class="text-center">
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No</th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. Resep
+                                    <th class="px-2 py-2 text-sm font-medium border-b">No</th>
+                                    <th class="px-2 py-2 text-sm font-medium border-b">No. Resep
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. SJP
+                                    <th class="px-2 py-2 text-sm font-medium border-b">No. SJP
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. SEP
+                                    <th class="px-2 py-2 text-sm font-medium border-b">No. SEP
                                         Kunjungan</th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. Kartu
+                                    <th class="px-2 py-2 text-sm font-medium border-b">No. Kartu
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Nama Peserta
+                                    <th class="px-2 py-2 text-sm font-medium border-b">Nama Peserta
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl. Entry
+                                    <th class="px-2 py-2 text-sm font-medium border-b">Tgl. Entry
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl. Resep
+                                    <th class="px-2 py-2 text-sm font-medium border-b">Tgl. Resep
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Biaya Tagih
+                                    <th class="px-2 py-2 text-sm font-medium border-b">Biaya Tagih
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Biaya
+                                    <th class="px-2 py-2 text-sm font-medium border-b">Biaya
                                         Verifikasi</th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Iterasi
+                                    <th class="px-2 py-2 text-sm font-medium border-b">Iterasi
                                     </th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Aksi</th>
+                                    <th class="px-2 py-2 text-sm font-medium border-b"></th>
 
                                 </tr>
                             </thead>
@@ -275,43 +275,45 @@ const formatTanggal = (tanggal) => {
                                 <template v-if="searchResult && searchResult.length > 0">
                                     <tr v-for="(item, index) in searchResult" :key="index"
                                         class="hover:bg-gray-50 text-center">
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ index + 1 }}</td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">{{ item.NORESEP
+                                        <td class="px-2 py-2 text-sm border-b">{{ index + 1 }}</td>
+                                        <td class="px-2 py-2 text-sm border-b font-medium">{{ item.NORESEP
                                             ||
                                             '-' }}</td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOAPOTIK || '-' }}
+                                        <td class="px-2 py-2 text-sm border-b">{{ item.NOAPOTIK || '-' }}
                                         </td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium text-blue-600">
+                                        <td class="px-2 py-2 text-sm border-b font-medium text-blue-600">
                                             {{
                                                 item.NOSEP_KUNJUNGAN || '-' }}</td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}
+                                        <td class="px-2 py-2 text-sm border-b">{{ item.NOKARTU || '-' }}
                                         </td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">{{ item.NAMA ||
+                                        <td class="px-2 py-2 text-sm border-b font-medium">{{ item.NAMA ||
                                             '-'
-                                        }}</td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">{{
+                                            }}</td>
+                                        <td class="px-2 py-2 text-sm border-b">{{
                                             formatTanggal(item.TGLENTRY)
-                                        }}</td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">{{
+                                            }}</td>
+                                        <td class="px-2 py-2 text-sm border-b">{{
                                             formatTanggal(item.TGLRESEP)
-                                        }}</td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">
+                                            }}</td>
+                                        <td class="px-2 py-2 text-sm border-b text-orange-600">
                                             {{ formatCurrency(item.BYTAGRSP) }}
                                         </td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">
+                                        <td class="px-2 py-2 text-sm text-green-600 border-b">
                                             {{ formatCurrency(item.BYVERRSP) }}
                                         </td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">
-                                            <span class="px-2 py-1 text-xs rounded-full"
-                                                :class="item.FLAGITER === 'True' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'">
-                                                {{ item.FLAGITER === 'True' ? 'Ya' : 'Tidak' }}
+                                        <td class="px-2 py-2 text-sm border-b text-center">
+                                            <span
+                                                class="text-lg inline-flex items-center justify-center"
+                                                :class="item.FLAGITER === 'True' ? 'text-green-600' : 'text-rose-600'">
+                                                <font-awesome-icon
+                                                    :icon="item.FLAGITER === 'True' ? 'check' : 'times'" />
                                             </span>
                                         </td>
-                                        <td class="px-2 py-2 text-sm text-gray-900 border-b">
-                                            <Tooltip text="Hapus Klaim" bgColor="bg-red-600">
+                                        <td class="px-2 py-2 text-sm border-b">
+                                            <Tooltip text="Detail Klaim" bgColor="bg-red-600">
                                                 <button @click="openDelete(item)"
-                                                    class="px-2 py-1 text-xs font-medium text-red-600 rounded transition duration-300 hover:bg-red-200 hover:text-green-600">
-                                                    <font-awesome-icon icon="trash" />
+                                                    class="px-2 py-1 text-sm font-medium text-red-600 rounded transition duration-300 hover:bg-red-200 hover:text-green-600">
+                                                    <font-awesome-icon icon="list" />
                                                 </button>
                                             </Tooltip>
                                         </td>

@@ -135,7 +135,7 @@ const formatTanggal = (tanggal) => {
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
                         <div class="col-span-5">
                             <select id="JnsTgl" v-model="searchForm.JnsTgl"
-                                class="px-3 py-1 w-full  border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent">
+                                class="px-3 py-1.5 text-sm w-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent">
                                 <option value="TGLPELSJP">Berdasarkan Tanggal Pelayanan</option>
                                 <option value="TGLRSP">Berdasarkan Tanggal Resep</option>
                             </select>
@@ -143,21 +143,21 @@ const formatTanggal = (tanggal) => {
 
                         <div class="col-span-3">
                             <input id="TglMulai" v-model="searchForm.TglMulai" type="date"
-                                class="px-3 py-1 w-full  border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent"
+                                class="px-3 py-1.5 text-sm w-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent"
                                 required>
                         </div>
 
                         <div class="col-span-3">
                             <input id="TglAkhir" v-model="searchForm.TglAkhir" type="date"
-                                class="px-3 py-1 w-full  border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent"
+                                class="px-3 py-1.5 text-sm w-full border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent"
                                 required>
                         </div>
 
                         <div class="flex col-span-1">
                             <button type="submit" :disabled="isLoading"
                                 class="flex items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600">
-                                <font-awesome-icon v-if="!isLoading" icon="search" class="mr-2"/>
-                                <font-awesome-icon v-if="isLoading" icon="spinner" spin class="px-5 mr-1.5"/>
+                                <font-awesome-icon v-if="!isLoading" icon="search" class="mr-2" />
+                                <font-awesome-icon v-if="isLoading" icon="spinner" spin class="px-5 mr-1.5" />
                                 {{ isLoading ? '' : 'Filter' }}
                             </button>
                         </div>
@@ -198,37 +198,38 @@ const formatTanggal = (tanggal) => {
                             <template v-if="searchResult && searchResult.length > 0">
                                 <tr v-for="(item, index) in searchResult" :key="index"
                                     class="hover:bg-gray-50 text-center">
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ index + 1 }}</td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NORESEP }}
+                                    <td class="px-2 py-2 text-sm border-b">{{ index + 1 }}</td>
+                                    <td class="px-2 py-2 text-sm border-b">{{ item.NORESEP }}
                                     </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOAPOTIK || '-' }}
+                                    <td class="px-2 py-2 text-sm border-b">{{ item.NOAPOTIK || '-' }}
                                     </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
+                                    <td class="px-2 py-2 text-sm border-b">
                                         {{ item.NOSEP_KUNJUNGAN || '-' }}</td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}
+                                    <td class="px-2 py-2 text-sm border-b">{{ item.NOKARTU || '-' }}
                                     </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">{{ item.NAMA
-                                        ||'-'}}</td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLENTRY)
-                                        }}</td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
-                                        }}</td>
-                                    <td class="px-2 py-2 text-sm text-red-700 border-b font-medium">
+                                    <td class="px-2 py-2 text-sm border-b font-medium">{{ item.NAMA
+                                        || '-' }}</td>
+                                    <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLENTRY)
+                                    }}</td>
+                                    <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLRESEP)
+                                    }}</td>
+                                    <td class="px-2 py-2 text-sm text-yellow-600 border-b">
                                         {{ formatCurrency(item.BYTAGRSP) }}
                                     </td>
                                     <td class="px-2 py-2 text-sm text-green-700 border-b">
                                         {{ formatCurrency(item.BYVERRSP) }}
                                     </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
-                                        <span class="px-2 py-1 text-xs rounded-lg"
-                                            :class="item.FLAGITER === 'True' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'">
-                                            {{ item.FLAGITER === 'True' ? 'Ya' : 'Tidak' }}
+                                    <td class="px-2 py-2 text-sm border-b text-center">
+                                        <span
+                                            class="text-lg inline-flex items-center justify-center"
+                                            :class="item.FLAGITER === 'True' ? 'text-green-600' : 'text-red-600'">
+                                            <font-awesome-icon :icon="item.FLAGITER === 'True' ? 'check' : 'times'" />
                                         </span>
                                     </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
+                                    <td class="px-2 py-2 text-sm border-b">
                                         <Tooltip text="Detail Klaim" bgColor="bg-red-600">
                                             <button @click="openDelete(item)"
-                                                class="px-2 py-1 text-xs font-medium text-red-600 transition duration-300 hover:bg-red-200 hover:text-green-600">
+                                                class="px-2 py-1 text-sm font-medium text-red-600 transition duration-300 hover:bg-red-200 hover:text-green-600">
                                                 <font-awesome-icon icon="list" />
                                             </button>
                                         </Tooltip>
