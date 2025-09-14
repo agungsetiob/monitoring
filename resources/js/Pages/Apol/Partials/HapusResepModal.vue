@@ -1,7 +1,7 @@
 <template>
   <Modal :show="show" max-width="4xl" @close="close">
     <div class="flex items-center justify-between px-5 py-4 border-b">
-      <h3 class="text-lg font-semibold">Hapus Resep</h3>
+      <h3 class="text-lg font-semibold">Detail Resep</h3>
     </div>
 
     <div class="px-5 py-4 space-y-4">
@@ -109,7 +109,7 @@
 
     <div v-if="!isLoading" class="flex items-center justify-end gap-3 px-4 py-4">
       <button @click="close" class="px-2 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
-        Batal
+        Tutup
       </button>
       <button :disabled="isDeleting || deleteDisabled || isLoadingObatList" @click="submitDelete"
         class="px-2 py-1 rounded-md text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">

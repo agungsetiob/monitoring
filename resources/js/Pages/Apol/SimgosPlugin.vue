@@ -124,51 +124,41 @@ const formatTanggal = (tanggal) => {
 <template>
 
     <Head title="Daftar Resep" />
-    <div class="p-4 min-h-screen bg-gradient-to-br from-blue-100 to-green-100 md:p-6">
+    <div class="p-4 min-h-screen md:p-3">
         <div class="mx-auto max-w-8xl">
             <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
             <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
             <!-- Search Form -->
-            <div class="p-6 mb-6 bg-white rounded-xl shadow-lg">
-                <h2 class="mb-4 text-xl font-bold text-gray-800">Filter Daftar Resep</h2>
-
-                <form @submit.prevent="cariData" class="space-y-4">
+            <div class="p-1 mb-1 bg-white border border-gray-300">
+                <form @submit.prevent="cariData">
                     <input type="hidden" v-model="searchForm.kdppk" />
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                        <div>
-                            <label for="JnsTgl" class="block mb-2 text-sm font-medium text-gray-700">
-                                Jenis Tanggal
-                            </label>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
+                        <div class="col-span-5">
                             <select id="JnsTgl" v-model="searchForm.JnsTgl"
-                                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                <option value="TGLPELSJP">Tanggal Pelayanan SJP</option>
-                                <option value="TGLRSP">Tanggal Resep</option>
+                                class="px-3 py-1 w-full  border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent">
+                                <option value="TGLPELSJP">Berdasarkan Tanggal Pelayanan</option>
+                                <option value="TGLRSP">Berdasarkan Tanggal Resep</option>
                             </select>
                         </div>
 
-                        <div>
-                            <label for="TglMulai" class="block mb-2 text-sm font-medium text-gray-700">
-                                Tanggal Mulai <span class="text-red-600">*</span>
-                            </label>
+                        <div class="col-span-3">
                             <input id="TglMulai" v-model="searchForm.TglMulai" type="date"
-                                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="px-3 py-1 w-full  border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent"
                                 required>
                         </div>
 
-                        <div>
-                            <label for="TglAkhir" class="block mb-2 text-sm font-medium text-gray-700">
-                                Tanggal Akhir <span class="text-red-600">*</span>
-                            </label>
+                        <div class="col-span-3">
                             <input id="TglAkhir" v-model="searchForm.TglAkhir" type="date"
-                                class="px-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                class="px-3 py-1 w-full  border border-gray-300 focus:outline-none focus:ring-1 focus:ring-cyan-600 focus:border-transparent"
                                 required>
                         </div>
 
-                        <div class="flex items-end">
+                        <div class="flex col-span-1">
                             <button type="submit" :disabled="isLoading"
-                                class="flex gap-2 items-center px-6 py-2 font-semibold text-white bg-green-600 rounded-lg transition duration-300 hover:bg-green-700 disabled:bg-green-400">
-                                <font-awesome-icon v-if="isLoading" icon="spinner" spin />
-                                {{ isLoading ? 'Mencari...' : 'Cari Data' }}
+                                class="flex items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600">
+                                <font-awesome-icon v-if="!isLoading" icon="search" class="mr-2"/>
+                                <font-awesome-icon v-if="isLoading" icon="spinner" spin class="px-5 mr-1.5"/>
+                                {{ isLoading ? '' : 'Filter' }}
                             </button>
                         </div>
                     </div>
@@ -176,37 +166,31 @@ const formatTanggal = (tanggal) => {
             </div>
 
             <!-- Search Result -->
-            <div class="p-6 mb-6 bg-white rounded-xl shadow-lg">
-                <h3 class="mb-4 text-lg font-bold text-gray-800">
-                    Daftar Klaim Resep (<span class="text-green-500">{{ searchResult.length }} data</span>)
-                </h3>
-
-                <div class="w-full overflow-x-auto sm:overflow-visible">
-                    <table class="min-w-full table-fixed bg-white rounded-lg border border-gray-200">
-                        <thead class="bg-gray-100">
+            <div class="mb-2">
+                <div class="w-full sm:overflow-visible border border-teal-300">
+                    <table class="min-w-full table-fixed bg-white overflow-x-auto">
+                        <thead class="bg-teal-500">
                             <tr class="text-center">
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No</th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. Resep
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">No</th>
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">No. Resep
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. SJP
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">No. Apotek
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. SEP
-                                    Kunjungan</th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">No. Kartu
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">No. SEP</th>
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">No. Kartu
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Nama Peserta
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">Nama
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl. Entry
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">Tgl. Entry
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl. Resep
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">Tgl. Resep
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Biaya Tagih
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">Tagihan
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Biaya
-                                    Verifikasi</th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Iterasi
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">Verifikasi</th>
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b">Iterasi
                                 </th>
-                                <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Aksi</th>
+                                <th class="px-2 py-2 text-sm font-medium text-white border-b"></th>
 
                             </tr>
                         </thead>
@@ -215,11 +199,11 @@ const formatTanggal = (tanggal) => {
                                 <tr v-for="(item, index) in searchResult" :key="index"
                                     class="hover:bg-gray-50 text-center">
                                     <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ index + 1 }}</td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">{{ item.NORESEP }}
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NORESEP }}
                                     </td>
                                     <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOAPOTIK || '-' }}
                                     </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium text-blue-600">
+                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
                                         {{ item.NOSEP_KUNJUNGAN || '-' }}</td>
                                     <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ item.NOKARTU || '-' }}
                                     </td>
@@ -229,38 +213,31 @@ const formatTanggal = (tanggal) => {
                                         }}</td>
                                     <td class="px-2 py-2 text-sm text-gray-900 border-b">{{ formatTanggal(item.TGLRESEP)
                                         }}</td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b font-medium">
+                                    <td class="px-2 py-2 text-sm text-red-700 border-b font-medium">
                                         {{ formatCurrency(item.BYTAGRSP) }}
                                     </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border-b">
+                                    <td class="px-2 py-2 text-sm text-green-700 border-b">
                                         {{ formatCurrency(item.BYVERRSP) }}
                                     </td>
                                     <td class="px-2 py-2 text-sm text-gray-900 border-b">
-                                        <span class="px-2 py-1 text-xs rounded-full"
+                                        <span class="px-2 py-1 text-xs rounded-lg"
                                             :class="item.FLAGITER === 'True' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'">
                                             {{ item.FLAGITER === 'True' ? 'Ya' : 'Tidak' }}
                                         </span>
                                     </td>
                                     <td class="px-2 py-2 text-sm text-gray-900 border-b">
-                                        <Tooltip text="Hapus Klaim" bgColor="bg-red-600">
+                                        <Tooltip text="Detail Klaim" bgColor="bg-red-600">
                                             <button @click="openDelete(item)"
-                                                class="px-2 py-1 text-xs font-medium text-red-600 rounded transition duration-300 hover:bg-red-200 hover:text-green-600">
-                                                <font-awesome-icon icon="trash" />
+                                                class="px-2 py-1 text-xs font-medium text-red-600 transition duration-300 hover:bg-red-200 hover:text-green-600">
+                                                <font-awesome-icon icon="list" />
                                             </button>
                                         </Tooltip>
                                     </td>
                                 </tr>
                             </template>
                             <tr v-else>
-                                <td colspan="14" class="px-3 py-8 text-center text-gray-500">
+                                <td colspan="14" class="px-3 py-8">
                                     <div class="flex flex-col items-center">
-                                        <svg class="w-12 h-12 mb-2 text-gray-300" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                            </path>
-                                        </svg>
-                                        <p class="text-lg font-medium">Tidak ada data resep</p>
                                     </div>
                                 </td>
                             </tr>

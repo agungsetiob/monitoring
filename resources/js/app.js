@@ -12,13 +12,14 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import { faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, 
-    faFaceSadCry, faPills, faChartBar,
+    faFaceSadCry, faPills, faChartBar, faSearch,
     faChevronLeft, faChevronRight, faEdit, faNotesMedical, faTrash,
-    faSpinner, faTimes, faUserDoctor
+    faSpinner, faTimes, faUserDoctor,
+    faList
  } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, 
-    faFaceSadCry, faPills, faChartBar,
+    faFaceSadCry, faPills, faChartBar, faSearch, faList,
     faChevronLeft, faChevronRight, faEdit, faNotesMedical, faTrash, faSpinner,
     faTimes, faUserDoctor);
 
