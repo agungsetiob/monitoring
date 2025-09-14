@@ -1,9 +1,11 @@
 <template>
     <Modal :show="show" max-width="4xl" @close="close">
         <div class="flex items-center justify-between px-5 py-4 border-b">
-            <h3 class="text-lg font-semibold">Buat Resep Klaim Obat Kronis {{ props.selectedItem.NOMOR }}</h3>
+            <div>
+                <h3 class="text-lg font-semibold">Buat Resep Klaim Obat Kronis</h3>
+                <p class="text-xs text-rose-400">{{ props.selectedItem.RESPONSE }}</p>
+            </div>
         </div>
-
         <div class="px-5 py-4 space-y-4">
             <div v-if="showError && form.errors.general" class="mb-4 p-4 bg-red-50 border-l-4 border-red-500">
                 <div class="flex">
@@ -142,7 +144,7 @@
                                     Status:
                                     <span :class="o.REFERENSI?.LOG?.STATUS == 0 ? 'text-rose-600' : 'text-green-600'">
                                         {{ o.REFERENSI?.LOG?.STATUS == undefined ? 'Belum kirim' :
-                                        o.REFERENSI?.LOG?.RESPONSE }}
+                                            o.REFERENSI?.LOG?.RESPONSE }}
                                     </span>
                                 </div>
                             </div>
@@ -214,11 +216,10 @@ watch(() => props.show, async (isOpen) => {
             tglrsp: dayjs(props.selectedItem.MASUK).format('YYYY-MM-DD') ?? '',
             tglpelrsp: dayjs(props.selectedItem.TGLPELRSP).format('YYYY-MM-DD') ?? '',
             kddokter: props.selectedItem.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN ?? '',
-            kdjnsobat: '1',
-            iterasi: '0',
-            kunjungan: props.selectedItem.NOMOR ?? ''
+            kdjnsobat: props.selectedItem.JENISRESEP?? '1',
+            iterasi: props.selectedItem.ITERASI ?? '0',
+            kunjungan: props.selectedItem.NOMOR ?? '',
         })
-
 
         try {
             const { data } = await axios.get('/resep-detil', {
@@ -269,7 +270,7 @@ const submitResep = async () => {
                 NOMOR: props.selectedItem.NOMOR ?? ''
             })
             close()
-        }else {
+        } else {
             form.errors = { general: data.message || 'Gagal simpan resep' }
             showError.value = true
 

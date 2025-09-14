@@ -90,6 +90,7 @@
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Dokter</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Asal Resep</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Tgl Resep</th>
+                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Jns Resep</th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Aksi</th>
                                 </tr>
                             </thead>
@@ -116,11 +117,11 @@
                                                 }})</span>
                                         </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
+                                        <td class="px-2 py-2 text-sm border-b">{{ getJenisResepText(item.JENISRESEP) }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
                                             <Tooltip text="Kirim Resep ke BPJS" bgColor="bg-rose-600">
                                                 <button @click="openModalSimpan(item)"
-                                                    class="text-lg rounded hover:text-green-600 text-rose-700"
-                                                    :disabled="submittedKunjungan.includes(String(item.NOMOR))">
+                                                    class="text-lg rounded hover:text-green-600 text-rose-700">
                                                     <font-awesome-icon icon="notes-medical" />
                                                 </button>
                                             </Tooltip>
@@ -257,6 +258,13 @@ const getAsalResep = (item) => {
 const getPoliRsp = (item) => {
     const penjaminRuangan = item.REFERENSI?.ASAL_RESEP?.REFERENSI?.PENJAMIN_RUANGAN;
     return Array.isArray(penjaminRuangan) ? penjaminRuangan[0]?.RUANGAN_PENJAMIN || '' : '';
+};
+
+const getJenisResepText = (jenis) => {
+    if (jenis === "1") return "PRB";
+    if (jenis === "2") return "Kronis";
+    if (jenis === "3") return "Kemoterapi";
+    return "-";
 };
 
 const formatDateTime = (datetime) => {

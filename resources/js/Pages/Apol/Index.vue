@@ -265,7 +265,7 @@ const formatTanggal = (tanggal) => {
                                     </th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Biaya
                                         Verifikasi</th>
-                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Flag Iter
+                                    <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Iterasi
                                     </th>
                                     <th class="px-2 py-2 text-sm font-medium text-gray-700 border-b">Aksi</th>
 
