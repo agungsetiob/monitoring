@@ -66,6 +66,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
 });
 Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(function () {
     Route::get('/apol', [ApolController::class, 'index'])->name('apol.index');
+    Route::get('/apol-simgos-plugin', [ApolController::class, 'simgosPlugin'])->name('apol.simgos-plugin');
     Route::post('/apol/daftar-resep', [ApolController::class, 'daftarResep']);
     Route::post('/apol/summary-resep', [ApolController::class, 'getSummaryResep']);
     Route::delete('/apol/hapus-resep', [ApolController::class, 'hapusResep'])->name('apol.hapus-resep');

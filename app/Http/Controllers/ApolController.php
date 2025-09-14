@@ -26,6 +26,13 @@ class ApolController extends Controller
         ]);
     }
 
+    public function simgosPlugin()
+    {
+        return inertia('Apol/SimgosPlugin', [
+            'defaultKdppk' => config('services.apol.apotek_ppk')
+        ]);
+    }
+
     public function hapusObat(Request $request)
     {
         $data = [
