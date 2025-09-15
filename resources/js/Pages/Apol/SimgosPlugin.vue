@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
 import SuccessFlash from '@/Components/SuccessFlash.vue'
 import ErrorFlash from '@/Components/ErrorFlash.vue'
-import HapusResepModal from './Partials/HapusResepModal.vue';
+import HapusResepSimgosModal from './Partials/HapusResepSimgosModal.vue';
 
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -248,6 +248,6 @@ const formatTanggal = (tanggal) => {
             </div>
         </div>
     </div>
-    <HapusResepModal :show="showDeleteModal" :selected-item="selectedItem" @close="closeDelete"
+    <HapusResepSimgosModal :show="showDeleteModal" :selected-item="selectedItem" @close="closeDelete"
         @deleted="handleResepDeleted" />
 </template>
