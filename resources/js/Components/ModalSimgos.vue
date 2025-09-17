@@ -100,9 +100,9 @@ const maxWidthClass = computed(() => {
                     class="mb-6 transform overflow-hidden bg-white shadow-xl transition-all sm:mx-auto sm:w-full border border-teal-500"
                     :class="maxWidthClass">
                     <button @click="close"
-                        class="absolute top-0.5 right-0.5 py-1 px-2.5 text-white bg-red-600 hover:bg-red-800 transition duration-200"
+                        class="absolute top-0.5 right-0.5 py-1 px-2.5 text-white bg-red-500 hover:bg-red-800 transition duration-200"
                         aria-label="Close">
-                        <font-awesome-icon icon="times" class="text-lg top-0.5" />
+                        <font-awesome-icon icon="times" class="top-0.5" />
                     </button>
                     <slot v-if="showSlot" />
                 </div>

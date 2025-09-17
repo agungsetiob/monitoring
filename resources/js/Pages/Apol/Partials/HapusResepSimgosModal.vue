@@ -81,7 +81,7 @@
                 </div>
               </div>
               <button @click="deleteSingleObat(o, idx)"
-                class="ml-2 px-2 py-1 rounded text-sm text-rose-600 hover:bg-rose-100 disabled:opacity-50"
+                class="ml-2 px-2 py-1 text-sm text-rose-600 hover:bg-rose-100 disabled:opacity-50"
                 :disabled="isDeleting">
                 <font-awesome-icon icon="times" />
               </button>
@@ -109,7 +109,7 @@
 
     <div v-if="!isLoading" class="flex items-center justify-end gap-3 px-4 py-4">
       <button :disabled="isDeleting || deleteDisabled || isLoadingObatList" @click="submitDelete"
-        class="px-2 py-1 text-white bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400">
+        class="px-2 py-1 text-white bg-rose-500 hover:bg-rose-700 disabled:bg-rose-400 w-full">
         <font-awesome-icon v-if="isDeleting" icon="spinner" spin />
         {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
       </button>

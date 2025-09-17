@@ -710,7 +710,7 @@ class ApolApiService
                         'SIGNA1OBT' => $item['SIGNA1'] ?? $item['REFERENSI']['FREKUENSIATURAN']['SIGNA1'] ?? 1,
                         'SIGNA2OBT' => $item['SIGNA2'] ?? $item['REFERENSI']['FREKUENSIATURAN']['SIGNA2'] ?? 1,
                         'JMLOBT' => $item['JUMLAH'] ?? 1,
-                        'JHO' => 1,
+                        'JHO' => $item['HARI'] ?? 1,
                         'CatKhsObt' => $item['RACIKAN'] == 1 ? 'Racikan' : 'Non Racikan',
                         'KUNJUNGAN' => $data['KUNJUNGAN'] ?? null,
                         'REF_FARMASI' => $item['ID'] ?? null,
@@ -789,8 +789,6 @@ class ApolApiService
             ];
         }
     }
-
-
     public function insertResepNonRacik(array $data): array
     {
         $ts = $this->makeTimestampSecondsUTC();
