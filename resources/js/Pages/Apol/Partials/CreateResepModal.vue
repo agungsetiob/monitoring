@@ -60,6 +60,7 @@
                     </div>
 
                     <FormField label="Kode Dokter" :value="form.kddokter" />
+                    <FormField label="NO. SJP" :value="form.no_apotek" />
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -149,6 +150,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div>
+                            <div v-if="o.REFERENSI?.LOG?.STATUS != 1" class="mt-1">
+                                <button @click="kirimObat(o)" :disabled="isKirimObat"
+                                    class="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed">
+                                    <font-awesome-icon v-if="isKirimObat" icon="spinner" spin />
+                                    {{ isKirimObat ? '' : 'Kirim obat' }}
+                                </button>
+                            </div>
+                        </div>
                     </li>
                 </ul>
             </template>
@@ -158,8 +168,8 @@
             <button @click="close" class="px-2 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">
                 Batal
             </button>
-            <button :disabled="isSubmitting" @click="submitResep"
-                class="px-2 py-1 border rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400">
+            <button :disabled="isSubmitting || props.selectedItem.STATUSKLAIM == 1" @click="submitResep"
+                class="px-2 py-1 border rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed">
                 <font-awesome-icon v-if="isSubmitting" icon="spinner" spin />
                 {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online BPJS' }}
             </button>
@@ -197,6 +207,7 @@ const form = reactive({
     kdjnsobat: '1',
     iterasi: '0',
     kunjungan: '',
+    no_apotek: '',
     errors: {}
 })
 
@@ -216,9 +227,10 @@ watch(() => props.show, async (isOpen) => {
             tglrsp: dayjs(props.selectedItem.MASUK).format('YYYY-MM-DD') ?? '',
             tglpelrsp: dayjs(props.selectedItem.TGLPELRSP).format('YYYY-MM-DD') ?? '',
             kddokter: props.selectedItem.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN ?? '',
-            kdjnsobat: props.selectedItem.JENISRESEP?? '1',
+            kdjnsobat: props.selectedItem.JENISRESEP ?? '1',
             iterasi: props.selectedItem.ITERASI ?? '0',
             kunjungan: props.selectedItem.NOMOR ?? '',
+            no_apotek: props.selectedItem.NO_APOTEK || ''
         })
 
         try {
@@ -315,4 +327,44 @@ watch(resepDetil, (newVal) => {
         }
     })
 }, { deep: true })
+
+const isKirimObat = ref(false)
+
+const kirimObat = async (item) => {
+    isKirimObat.value = true
+    const payload = {
+        TGLSJP: form.tglsjp,
+        REFASALSJP: form.refasalsjp,
+        POLIRSP: form.polirsp,
+        KDJNSOBAT: form.kdjnsobat,
+        NORESEP: form.noresep,
+        IDUSERSJP: form.idusersjp,
+        TGLRSP: form.tglrsp,
+        TGLPELRSP: form.tglpelrsp,
+        KdDokter: form.kddokter,
+        iterasi: form.iterasi,
+        KUNJUNGAN: form.kunjungan,
+        NOSJP: props.selectedItem.NO_APOTEK || item.REFERENSI?.LOG?.NOSJP || '',
+        DETAIL: [item]
+    }
+
+    try {
+        const { data } = await axios.post('/apol/update-item-resep', payload)
+
+        item.REFERENSI.LOG = {
+            STATUS: data.success ? 1 : 0,
+            RESPONSE: data.message,
+            NOSJP: payload.NOSJP
+        }
+    } catch (err) {
+        item.REFERENSI.LOG = {
+            STATUS: 0,
+            RESPONSE: err.response?.data?.message || 'Error saat kirim',
+            NOSJP: payload.NOSJP
+        }
+    } finally {
+        isKirimObat.value = false
+    }
+}
+
 </script>

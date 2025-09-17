@@ -652,7 +652,6 @@ class ApolApiService
     {
         $ts = $this->makeTimestampSecondsUTC();
         $signature = $this->makeSignature($this->consId, $ts, $this->secretKey);
-
         $headers = [
             'X-cons-id' => $this->consId,
             'X-timestamp' => $ts,
@@ -828,5 +827,55 @@ class ApolApiService
                 'message' => 'HTTP request failed: ' . $e->getMessage()
             ];
         }
+    }
+
+    public function updateItemResep(array $data)
+    {
+        $item = $data['DETAIL'][0];
+
+        $nosjp = $data['NOSJP'] ?? '0';
+        $noresep = $data['NORESEP'] ?? '0';
+
+        $detailPayload = [
+            'NOSJP' => $nosjp,
+            'NORESEP' => $noresep,
+            'KDOBT' => $item['REFERENSI']['DPHO']['kodeobat'] ?? '',
+            'NMOBAT' => $item['REFERENSI']['DPHO']['namaobat'] ?? '',
+            'SIGNA1OBT' => $item['SIGNA1'] ?? $item['REFERENSI']['FREKUENSIATURAN']['SIGNA1'] ?? 1,
+            'SIGNA2OBT' => $item['SIGNA2'] ?? $item['REFERENSI']['FREKUENSIATURAN']['SIGNA2'] ?? 1,
+            'JMLOBT' => $item['JUMLAH'] ?? 1,
+            'JHO' => $item['HARI'] ?? 1,
+            'CatKhsObt' => $item['RACIKAN'] == 1 ? 'Racikan' : 'Non Racikan',
+            'KUNJUNGAN' => $data['KUNJUNGAN'] ?? null,
+            'REF_FARMASI' => $item['ID'] ?? null,
+        ];
+
+        if ($item['RACIKAN'] == 1) {
+            $detailPayload['JNSROBT'] = $item['REFERENSI']['JNSROBT'] ?? 'R.01';
+            $detailPayload['PERMINTAAN'] = $item['PERMINTAAN'] ?? 1;
+            $res = $this->insertResepRacik($detailPayload);
+        } else {
+            $res = $this->insertResepNonRacik($detailPayload);
+        }
+
+        $responseMessage = $res['message'] ?? 'Unknown';
+
+        $detailPayload['RESPONSE'] = $responseMessage;
+        $detailPayload['STATUS'] = $res['success'] ? 1 : 0;
+        $this->logKirimResepDetil->simpan($detailPayload);
+
+        if (!$res['success']) {
+            return [
+                'success' => false,
+                'message' => $responseMessage,
+                'metaData' => ['code' => $res['code'] ?? '500', 'message' => $responseMessage]
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => $responseMessage,
+            'metaData' => ['code' => '200', 'message' => $responseMessage]
+        ];
     }
 }

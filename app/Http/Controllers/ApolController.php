@@ -537,4 +537,31 @@ class ApolController extends Controller
         }
     }
 
+    public function updateItemResep(Request $request)
+    {
+        $data = $request->all();
+
+        if (!isset($data['DETAIL']) || !is_array($data['DETAIL']) || count($data['DETAIL']) !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'DETAIL harus berisi satu item'
+            ], 400);
+        }
+
+        if (empty($data['NOSJP'])) {
+            $data['NOSJP'] = $data['DETAIL'][0]['REFERENSI']['LOG']['NOSJP'] ?? null;
+        }
+
+        if (!$data['NOSJP']) {
+            return response()->json([
+                'success' => false,
+                'message' => 'NOSJP tidak ditemukan'
+            ], 422);
+        }
+
+        $result = $this->apiService->updateItemResep($data);
+
+        return response()->json($result);
+    }
+
 }

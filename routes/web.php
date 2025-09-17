@@ -74,6 +74,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     Route::get('/apol/pelayanan/obat/daftar/{nosep?}', [ApolController::class, 'getDaftarPelayananObat'])
         ->name('apol.obat.daftar');
     Route::post('/apol/simpan-resep', [ApolController::class, 'simpanResep'])->name('apol.simpan-resep');
+    Route::post('/apol/update-item-resep', [ApolController::class, 'updateItemResep'])->name('apol.update-item-resep');
     
     //route from ws simgos
     Route::get('/resep-klaim-terpisah', function () {
