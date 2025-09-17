@@ -109,7 +109,7 @@
 
     <div v-if="!isLoading" class="flex items-center justify-end gap-3 px-4 py-4">
       <button :disabled="isDeleting || deleteDisabled || isLoadingObatList" @click="submitDelete"
-        class="px-2 py-1 text-white bg-rose-500 hover:bg-rose-700 disabled:bg-rose-400 w-full">
+        class="px-2 py-1 text-white bg-rose-500 hover:bg-rose-700 disabled:bg-rose-400">
         <font-awesome-icon v-if="isDeleting" icon="spinner" spin />
         {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
       </button>

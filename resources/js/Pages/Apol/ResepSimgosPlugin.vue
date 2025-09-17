@@ -35,7 +35,7 @@
 
                         <div class="flex col-span-1">
                             <button type="submit" :disabled="isLoading"
-                                class="flex items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600">
+                                class="flex items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600 w-full">
                                 <font-awesome-icon v-if="!isLoading" icon="search" class="mr-2" />
                                 <font-awesome-icon v-if="isLoading" icon="spinner" spin class="px-5" />
                                 {{ isLoading ? '' : 'Filter' }}
@@ -76,7 +76,12 @@
                                     :data-kddokter="item.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN"
                                     :data-noresep="item.REFERENSI?.NOMORRESEP?.NOMOR">
                                     <td class="px-2 py-2 text-sm border-b">{{ index + 1 }}</td>
-                                    <td class="px-2 py-2 text-sm font-medium border-b">{{ item.NOMOR || '-' }}</td>
+                                    <td :class="[
+                                        'px-2 py-2 text-sm border-b',
+                                        getJenisKunjungan(item) == 3 ? 'font-semibold text-rose-600' : ''
+                                    ]">
+                                        {{ item.NOMOR }}
+                                    </td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.MASUK) }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.KELUAR) }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ item.REFASALSJP || '-' }}</td>
@@ -86,7 +91,7 @@
                                     <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
                                     <td class="px-2 py-2 text-sm border-b">
                                         {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
-                                        }})</span>
+                                            }})</span>
                                     </td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ getJenisResepText(item.JENISRESEP) }}</td>
@@ -213,6 +218,10 @@ const getDokterNama = (item) => {
 
 const getAsalResep = (item) => {
     return item.REFERENSI?.ASAL_RESEP?.DESKRIPSI || '-';
+};
+
+const getJenisKunjungan = (item) => {
+    return item.REFERENSI?.ASAL_RESEP?.JENIS_KUNJUNGAN || '-';
 };
 
 const getPoliRsp = (item) => {

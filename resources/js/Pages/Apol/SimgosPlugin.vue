@@ -155,7 +155,7 @@ const formatTanggal = (tanggal) => {
 
                         <div class="flex col-span-1">
                             <button type="submit" :disabled="isLoading"
-                                class="flex items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600">
+                                class="flex items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600 w-full">
                                 <font-awesome-icon v-if="!isLoading" icon="search" class="mr-2" />
                                 <font-awesome-icon v-if="isLoading" icon="spinner" spin class="px-5" />
                                 {{ isLoading ? '' : 'Filter' }}
