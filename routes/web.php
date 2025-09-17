@@ -80,6 +80,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     Route::get('/resep-klaim-terpisah', function () {
         return inertia('Apol/ResepSimgos');
     })->name('resep-klaim-terpisah');
+    Route::get('/resep-simgos-plugin', [ApolController::class, 'resepSimgosPlugin']);
     Route::get('/resep-simgos', [PelayananApolController::class, 'resepKlaimTerpisah']);
     Route::get('/resep-detil', [PelayananApolController::class, 'resepDetil']);
 

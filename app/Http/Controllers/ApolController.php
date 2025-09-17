@@ -26,6 +26,7 @@ class ApolController extends Controller
         ]);
     }
 
+    // Daftar resep apol bpjs simgos
     public function simgosPlugin()
     {
         return inertia('Apol/SimgosPlugin', [
@@ -33,6 +34,11 @@ class ApolController extends Controller
         ]);
     }
 
+    // daftar resep simgos
+    public function resepSimgosPlugin()
+    {
+        return inertia('Apol/ResepSimgosPlugin');
+    }
     public function hapusObat(Request $request)
     {
         $data = [
@@ -474,7 +480,7 @@ class ApolController extends Controller
         $validator = \Validator::make($request->all(), [
             'TGLSJP' => 'required|string',
             'REFASALSJP' => 'required|string|max:50',
-            'POLIRSP' => 'required|string|max:10',
+            //'POLIRSP' => 'required|string|max:10',
             'KDJNSOBAT' => 'required|string|in:1,2,3',
             'NORESEP' => 'required|string|max:50',
             'IDUSERSJP' => 'required|string|max:50',
@@ -485,7 +491,7 @@ class ApolController extends Controller
         ], [
             'TGLSJP.required' => 'Tanggal SJP harus diisi',
             'REFASALSJP.required' => 'Referensi Asal SJP harus diisi',
-            'POLIRSP.required' => 'Poli Resep harus diisi',
+            //'POLIRSP.required' => 'Poli Resep harus diisi',
             'KDJNSOBAT.required' => 'Jenis Obat harus dipilih',
             'KDJNSOBAT.in' => 'Jenis Obat harus 1, 2, atau 3',
             'NORESEP.required' => 'Nomor Resep harus diisi',
