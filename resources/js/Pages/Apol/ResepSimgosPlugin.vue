@@ -3,7 +3,6 @@
         <div class="mx-auto max-w-8xl">
             <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
             <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
-
             <!-- Filter Form -->
             <div class="p-1 mb-1 bg-white border border-gray-300">
                 <form @submit.prevent="cariData">
@@ -48,8 +47,8 @@
 
             <!-- Hasil -->
             <div class="mb-2">
-                <div class="w-full sm:overflow-visible border border-teal-300">
-                    <table class="min-w-full table-fixed bg-white overflow-x-auto">
+                <div class="w-full border border-teal-300 overflow-hidden">
+                    <table class="min-w-full table-auto bg-white">
                         <thead class="bg-teal-500">
                             <tr class="text-center">
                                 <th class="px-2 py-2 text-sm font-medium text-white border-b">No</th>
@@ -87,12 +86,12 @@
                                     <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
                                     <td class="px-2 py-2 text-sm border-b">
                                         {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
-                                            }})</span>
+                                        }})</span>
                                     </td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ getJenisResepText(item.JENISRESEP) }}</td>
                                     <td class="px-2 py-2 text-sm border-b">
-                                        <Tooltip text="Kirim Resep ke BPJS" bgColor="bg-green-600">
+                                        <Tooltip text="Detail" bgColor="bg-green-600">
                                             <button @click="openModalSimpan(item)"
                                                 class="px-2 py-1 text-sm font-medium text-red-600 transition duration-300 hover:bg-red-200 hover:text-green-600 rounded">
                                                 <font-awesome-icon icon="notes-medical" />
@@ -111,7 +110,7 @@
         </div>
     </div>
 
-    <CreateResepModal :show="showModalSimpan" :selected-item="selectedResep" @close="showModalSimpan = false"
+    <CreateResepSimgosModal :show="showModalSimpan" :selected-item="selectedResep" @close="showModalSimpan = false"
         @saved="handleResepSaved" />
 </template>
 
@@ -120,7 +119,7 @@ import { ref, reactive, onMounted } from "vue";
 import dayjs from "dayjs";
 import ErrorFlash from "@/Components/ErrorFlash.vue";
 import SuccessFlash from "@/Components/SuccessFlash.vue";
-import CreateResepModal from "./Partials/CreateResepModal.vue";
+import CreateResepSimgosModal from "./Partials/CreateResepSimgosModal.vue";
 import Tooltip from "@/Components/Tooltip.vue";
 
 const isLoading = ref(false);
