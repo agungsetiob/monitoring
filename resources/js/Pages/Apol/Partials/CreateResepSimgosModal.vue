@@ -5,7 +5,7 @@
                 <h3 class="text-lg text-white">Buat Resep</h3>
             </div>
         </div>
-        <div class="px-5 py-4 space-y-4">
+        <div class="px-5 py-2 space-y-2">
             <p class="text-xs text-rose-400">{{ props.selectedItem.RESPONSE }}</p>
             <div v-if="showError && form.errors.general" class="mb-4 p-4 bg-red-50 border-l-4 border-red-500">
                 <div class="flex">
@@ -66,8 +66,7 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                         <label class="block mb-1 text-sm font-medium text-gray-700">Jenis Obat</label>
-                        <select v-model="form.kdjnsobat"
-                            class="w-full border px-3 py-2 text-sm border-gray-300">
+                        <select v-model="form.kdjnsobat" class="w-full border px-3 py-2 text-sm border-gray-300">
                             <option value="1">PRB</option>
                             <option value="2">Kronis</option>
                             <option value="3">Kemoterapi</option>
@@ -122,7 +121,7 @@
                                 </div>
 
                                 <div>
-                                    Signa:
+                                    Signa 1 x 2:
                                     <span v-if="!editIndexMap[idx]?.signa1" @dblclick="enableEdit(idx, 'signa1')"
                                         class="text-amber-500 cursor-pointer">
                                         {{ o.SIGNA1 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA1 }}
@@ -143,9 +142,14 @@
                                 </div>
                                 <div>
                                     Status:
-                                    <span :class="o.REFERENSI?.LOG?.STATUS == 0 ? 'text-rose-600' : 'text-green-600'">
-                                        {{ o.REFERENSI?.LOG?.STATUS == undefined ? 'Belum kirim' :
-                                            o.REFERENSI?.LOG?.RESPONSE }}
+                                    <span :class="o.REFERENSI?.LOG?.STATUS === undefined
+                                        ? 'text-cyan-600'
+                                        : (o.REFERENSI?.LOG?.STATUS == 0
+                                            ? 'text-rose-600'
+                                            : 'text-green-600')">
+                                        {{ o.REFERENSI?.LOG?.STATUS === undefined
+                                            ? 'Belum klaim'
+                                        : o.REFERENSI?.LOG?.RESPONSE }}
                                     </span>
                                 </div>
                             </div>
@@ -153,7 +157,7 @@
                         <div>
                             <div v-if="o.REFERENSI?.LOG?.STATUS != 1" class="mt-1">
                                 <button @click="kirimObat(o)" :disabled="isKirimObat"
-                                    class="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed">
+                                    class="text-xs px-2 py-1 bg-blue-500 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed">
                                     <font-awesome-icon v-if="isKirimObat" icon="spinner" spin />
                                     {{ isKirimObat ? '' : 'Kirim obat' }}
                                 </button>
@@ -164,11 +168,11 @@
             </template>
         </div>
 
-        <div class="flex items-center justify-end gap-2 px-4 py-4">
+        <div class="flex items-center justify-end gap-2 px-4 py-2">
             <button :disabled="isSubmitting || props.selectedItem.STATUSKLAIM == 1" @click="submitResep"
-                class="px-2 py-1 border text-white bg-green-500 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed">
+                class="px-2 py-1 border text-white bg-green-400 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed">
                 <font-awesome-icon v-if="isSubmitting" icon="spinner" spin />
-                {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online BPJS' }}
+                {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online' }}
             </button>
         </div>
     </ModalSimgos>

@@ -98,13 +98,18 @@
                                 <template v-if="resepList.length > 0">
                                     <tr v-for="(item, index) in resepList" :key="index"
                                         class="text-center hover:bg-gray-50" :class="{
-                                            'bg-teal-100 hover:bg-teal-200': item.STATUSKLAIM == 1,
+                                            'text-green-700 hover:bg-teal-100': item.STATUSKLAIM == 1,
                                             'bg-green-100 hover:bg-green-200': submittedKunjungan.includes(String(item.NOMOR))
                                         }" :data-idusersjp="item.IDUSERSJP"
                                         :data-kddokter="item.REFERENSI?.DPJP_PENJAMIN_RS?.DPJP_PENJAMIN"
                                         :data-noresep="item.REFERENSI?.NOMORRESEP?.NOMOR">
                                         <td class="px-2 py-2 text-sm border-b">{{ index + 1 }}</td>
-                                        <td class="px-2 py-2 text-sm font-medium border-b">{{ item.NOMOR || '-' }}</td>
+                                        <td :class="[
+                                            'px-2 py-2 text-sm border-b',
+                                            getJenisKunjungan(item) == 3 ? 'font-semibold text-rose-600' : ''
+                                        ]">
+                                            {{ item.NOMOR }}
+                                        </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.MASUK) }}</td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.KELUAR) }}</td>
                                         <td class="px-2 py-2 text-sm border-b">{{ item.REFASALSJP || '-' }}</td>
@@ -114,10 +119,11 @@
                                         <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
                                         <td class="px-2 py-2 text-sm border-b">
                                             {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
-                                                }})</span>
+                                            }})</span>
                                         </td>
                                         <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
-                                        <td class="px-2 py-2 text-sm border-b">{{ getJenisResepText(item.JENISRESEP) }}</td>
+                                        <td class="px-2 py-2 text-sm border-b">{{ getJenisResepText(item.JENISRESEP) }}
+                                        </td>
                                         <td class="px-2 py-2 text-sm border-b">
                                             <Tooltip text="Kirim Resep ke BPJS" bgColor="bg-green-600">
                                                 <button @click="openModalSimpan(item)"
@@ -271,4 +277,8 @@ const formatDateTime = (datetime) => {
     if (!datetime) return '-';
     return dayjs(datetime).format("DD-MM-YYYY");
 };
+const getJenisKunjungan = (item) => {
+    return item.REFERENSI?.ASAL_RESEP?.JENIS_KUNJUNGAN || '-';
+};
+
 </script>

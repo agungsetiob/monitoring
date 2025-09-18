@@ -143,9 +143,14 @@
                                 </div>
                                 <div>
                                     Status:
-                                    <span :class="o.REFERENSI?.LOG?.STATUS == 0 ? 'text-rose-600' : 'text-green-600'">
-                                        {{ o.REFERENSI?.LOG?.STATUS == undefined ? 'Belum kirim' :
-                                            o.REFERENSI?.LOG?.RESPONSE }}
+                                    <span :class="o.REFERENSI?.LOG?.STATUS === undefined
+                                        ? 'text-teal-600'
+                                        : (o.REFERENSI?.LOG?.STATUS == 0
+                                            ? 'text-rose-600'
+                                            : 'text-green-600')">
+                                        {{ o.REFERENSI?.LOG?.STATUS === undefined
+                                            ? 'Belum klaim'
+                                        : o.REFERENSI?.LOG?.RESPONSE }}
                                     </span>
                                 </div>
                             </div>
@@ -171,7 +176,7 @@
             <button :disabled="isSubmitting || props.selectedItem.STATUSKLAIM == 1" @click="submitResep"
                 class="px-2 py-1 border rounded-md text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed">
                 <font-awesome-icon v-if="isSubmitting" icon="spinner" spin />
-                {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online BPJS' }}
+                {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online' }}
             </button>
         </div>
     </Modal>

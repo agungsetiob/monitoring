@@ -1,8 +1,8 @@
 <template>
     <div class="p-4 min-h-screen md:p-3 bg-white">
         <div class="mx-auto max-w-8xl">
-            <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
-            <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
+            <ErrorFlashSimgos :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
+            <SuccessFlashSimgos :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
             <!-- Filter Form -->
             <div class="p-1 mb-1 bg-white border border-gray-300">
                 <form @submit.prevent="cariData">
@@ -122,10 +122,10 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import dayjs from "dayjs";
-import ErrorFlash from "@/Components/ErrorFlash.vue";
-import SuccessFlash from "@/Components/SuccessFlash.vue";
 import CreateResepSimgosModal from "./Partials/CreateResepSimgosModal.vue";
 import Tooltip from "@/Components/Tooltip.vue";
+import SuccessFlashSimgos from "@/Components/SuccessFlashSimgos.vue";
+import ErrorFlashSimgos from "@/Components/ErrorFlashSimgos.vue";
 
 const isLoading = ref(false);
 const errorMessage = ref("");
