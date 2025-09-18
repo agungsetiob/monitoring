@@ -3,9 +3,9 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { ref, reactive, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
-import SuccessFlash from '@/Components/SuccessFlash.vue'
-import ErrorFlash from '@/Components/ErrorFlash.vue'
 import HapusResepSimgosModal from './Partials/HapusResepSimgosModal.vue';
+import ErrorFlashSimgos from '@/Components/ErrorFlashSimgos.vue';
+import SuccessFlashSimgos from '@/Components/SuccessFlashSimgos.vue';
 
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -126,8 +126,8 @@ const formatTanggal = (tanggal) => {
     <Head title="Daftar Resep" />
     <div class="p-4 min-h-screen md:p-3">
         <div class="mx-auto max-w-8xl">
-            <ErrorFlash :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
-            <SuccessFlash :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
+            <ErrorFlashSimgos :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
+            <SuccessFlashSimgos :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
             <!-- Search Form -->
             <div class="p-1 mb-1 bg-white border border-gray-300">
                 <form @submit.prevent="cariData">
