@@ -1,9 +1,9 @@
 <template>
-    <Transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 translate-y-4"
+    <Transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 -translate-y-4"
         enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200"
         leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-4">
-        <div v-if="flash.error" class="fixed inset-x-0 top-4 flex justify-center z-50 px-4">
-            <div class="flex items-center justify-between w-full max-w-md bg-gray-50 border-l-4 border-red-600 px-4 py-3 shadow-lg"
+        <div v-if="flash.error" class="absolute inset-x-0 top-0 flex justify-center z-[9999] px-4">
+            <div class="flex items-center justify-between w-full max-w-md bg-gray-50 border-l-4 border-red-600 px-3 py-3 shadow-lg"
                 role="alert" style="backdrop-filter: blur(10px);" ref="errorAlert">
                 <div class="flex items-start">
                     <div>

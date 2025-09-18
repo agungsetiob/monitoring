@@ -9,7 +9,7 @@
     >
       <div v-if="flash.success" class="fixed inset-x-0 top-4 flex justify-center z-50 px-4">
         <div
-          class="flex items-center justify-between w-full max-w-md bg-gray-50 border-l-4 border-green-500 px-4 py-3 shadow-lg"
+          class="flex items-center justify-between w-full max-w-md bg-gray-50 border-l-4 border-green-500 px-3 py-3 shadow-lg"
           role="alert"
           style="backdrop-filter: blur(10px);"
           ref="successAlert"
