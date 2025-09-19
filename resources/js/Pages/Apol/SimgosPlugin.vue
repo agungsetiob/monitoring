@@ -155,10 +155,12 @@ const formatTanggal = (tanggal) => {
 
                         <div class="flex col-span-1">
                             <button type="submit" :disabled="isLoading"
-                                class="flex items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600 w-full">
-                                <font-awesome-icon v-if="!isLoading" icon="search" class="mr-2" />
-                                <font-awesome-icon v-if="isLoading" icon="spinner" spin class="px-5" />
-                                {{ isLoading ? '' : 'Filter' }}
+                                class="flex justify-center items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600 w-full relative">
+                                <div class="flex items-center justify-center space-x-1">
+                                    <font-awesome-icon v-if="!isLoading" icon="search" />
+                                    <font-awesome-icon v-if="isLoading" icon="spinner" spin />
+                                    <span>{{ isLoading ? '' : 'Filter' }}</span>
+                                </div>
                             </button>
                         </div>
                     </div>
@@ -210,9 +212,9 @@ const formatTanggal = (tanggal) => {
                                     <td class="px-2 py-2 text-sm border-b font-medium">{{ item.NAMA
                                         || '-' }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLENTRY)
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLRESEP)
-                                    }}</td>
+                                        }}</td>
                                     <td class="px-2 py-2 text-sm text-yellow-600 border-b">
                                         {{ formatCurrency(item.BYTAGRSP) }}
                                     </td>
@@ -220,8 +222,7 @@ const formatTanggal = (tanggal) => {
                                         {{ formatCurrency(item.BYVERRSP) }}
                                     </td>
                                     <td class="px-2 py-2 text-sm border-b text-center">
-                                        <span
-                                            class="text-lg inline-flex items-center justify-center"
+                                        <span class="text-lg inline-flex items-center justify-center"
                                             :class="item.FLAGITER === 'True' ? 'text-green-600' : 'text-red-600'">
                                             <font-awesome-icon :icon="item.FLAGITER === 'True' ? 'check' : 'times'" />
                                         </span>
