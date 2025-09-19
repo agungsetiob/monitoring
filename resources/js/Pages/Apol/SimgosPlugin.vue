@@ -122,7 +122,7 @@ const formatTanggal = (tanggal) => {
 </script>
 
 <template>
-    <div class="text-white text-sm px-4 py-2 bg-[#3282ba]">
+    <div class="text-white text-sm px-4 py-1.5 bg-[#3282ba]">
         Daftar Resep Apotek Online
     </div>
     <div class="p-2 min-h-screen md:p-2">

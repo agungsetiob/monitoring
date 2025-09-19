@@ -1,5 +1,5 @@
 <template>
-    <div class="text-white text-sm px-4 py-2 bg-[#3282ba]">
+    <div class="text-white text-sm px-4 py-1.5 bg-[#3282ba]">
         Resep Pelayanan V2
     </div>
     <div class="p-2 min-h-screen md:p-2">
