@@ -123,7 +123,7 @@ const formatTanggal = (tanggal) => {
 
 <template>
     <div class="text-white text-sm px-4 py-2 bg-[#3282ba]">
-        Daftar Resep
+        Daftar Resep Apotek Online
     </div>
     <div class="p-2 min-h-screen md:p-2">
         <div class="mx-auto max-w-8xl">
