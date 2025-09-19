@@ -1,6 +1,6 @@
 <template>
   <ModalSimgos :show="show" max-width="4xl" @close="close">
-    <div class="flex items-center justify-between px-2 py-1 border-b bg-teal-500">
+    <div class="flex items-center justify-between px-2 py-1 border-b bg-[#19c5bf]">
       <h3 class="text-lg text-white">Detail Resep</h3>
     </div>
 
@@ -60,7 +60,7 @@
             <h4 class="text-sm font-semibold text-gray-800">
               Daftar Obat ({{ isLoadingObatList ? 'memuat...' : obatList.length + ' item' }})
             </h4>
-            <button class="text-xs px-2 py-1 border border-gray-300 hover:bg-gray-50" @click="loadObatList"
+            <button class="text-xs px-2 py-1 border border-gray-300 hover:bg-gray-100" @click="loadObatList"
               :disabled="isLoadingObatList">
               reload
             </button>
@@ -109,7 +109,7 @@
 
     <div v-if="!isLoading" class="flex items-center justify-end gap-3 px-4 py-4">
       <button :disabled="isDeleting || deleteDisabled || isLoadingObatList" @click="submitDelete"
-        class="px-2 py-1 text-white bg-rose-500 hover:bg-rose-700 disabled:bg-rose-400">
+        class="px-2 py-1 text-white bg-[#e44959] hover:bg-[#661e26] disabled:bg-rose-400">
         <font-awesome-icon v-if="isDeleting" icon="spinner" spin />
         {{ isDeleting ? 'Memproses...' : 'Hapus Resep' }}
       </button>

@@ -1,6 +1,6 @@
 <template>
     <ModalSimgos :show="show" max-width="4xl" @close="close">
-        <div class="flex items-center justify-between px-1 py-1 border-b bg-teal-500">
+        <div class="flex items-center justify-between px-1 py-1 border-b bg-[#19c5bf]">
             <div>
                 <h3 class="text-lg text-white">Buat Resep</h3>
             </div>
@@ -170,7 +170,7 @@
 
         <div class="flex items-center justify-end gap-2 px-4 py-2">
             <button :disabled="isSubmitting || props.selectedItem.STATUSKLAIM == 1" @click="submitResep"
-                class="px-2 py-1 border text-white bg-green-400 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed">
+                class="px-2 py-1 border text-white bg-[#9cc96b] hover:bg-[#43572f] disabled:bg-green-400 disabled:cursor-not-allowed">
                 <font-awesome-icon v-if="isSubmitting" icon="spinner" spin />
                 {{ isSubmitting ? 'Mengirim...' : 'Kirim ke Apotek Online' }}
             </button>

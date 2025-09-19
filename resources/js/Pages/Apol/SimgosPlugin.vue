@@ -210,12 +210,9 @@ const formatTanggal = (tanggal) => {
                                         {{ item.NOSEP_KUNJUNGAN || '-' }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ item.NOKARTU || '-' }}
                                     </td>
-                                    <td class="px-2 py-2 text-sm border-b font-medium">{{ item.NAMA
-                                        || '-' }}</td>
-                                    <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLENTRY)
-                                    }}</td>
-                                    <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLRESEP)
-                                    }}</td>
+                                    <td class="px-2 py-2 text-sm border-b font-medium">{{ item.NAMA }}</td>
+                                    <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLENTRY) }}</td>
+                                    <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLRESEP) }}</td>
                                     <td class="px-2 py-2 text-sm text-yellow-600 border-b">
                                         {{ formatCurrency(item.BYTAGRSP) }}
                                     </td>
