@@ -124,6 +124,9 @@ const formatTanggal = (tanggal) => {
 <template>
 
     <Head title="Daftar Resep" />
+    <div class="text-white text-sm px-4 py-2 bg-[#3282ba]">
+        Daftar Resep
+    </div>
     <div class="p-4 min-h-screen md:p-3">
         <div class="mx-auto max-w-8xl">
             <ErrorFlashSimgos :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
@@ -155,7 +158,7 @@ const formatTanggal = (tanggal) => {
 
                         <div class="flex col-span-1">
                             <button type="submit" :disabled="isLoading"
-                                class="flex justify-center items-center px-5 py-1 font-semibold text-white bg-cyan-700 transition duration-300 hover:bg-cyan-900 disabled:bg-cyan-600 w-full relative">
+                                class="flex justify-center items-center px-5 py-1 font-semibold text-white bg-[#3282ba] hover:bg-[#133248] transition duration-300 disabled:bg-cyan-600 w-full relative">
                                 <div class="flex items-center justify-center space-x-1">
                                     <font-awesome-icon v-if="!isLoading" icon="search" />
                                     <font-awesome-icon v-if="isLoading" icon="spinner" spin />
@@ -171,7 +174,7 @@ const formatTanggal = (tanggal) => {
             <div class="mb-2">
                 <div class="w-full sm:overflow-visible border border-teal-300">
                     <table class="min-w-full table-fixed bg-white overflow-x-auto">
-                        <thead class="bg-teal-500">
+                        <thead style="background-color: #19c5bf;">
                             <tr class="text-center">
                                 <th class="px-2 py-2 text-sm font-medium text-white border-b">No</th>
                                 <th class="px-2 py-2 text-sm font-medium text-white border-b">No. Resep
@@ -212,9 +215,9 @@ const formatTanggal = (tanggal) => {
                                     <td class="px-2 py-2 text-sm border-b font-medium">{{ item.NAMA
                                         || '-' }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLENTRY)
-                                        }}</td>
+                                    }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatTanggal(item.TGLRESEP)
-                                        }}</td>
+                                    }}</td>
                                     <td class="px-2 py-2 text-sm text-yellow-600 border-b">
                                         {{ formatCurrency(item.BYTAGRSP) }}
                                     </td>
