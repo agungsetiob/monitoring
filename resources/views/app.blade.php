@@ -17,7 +17,7 @@
         @inertiaHead
         <style>
             .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
+            width: 3px;
             }
 
             .scroll-w::-webkit-scrollbar-thumb {

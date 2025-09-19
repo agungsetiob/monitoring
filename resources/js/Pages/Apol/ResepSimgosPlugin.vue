@@ -2,7 +2,7 @@
     <div class="text-white text-sm px-4 py-2 bg-[#3282ba]">
         Resep Pelayanan V2
     </div>
-    <div class="p-2 min-h-screen md:p-2 bg-white">
+    <div class="p-2 min-h-screen md:p-2">
         <div class="mx-auto max-w-8xl">
             <ErrorFlashSimgos :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
             <SuccessFlashSimgos :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />

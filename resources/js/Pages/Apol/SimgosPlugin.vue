@@ -1,5 +1,5 @@
 <script setup>
-import { Head, usePage } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
 import { ref, reactive, onMounted } from 'vue';
 import dayjs from 'dayjs';
 import Tooltip from '@/Components/Tooltip.vue';
@@ -122,12 +122,10 @@ const formatTanggal = (tanggal) => {
 </script>
 
 <template>
-
-    <Head title="Daftar Resep" />
     <div class="text-white text-sm px-4 py-2 bg-[#3282ba]">
         Daftar Resep
     </div>
-    <div class="p-4 min-h-screen md:p-3">
+    <div class="p-2 min-h-screen md:p-2">
         <div class="mx-auto max-w-8xl">
             <ErrorFlashSimgos :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
             <SuccessFlashSimgos :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
