@@ -90,7 +90,7 @@
                     <li v-for="(o, idx) in resepDetil" :key="o.ID"
                         class="text-sm flex items-center justify-between border-b last:border-0 py-1">
                         <div class="flex-1 min-w-0 flex items-start gap-2">
-                            <div class="mt-1">
+                            <div class="mt-1 ml-1">
                                 <input type="checkbox" v-model="o.isKlaimSelected"
                                     :disabled="o.ISKLAIM == 1 && o.KSTATUS == 1"
                                     class="rounded text-green-600 focus:ring-green-500" />
@@ -113,22 +113,6 @@
                                         <span class="text-teal-500">{{ o.REFERENSI?.DPHO?.harga }}</span>
                                     </div>
                                     <div>
-                                        Jumlah:
-                                        <span v-if="!editIndexMap[idx]?.jumlah" @dblclick="enableEdit(idx, 'jumlah')"
-                                            class="text-cyan-500 cursor-pointer">
-                                            {{ o.JUMLAH }}
-                                        </span>
-                                        <input v-else type="number" v-model="o.JUMLAH" @blur="disableEdit(idx, 'jumlah')"
-                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
-                                        &middot; Hari:
-                                        <span v-if="!editIndexMap[idx]?.hari" @dblclick="enableEdit(idx, 'hari')"
-                                            class="text-rose-500 cursor-pointer">
-                                            {{ o.HARI }}
-                                        </span>
-                                        <input v-else type="number" v-model="o.HARI" @blur="disableEdit(idx, 'hari')"
-                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
-                                    </div>
-                                    <div>
                                         Signa:
                                         <span v-if="!editIndexMap[idx]?.signa1" @dblclick="enableEdit(idx, 'signa1')"
                                             class="text-amber-500 cursor-pointer">
@@ -147,12 +131,26 @@
                                         <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI }}</span>
                                         &middot; Permintaan:
                                         <span class="text-orange-500">{{ o.PERMINTAAN }}</span>
+                                        &middot; Jumlah:
+                                        <span v-if="!editIndexMap[idx]?.jumlah" @dblclick="enableEdit(idx, 'jumlah')"
+                                            class="text-cyan-500 cursor-pointer">
+                                            {{ o.JUMLAH }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.JUMLAH" @blur="disableEdit(idx, 'jumlah')"
+                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
+                                        &middot; Hari:
+                                        <span v-if="!editIndexMap[idx]?.hari" @dblclick="enableEdit(idx, 'hari')"
+                                            class="text-rose-500 cursor-pointer">
+                                            {{ o.HARI }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.HARI" @blur="disableEdit(idx, 'hari')"
+                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
                                     </div>
                                     <div>
                                         Status:
                                         <span :class="o.REFERENSI?.LOG?.STATUS === undefined
-                                            ? 'text-teal-600'
-                                            : (o.REFERENSI?.LOG?.STATUS == 0
+                                            ? 'text-sky-600'
+                                            : (o.REFERENSI?.LOG?.STATUS == 0 || o.REFERENSI?.LOG?.STATUS == 9
                                                 ? 'text-rose-600'
                                                 : 'text-green-600')">
                                             {{ o.REFERENSI?.LOG?.STATUS === undefined

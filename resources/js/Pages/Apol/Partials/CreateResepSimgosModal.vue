@@ -150,7 +150,7 @@
                                         Status:
                                         <span :class="o.REFERENSI?.LOG?.STATUS === undefined
                                             ? 'text-cyan-600'
-                                            : (o.REFERENSI?.LOG?.STATUS == 0
+                                            : (o.REFERENSI?.LOG?.STATUS == 0 || o.REFERENSI?.LOG?.STATUS == 9
                                                 ? 'text-rose-600'
                                                 : 'text-green-600')">
                                             {{ o.REFERENSI?.LOG?.STATUS === undefined
