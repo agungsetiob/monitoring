@@ -1,12 +1,15 @@
 <template>
-    <div class="text-white text-sm px-4 py-1.5 bg-[#3282ba]">
-        Resep Pelayanan V2
+    <div class="text-white text-sm px-4 py-1.5 bg-[#3282ba] flex items-center justify-between">
+        <span>Resep Pelayanan V2</span>
+        <button @click="refreshPage"
+            class="px-1 text-sm font-semibold text-white hover:rotate-180 transition duration-300">
+            <font-awesome-icon icon="sync-alt" />
+        </button>
     </div>
     <div class="p-2 min-h-screen md:p-2">
         <div class="mx-auto max-w-8xl">
             <ErrorFlashSimgos :flash="{ error: errorMessage }" @clearFlash="errorMessage = ''" />
             <SuccessFlashSimgos :flash="{ success: successMessage }" @clearFlash="successMessage = ''" />
-            <!-- Filter Form -->
             <div class="p-1 mb-1 bg-white border border-gray-300">
                 <form @submit.prevent="cariData">
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
@@ -50,7 +53,6 @@
                 </form>
             </div>
 
-            <!-- Hasil -->
             <div class="mb-2">
                 <div class="w-full border border-teal-300 overflow-hidden">
                     <table class="min-w-full table-auto bg-white">
@@ -96,7 +98,7 @@
                                     <td class="px-2 py-2 text-sm border-b">{{ getDokterNama(item) || '-' }}</td>
                                     <td class="px-2 py-2 text-sm border-b">
                                         {{ getAsalResep(item) }}<span v-if="getPoliRsp(item)"> ({{ getPoliRsp(item)
-                                            }})</span>
+                                                }})</span>
                                     </td>
                                     <td class="px-2 py-2 text-sm border-b">{{ formatDateTime(item.TGLPELRSP) }}</td>
                                     <td class="px-2 py-2 text-sm border-b">{{ getJenisResepText(item.JENISRESEP) }}</td>
@@ -244,5 +246,9 @@ const getJenisResepText = (jenis) => {
 const formatDateTime = (datetime) => {
     if (!datetime) return '-';
     return dayjs(datetime).format("DD-MM-YYYY");
+};
+
+const refreshPage = () => {
+    window.location.reload();
 };
 </script>

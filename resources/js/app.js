@@ -16,11 +16,12 @@ import { faPrescriptionBottleMedical, faBedPulse, faMars, faVenus,
     faChevronLeft, faChevronRight, faEdit, faNotesMedical,
     faSpinner, faTimes, faUserDoctor,
     faList,
-    faCheck
+    faCheck,
+    faSyncAlt
  } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faPrescriptionBottleMedical, faBedPulse, faMars, faVenus, 
-    faFaceSadCry, faPills, faChartBar, faSearch, faList,
+    faFaceSadCry, faPills, faChartBar, faSearch, faList, faSyncAlt,
     faChevronLeft, faChevronRight, faEdit, faNotesMedical, faCheck, faSpinner,
     faTimes, faUserDoctor);
 
