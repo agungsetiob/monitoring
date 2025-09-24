@@ -22,7 +22,6 @@
             </div>
 
             <template v-else>
-                <!-- Editable Tanggal -->
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
                     <FormField label="No Resep" :value="form.noresep" />
                     <FormField label="ID User SJP" :value="form.idusersjp" />
@@ -81,85 +80,93 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- Detail Obat -->
+                <div class="py-1 text-md font-medium text-gray-800 border-b">
+                    {{ resepDetil.length }} Item Obat
+                </div>
                 <ul v-if="resepDetil.length > 0" class="mt-2 space-y-1 max-h-48 overflow-auto pr-1">
                     <li v-for="(o, idx) in resepDetil" :key="o.ID"
                         class="text-sm flex items-center justify-between border-b last:border-0 py-1">
-                        <div class="flex-1 min-w-0">
-                            <div class="font-medium truncate">
-                                {{ o.REFERENSI?.BARANG?.NAMA }}
-                                <span v-if="o.RACIKAN == 1"
-                                    class="px-1 rounded-md bg-red-100 text-xs ml-1 text-red-800">{{ o.REFERENSI?.JNSROBT
-                                    }}</span>
+                        <div class="flex-1 min-w-0 flex items-start gap-2">
+                            <div class="mt-1 ml-1">
+                                <input type="checkbox" v-model="o.isKlaimSelected"
+                                    :disabled="o.ISKLAIM == 1 && o.KSTATUS == 1"
+                                    class="rounded text-green-600 focus:ring-green-500" />
                             </div>
-                            <div class="text-xs text-gray-500 space-y-0.5">
-                                <div>
-                                    Kode:
-                                    <span class="font-mono text-blue-500">{{ o.REFERENSI?.DPHO?.kodeobat }}</span>
-                                    &middot; Obat:
-                                    <span class="text-purple-500">{{ o.REFERENSI?.DPHO?.namaobat }}</span>
-                                    &middot; Harga:
-                                    <span class="text-teal-500">{{ o.REFERENSI?.DPHO?.harga }}</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium truncate">
+                                    {{ o.REFERENSI?.BARANG?.NAMA }}
+                                    <span v-if="o.RACIKAN == 1"
+                                        class="px-1 rounded-md bg-red-100 text-xs ml-1 text-red-800">{{ o.REFERENSI?.JNSROBT
+                                        }}</span>
                                 </div>
+                                <div class="text-xs text-gray-500 space-y-0.5">
+                                    <div>
+                                        Kode:
+                                        <span class="font-mono text-blue-500">{{ o.REFERENSI?.DPHO?.kodeobat }}</span>
+                                        &middot; Obat:
+                                        <span class="text-purple-500">{{ o.REFERENSI?.DPHO?.namaobat }}</span>
+                                        &middot; Harga:
+                                        <span class="text-teal-500">{{ o.REFERENSI?.DPHO?.harga }}</span>
+                                    </div>
 
-                                <div>
-                                    Jumlah:
-                                    <span v-if="!editIndexMap[idx]?.jumlah" @dblclick="enableEdit(idx, 'jumlah')"
-                                        class="text-cyan-500 cursor-pointer">
-                                        {{ o.JUMLAH }}
-                                    </span>
-                                    <input v-else type="number" v-model="o.JUMLAH" @blur="disableEdit(idx, 'jumlah')"
-                                        class="border px-1 py-0.5 text-xs w-16 rounded" />
-                                    &middot; Hari:
-                                    <span v-if="!editIndexMap[idx]?.hari" @dblclick="enableEdit(idx, 'hari')"
-                                        class="text-rose-500 cursor-pointer">
-                                        {{ o.HARI }}
-                                    </span>
-                                    <input v-else type="number" v-model="o.HARI" @blur="disableEdit(idx, 'hari')"
-                                        class="border px-1 py-0.5 text-xs w-16 rounded" />
-                                </div>
+                                    <div>
+                                        Jumlah:
+                                        <span v-if="!editIndexMap[idx]?.jumlah" @dblclick="enableEdit(idx, 'jumlah')"
+                                            class="text-cyan-500 cursor-pointer">
+                                            {{ o.JUMLAH }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.JUMLAH" @blur="disableEdit(idx, 'jumlah')"
+                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
+                                        &middot; Hari:
+                                        <span v-if="!editIndexMap[idx]?.hari" @dblclick="enableEdit(idx, 'hari')"
+                                            class="text-rose-500 cursor-pointer">
+                                            {{ o.HARI }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.HARI" @blur="disableEdit(idx, 'hari')"
+                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
+                                    </div>
 
-                                <div>
-                                    Signa 1 x 2:
-                                    <span v-if="!editIndexMap[idx]?.signa1" @dblclick="enableEdit(idx, 'signa1')"
-                                        class="text-amber-500 cursor-pointer">
-                                        {{ o.SIGNA1 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA1 }}
-                                    </span>
-                                    <input v-else type="number" v-model="o.SIGNA1" @blur="disableEdit(idx, 'signa1')"
-                                        class="border px-1 py-0.5 text-xs w-12 rounded" />
-                                    x
-                                    <span v-if="!editIndexMap[idx]?.signa2" @dblclick="enableEdit(idx, 'signa2')"
-                                        class="text-amber-500 cursor-pointer">
-                                        {{ o.SIGNA2 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA2 }}
-                                    </span>
-                                    <input v-else type="number" v-model="o.SIGNA2" @blur="disableEdit(idx, 'signa2')"
-                                        class="border px-1 py-0.5 text-xs w-12 rounded" />
-                                    &middot; Frekuensi:
-                                    <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI }}</span>
-                                    &middot; Permintaan:
-                                    <span class="text-orange-500">{{ o.PERMINTAAN }}</span>
-                                </div>
-                                <div>
-                                    Status:
-                                    <span :class="o.REFERENSI?.LOG?.STATUS === undefined
-                                        ? 'text-cyan-600'
-                                        : (o.REFERENSI?.LOG?.STATUS == 0
-                                            ? 'text-rose-600'
-                                            : 'text-green-600')">
-                                        {{ o.REFERENSI?.LOG?.STATUS === undefined
-                                            ? 'Belum klaim'
-                                        : o.REFERENSI?.LOG?.RESPONSE }}
-                                    </span>
+                                    <div>
+                                        Signa 1 x 2:
+                                        <span v-if="!editIndexMap[idx]?.signa1" @dblclick="enableEdit(idx, 'signa1')"
+                                            class="text-amber-500 cursor-pointer">
+                                            {{ o.SIGNA1 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA1 }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.SIGNA1" @blur="disableEdit(idx, 'signa1')"
+                                            class="border px-1 py-0.5 text-xs w-12 rounded" />
+                                        x
+                                        <span v-if="!editIndexMap[idx]?.signa2" @dblclick="enableEdit(idx, 'signa2')"
+                                            class="text-amber-500 cursor-pointer">
+                                            {{ o.SIGNA2 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA2 }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.SIGNA2" @blur="disableEdit(idx, 'signa2')"
+                                            class="border px-1 py-0.5 text-xs w-12 rounded" />
+                                        &middot; Frekuensi:
+                                        <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI }}</span>
+                                        &middot; Permintaan:
+                                        <span class="text-orange-500">{{ o.PERMINTAAN }}</span>
+                                    </div>
+                                    <div>
+                                        Status:
+                                        <span :class="o.REFERENSI?.LOG?.STATUS === undefined
+                                            ? 'text-cyan-600'
+                                            : (o.REFERENSI?.LOG?.STATUS == 0
+                                                ? 'text-rose-600'
+                                                : 'text-green-600')">
+                                            {{ o.REFERENSI?.LOG?.STATUS === undefined
+                                                ? 'Belum klaim'
+                                                : o.REFERENSI?.LOG?.RESPONSE }}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div>
                             <div v-if="o.REFERENSI?.LOG?.STATUS != 1" class="mt-1">
-                                <button @click="kirimObat(o)" :disabled="isKirimObat"
+                                <button @click="kirimObat(o, idx)" :disabled="isKirimObat.itemIndex === idx && isKirimObat.status"
                                     class="text-xs px-2 py-1 bg-blue-500 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed">
-                                    <font-awesome-icon v-if="isKirimObat" icon="spinner" spin />
-                                    {{ isKirimObat ? '' : 'Kirim obat' }}
+                                    <font-awesome-icon v-if="isKirimObat.itemIndex === idx && isKirimObat.status" icon="spinner" spin />
+                                    {{ (isKirimObat.itemIndex === idx && isKirimObat.status) ? '' : 'Kirim obat' }}
                                 </button>
                             </div>
                         </div>
@@ -239,7 +246,10 @@ watch(() => props.show, async (isOpen) => {
                 params: { RESEP: props.selectedItem.NOMOR }
             })
             if (data.success !== false) {
-                resepDetil.value = data.data || []
+                resepDetil.value = (data.data || []).map(item => ({
+                    ...item,
+                    isKlaimSelected: item.ISKLAIM === 1 && item.KSTATUS === 1
+                }))
             }
         } catch (e) {
             console.error('Gagal ambil detail resep', e)
@@ -258,6 +268,15 @@ const close = () => {
 const submitResep = async () => {
     isSubmitting.value = true
     form.errors = {}
+    showError.value = false
+
+    const selectedItems = resepDetil.value.filter(item => item.isKlaimSelected)
+    if (selectedItems.length === 0) {
+        form.errors.general = 'Pilih setidaknya satu item obat untuk dikirim.'
+        showError.value = true
+        isSubmitting.value = false
+        return
+    }
 
     try {
         const payload = {
@@ -272,7 +291,11 @@ const submitResep = async () => {
             KdDokter: form.kddokter,
             iterasi: form.iterasi,
             KUNJUNGAN: form.kunjungan,
-            DETAIL: resepDetil.value
+            DETAIL: selectedItems.map(item => ({
+                ...item,
+                SIGNA1: item.SIGNA1 || item.REFERENSI.FREKUENSIATURAN.SIGNA1,
+                SIGNA2: item.SIGNA2 || item.REFERENSI.FREKUENSIATURAN.SIGNA2,
+            }))
         }
 
         const { data } = await axios.post('/apol/simpan-resep', payload)
@@ -286,7 +309,6 @@ const submitResep = async () => {
         } else {
             form.errors = { general: data.message || 'Gagal simpan resep' }
             showError.value = true
-
         }
     } catch (err) {
         if (err.response?.data?.errors) {
@@ -294,7 +316,6 @@ const submitResep = async () => {
         } else {
             form.errors = { general: err.response?.data?.message || 'Error saat simpan resep' }
             showError.value = true
-
         }
     } finally {
         isSubmitting.value = false
@@ -305,6 +326,7 @@ const getPoliRsp = (item) => {
     const penjaminRuangan = item.REFERENSI?.ASAL_RESEP?.REFERENSI?.PENJAMIN_RUANGAN
     return Array.isArray(penjaminRuangan) ? penjaminRuangan[0]?.RUANGAN_PENJAMIN || '' : ''
 }
+
 const editIndexMap = reactive({})
 const editTanggal = reactive({
     tglsjp: false,
@@ -316,11 +338,11 @@ const enableEdit = (idx, field) => {
     if (!editIndexMap[idx]) editIndexMap[idx] = {}
     editIndexMap[idx][field] = true
 }
+
 const disableEdit = (idx, field) => {
     if (editIndexMap[idx]) editIndexMap[idx][field] = false
 }
 
-// Sync Jumlah dengan Hari
 watch(resepDetil, (newVal) => {
     newVal.forEach((item, idx) => {
         if (editIndexMap[idx]?.hari) {
@@ -329,10 +351,14 @@ watch(resepDetil, (newVal) => {
     })
 }, { deep: true })
 
-const isKirimObat = ref(false)
+const isKirimObat = reactive({
+    status: false,
+    itemIndex: null
+})
 
-const kirimObat = async (item) => {
-    isKirimObat.value = true
+const kirimObat = async (item, idx) => {
+    isKirimObat.status = true
+    isKirimObat.itemIndex = idx
     const payload = {
         TGLSJP: form.tglsjp,
         REFASALSJP: form.refasalsjp,
@@ -346,7 +372,11 @@ const kirimObat = async (item) => {
         iterasi: form.iterasi,
         KUNJUNGAN: form.kunjungan,
         NOSJP: props.selectedItem.NO_APOTEK || item.REFERENSI?.LOG?.NOSJP || '',
-        DETAIL: [item]
+        DETAIL: [{
+            ...item,
+            SIGNA1: item.SIGNA1 || item.REFERENSI.FREKUENSIATURAN.SIGNA1,
+            SIGNA2: item.SIGNA2 || item.REFERENSI.FREKUENSIATURAN.SIGNA2,
+        }]
     }
 
     try {
@@ -364,8 +394,8 @@ const kirimObat = async (item) => {
             NOSJP: payload.NOSJP
         }
     } finally {
-        isKirimObat.value = false
+        isKirimObat.status = false
+        isKirimObat.itemIndex = null
     }
 }
-
 </script>
