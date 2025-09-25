@@ -45,7 +45,7 @@ function isActive(routeName) {
           <div class="flex">
             <div class="flex shrink-0 items-center">
               <Link :href="route('landing-page')">
-              <img src="/img/logo.png" alt="SIGAP Logo" class="block h-10 w-auto" />
+              <img src="img/logo.png" alt="SIGAP Logo" class="block h-10 w-auto" />
               </Link>
             </div>
           </div>

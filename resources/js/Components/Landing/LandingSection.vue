@@ -34,7 +34,7 @@ document.addEventListener('inertia:finish', () => {
     </div>
 
     <div class="mb-12 text-center">
-      <img src="/img/sigap-obatin.png" alt="RSUD Logo" class="mx-auto mb-4 w-auto h-32">
+      <img src="img/sigap-obatin.png" alt="RSUD Logo" class="mx-auto mb-4 w-auto h-32">
       <!-- <h1 class="mb-4 text-4xl font-extrabold leading-tight text-gray-800 drop-shadow-md md:text-6xl">
         Selamat Datang di
       </h1> -->
@@ -52,6 +52,6 @@ document.addEventListener('inertia:finish', () => {
   </div>
 
   <div v-if="isLoading" class="flex fixed inset-0 z-50 flex-col justify-center items-center bg-white bg-opacity-80">
-    <video src="/img/loading.webm" autoplay loop muted playsinline />
+    <video src="img/loading.webm" autoplay loop muted playsinline />
   </div>
 </template>
