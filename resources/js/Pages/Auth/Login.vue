@@ -8,14 +8,14 @@
         <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
             <div class="hidden md:flex md:w-1/2 bg-gradient-to-br from-indigo-300 to-blue-100 overflow-hidden">
                 <div class="w-full h-full flex items-center justify-center relative">
-                    <img src="/img/bupati.webp" alt="Foto Bupati"
+                    <img src="img/bupati.webp" alt="Foto Bupati"
                         class="w-full h-full md:h-auto md:object-contain object-cover object-center" />
                 </div>
             </div>
             <div class="w-full md:w-1/2 p-6 sm:p-8 lg:p-10 space-y-6">
                 <div class="flex justify-center gap-4 items-center mb-6">
-                    <img src="/img/sigap-obatin.png" alt="Logo Sigap Obatin" class="h-12 sm:h-14 object-contain" />
-                    <img src="/img/logo.png" alt="Ilustrasi Beraksi" class="h-12 sm:h-14 object-contain" />
+                    <img src="img/sigap-obatin.png" alt="Logo Sigap Obatin" class="h-12 sm:h-14 object-contain" />
+                    <img src="img/logo.png" alt="Ilustrasi Beraksi" class="h-12 sm:h-14 object-contain" />
                 </div>
 
                 <div class="text-center">
@@ -100,7 +100,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post('/login');
+    form.post('login');
 };
 </script>
 

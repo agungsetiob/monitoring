@@ -84,7 +84,7 @@ function isActive(routeName) {
 
     <div class="flex-1 pt-16 pb-12 sm:pt-16 sm:pb-0 relative">
       <div v-if="isLoading" class="fixed inset-0 z-30 flex flex-col items-center justify-center bg-white bg-opacity-80">
-        <video src="/img/loading.webm" autoplay loop muted playsinline />
+        <video src="img/loading.webm" autoplay loop muted playsinline />
       </div>
       <main class="h-full overflow-auto">
         <slot />
