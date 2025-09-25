@@ -9,8 +9,8 @@ const isLoading = ref(false);
 const logoutForm = useForm({});
 const loginForm = useForm({});
 
-const onLogout = () => logoutForm.post(route('logout'));
-const onLogin = () => loginForm.get(route('login'));
+const onLogout = () => logoutForm.post('logout');
+const onLogin = () => loginForm.get('login');
 
 document.addEventListener('inertia:start', () => {
   isLoading.value = true;
