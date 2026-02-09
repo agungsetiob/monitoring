@@ -243,7 +243,9 @@ watch(() => props.show, async (isOpen) => {
         resepDetil.value = []
 
         Object.assign(form, {
-            noresep: props.selectedItem.REFERENSI?.NOMORRESEP?.NOMOR ?? '',
+            noresep: props.selectedItem.REFERENSI?.NOMORRESEP?.NOMOR 
+             ?? props.selectedItem.REFERENSI?.NOMORRESEP 
+             ?? '',
             idusersjp: props.selectedItem.IDUSERSJP ?? '',
             polirsp: getPoliRsp(props.selectedItem) ?? '',
             refasalsjp: props.selectedItem.REFASALSJP ?? '',
