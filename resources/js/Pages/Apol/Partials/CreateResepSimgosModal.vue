@@ -96,7 +96,8 @@
                                 <div class="font-medium truncate">
                                     {{ o.REFERENSI?.BARANG?.NAMA }}
                                     <span v-if="o.RACIKAN == 1"
-                                        class="px-1 rounded-md bg-red-100 text-xs ml-1 text-red-800">{{ o.REFERENSI?.JNSROBT
+                                        class="px-1 rounded-md bg-red-100 text-xs ml-1 text-red-800">{{
+                                            o.REFERENSI?.JNSROBT
                                         }}</span>
                                 </div>
                                 <div class="text-xs text-gray-500 space-y-0.5">
@@ -114,25 +115,34 @@
                                             class="text-amber-500 cursor-pointer">
                                             {{ o.SIGNA1 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA1 }}
                                         </span>
-                                        <input v-else type="number" v-model="o.SIGNA1" @blur="disableEdit(idx, 'signa1')"
+                                        <input v-else type="number" v-model="o.SIGNA1"
+                                            @blur="disableEdit(idx, 'signa1')"
                                             class="border px-1 py-0.5 text-xs w-12 rounded" />
                                         x
                                         <span v-if="!editIndexMap[idx]?.signa2" @dblclick="enableEdit(idx, 'signa2')"
                                             class="text-amber-500 cursor-pointer">
                                             {{ o.SIGNA2 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA2 }}
                                         </span>
-                                        <input v-else type="number" v-model="o.SIGNA2" @blur="disableEdit(idx, 'signa2')"
+                                        <input v-else type="number" v-model="o.SIGNA2"
+                                            @blur="disableEdit(idx, 'signa2')"
                                             class="border px-1 py-0.5 text-xs w-12 rounded" />
                                         &middot; Frekuensi:
-                                        <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI }}</span>
+                                        <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI
+                                            }}</span>
                                         &middot; Permintaan:
-                                        <span class="text-orange-500">{{ o.PERMINTAAN }}</span>
+                                        <span v-if="!editIndexMap[idx]?.permintaan" @dblclick="enableEdit(idx, 'permintaan')"
+                                            class="text-orange-500 cursor-pointer">
+                                            {{ o.PERMINTAAN }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.PERMINTAAN" @blur="disableEdit(idx, 'permintaan')"
+                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
                                         &middot; Jumlah:
                                         <span v-if="!editIndexMap[idx]?.jumlah" @dblclick="enableEdit(idx, 'jumlah')"
                                             class="text-cyan-500 cursor-pointer">
                                             {{ o.JUMLAH }}
                                         </span>
-                                        <input v-else type="number" v-model="o.JUMLAH" @blur="disableEdit(idx, 'jumlah')"
+                                        <input v-else type="number" v-model="o.JUMLAH"
+                                            @blur="disableEdit(idx, 'jumlah')"
                                             class="border px-1 py-0.5 text-xs w-16 rounded" />
                                         &middot; Hari:
                                         <span v-if="!editIndexMap[idx]?.hari" @dblclick="enableEdit(idx, 'hari')"
@@ -159,9 +169,11 @@
                         </div>
                         <div>
                             <div v-if="o.REFERENSI?.LOG?.STATUS != 1" class="mt-1">
-                                <button @click="kirimObat(o, idx)" :disabled="isKirimObat.itemIndex === idx && isKirimObat.status"
+                                <button @click="kirimObat(o, idx)"
+                                    :disabled="isKirimObat.itemIndex === idx && isKirimObat.status"
                                     class="text-xs px-2 py-1 bg-blue-500 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed">
-                                    <font-awesome-icon v-if="isKirimObat.itemIndex === idx && isKirimObat.status" icon="spinner" spin />
+                                    <font-awesome-icon v-if="isKirimObat.itemIndex === idx && isKirimObat.status"
+                                        icon="spinner" spin />
                                     {{ (isKirimObat.itemIndex === idx && isKirimObat.status) ? '' : 'Kirim obat' }}
                                 </button>
                             </div>
@@ -223,7 +235,7 @@ watch(() => props.show, async (isOpen) => {
         resepDetil.value = []
 
         Object.assign(form, {
-            noresep: props.selectedItem.REFERENSI?.NOMORRESEP?.NOMOR ?? '',
+            noresep: props.selectedItem.REFERENSI?.NOMORRESEP ?? '',
             idusersjp: props.selectedItem.IDUSERSJP ?? '',
             polirsp: getPoliRsp(props.selectedItem) ?? '',
             refasalsjp: props.selectedItem.REFASALSJP ?? '',

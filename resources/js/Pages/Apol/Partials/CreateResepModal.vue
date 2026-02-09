@@ -81,7 +81,7 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="py-2 text-md font-medium text-gray-800 border-b">
                     {{ resepDetil.length }} Obat
                 </div>
@@ -118,25 +118,36 @@
                                             class="text-amber-500 cursor-pointer">
                                             {{ o.SIGNA1 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA1 }}
                                         </span>
-                                        <input v-else type="number" v-model="o.SIGNA1" @blur="disableEdit(idx, 'signa1')"
+                                        <input v-else type="number" v-model="o.SIGNA1"
+                                            @blur="disableEdit(idx, 'signa1')"
                                             class="border px-1 py-0.5 text-xs w-12 rounded" />
                                         x
                                         <span v-if="!editIndexMap[idx]?.signa2" @dblclick="enableEdit(idx, 'signa2')"
                                             class="text-amber-500 cursor-pointer">
                                             {{ o.SIGNA2 || o.REFERENSI?.FREKUENSIATURAN?.SIGNA2 }}
                                         </span>
-                                        <input v-else type="number" v-model="o.SIGNA2" @blur="disableEdit(idx, 'signa2')"
+                                        <input v-else type="number" v-model="o.SIGNA2"
+                                            @blur="disableEdit(idx, 'signa2')"
                                             class="border px-1 py-0.5 text-xs w-12 rounded" />
                                         &middot; Frekuensi:
-                                        <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI }}</span>
+                                        <span class="text-indigo-500">{{ o.REFERENSI?.FREKUENSIATURAN?.FREKUENSI
+                                            }}</span>
                                         &middot; Permintaan:
-                                        <span class="text-orange-500">{{ o.PERMINTAAN }}</span>
+                                        <span v-if="!editIndexMap[idx]?.permintaan"
+                                            @dblclick="enableEdit(idx, 'permintaan')"
+                                            class="text-orange-500 cursor-pointer">
+                                            {{ o.PERMINTAAN }}
+                                        </span>
+                                        <input v-else type="number" v-model="o.PERMINTAAN"
+                                            @blur="disableEdit(idx, 'permintaan')"
+                                            class="border px-1 py-0.5 text-xs w-16 rounded" />
                                         &middot; Jumlah:
                                         <span v-if="!editIndexMap[idx]?.jumlah" @dblclick="enableEdit(idx, 'jumlah')"
                                             class="text-cyan-500 cursor-pointer">
                                             {{ o.JUMLAH }}
                                         </span>
-                                        <input v-else type="number" v-model="o.JUMLAH" @blur="disableEdit(idx, 'jumlah')"
+                                        <input v-else type="number" v-model="o.JUMLAH"
+                                            @blur="disableEdit(idx, 'jumlah')"
                                             class="border px-1 py-0.5 text-xs w-16 rounded" />
                                         &middot; Hari:
                                         <span v-if="!editIndexMap[idx]?.hari" @dblclick="enableEdit(idx, 'hari')"
