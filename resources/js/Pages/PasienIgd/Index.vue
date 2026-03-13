@@ -154,14 +154,19 @@ const getTriagePillColor = (status) => {
             <p class="text-md font-semibold">{{ getTimeDiff(patient.MASUK) }}</p>
           </div>
         </div>
-        <div class="flex flex-col">  
-          <div v-if="patient.TRAUMA === 1"
-            class="flex justify-center items-center p-1 text-red-800 bg-red-100 rounded-lg">
-            <span class="text-sm font-semibold text-center">TRAUMA</span>
-          </div>
-          <div v-if="patient.PONEK === 1"
-            class="flex justify-center items-center p-1 text-green-800 bg-green-100 rounded-lg">
-            <span class="text-sm font-semibold text-center">PONEK</span>
+        <div class="flex flex-col">
+          <div class="flex justify-center items-center p-1 rounded-lg" :class="patient.TRAUMA === 1
+            ? 'text-red-800 bg-red-100'
+            : patient.PONEK === 1
+              ? 'text-green-800 bg-green-100'
+              : 'text-green-800 bg-green-100'">
+            <span class="text-sm font-semibold text-center">
+              {{ patient.TRAUMA === 1
+                ? 'TRAUMA'
+                : patient.PONEK === 1
+                  ? 'PONEK'
+              : 'MEDIK' }}
+            </span>
           </div>
         </div>
       </div>
