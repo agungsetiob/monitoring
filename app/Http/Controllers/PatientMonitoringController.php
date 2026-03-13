@@ -15,15 +15,13 @@ class PatientMonitoringController extends Controller
      */
     public function index()
     {
-        return inertia('PasienIgd/Index', [
-            'initialData' => $this->getPatientData($this->igd),
-        ]);
+        return inertia('PasienIgd/Index');
     }
 
     /**
      * JSON API: Return the patient data.
      */
-    public function getPatients(Request $request)
+    public function getPatients()
     {
         $data = $this->getPatientData($this->igd);
         return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE);
@@ -106,7 +104,9 @@ class PatientMonitoringController extends Controller
                 t.NON_URGENT,
                 t.DOA,
                 t.KRITERIA,
-                t.HANDOVER
+                t.HANDOVER,
+                t.KASUS,
+                t.OBGYN
             FROM pendaftaran.kunjungan k
             LEFT JOIN pendaftaran.pendaftaran p ON p.NOMOR = k.NOPEN
             LEFT JOIN master.pasien p2 ON p.NORM = p2.NORM
@@ -121,7 +121,7 @@ class PatientMonitoringController extends Controller
             GROUP BY k.NOPEN, k.MASUK, p.NORM, p2.NAMA, p2.JENIS_KELAMIN, r.DESKRIPSI, k.NOMOR,
                 pri.JENIS_RUANG_PERAWATAN, pri.JENIS_PERAWATAN, pri.TANGGAL, pri.INDIKASI,
                 pri.DESKRIPSI, pri.DOKTER, pri.DIBUAT_TANGGAL, pg.GELAR_DEPAN, pg.NAMA, pg.GELAR_BELAKANG,
-                t.RESUSITASI, t.EMERGENCY, t.URGENT, t.LESS_URGENT, t.NON_URGENT, t.DOA, t.KRITERIA, t.HANDOVER
+                t.RESUSITASI, t.EMERGENCY, t.URGENT, t.LESS_URGENT, t.NON_URGENT, t.DOA, t.KRITERIA, t.HANDOVER, t.KASUS, t.OBGYN
             ORDER BY k.MASUK DESC
             LIMIT 20
         ", [$unitId]);
@@ -159,6 +159,20 @@ class PatientMonitoringController extends Controller
             }
 
             $item->TRIAGE_STATUS = $this->determineTriageStatus($item);
+
+            if (isset($item->KASUS)) {
+                $decodedKasus = json_decode($item->KASUS, true);
+                $item->TRAUMA = ($decodedKasus['JENIS'] ?? 0) == 1 ? 1 : 0;
+            } else {
+                $item->TRAUMA = 0;
+            }
+
+            if (isset($item->OBGYN)) {
+                $decodedObgyn = json_decode($item->OBGYN, true);
+                $item->PONEK = !empty($decodedObgyn['USIA_GESTASI']) ? 1 : 0;
+            } else {
+                $item->PONEK = 0;
+            }
 
             return $item;
         }, $results);

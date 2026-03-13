@@ -63,7 +63,7 @@ const getTimeDiff = (from) => {
   if (hours > 0) result += `${hours} jam `;
   if (minutes > 0 || hours === 0) result += `${minutes} menit`;
 
-  return result + ' lalu';
+  return result;
 };
 
 const getTriagePillColor = (status) => {
@@ -92,12 +92,12 @@ const getTriagePillColor = (status) => {
         </h1>
         <Link :href="route('landing-page')"
           class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition duration-300 ease-in-out transform hover:scale-105">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 12H5"></path>
-          <path d="M12 19l-7-7 7-7"></path>
-        </svg>
-        Kembali
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"></path>
+            <path d="M12 19l-7-7 7-7"></path>
+          </svg>
+          Kembali
         </Link>
       </div>
     </div>
@@ -147,11 +147,21 @@ const getTriagePillColor = (status) => {
         <div class="flex justify-between items-end text-sm">
           <div class="flex items-center">
             <span class="mr-1">⏰</span>
-            <p class="text-lg font-semibold">{{ patient.TANGGAL }}</p>
+            <p class="text-md font-semibold">{{ patient.TANGGAL }}</p>
           </div>
           <div class="flex items-center text-right">
             <span class="mr-1">⏳</span>
-            <p class="text-lg font-semibold">{{ getTimeDiff(patient.MASUK) }}</p>
+            <p class="text-md font-semibold">{{ getTimeDiff(patient.MASUK) }}</p>
+          </div>
+        </div>
+        <div class="flex flex-col">  
+          <div v-if="patient.TRAUMA === 1"
+            class="flex justify-center items-center p-1 text-red-800 bg-red-100 rounded-lg">
+            <span class="text-sm font-semibold text-center">TRAUMA</span>
+          </div>
+          <div v-if="patient.PONEK === 1"
+            class="flex justify-center items-center p-1 text-green-800 bg-green-100 rounded-lg">
+            <span class="text-sm font-semibold text-center">PONEK</span>
           </div>
         </div>
       </div>
