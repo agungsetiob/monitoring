@@ -14,12 +14,29 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Hapus semua pengguna yang ada
+
+        // User Admin
         User::create([
-            'name' => 'Admin',
+            'name' => 'Admin Utama',
             'email' => 'admin@dhaan.com',
             'password' => Hash::make('12345678'),
             'role' => 'admin',
+        ]);
+
+        // User IGD
+        User::create([
+            'name' => 'Petugas IGD',
+            'email' => 'igd@dhaan.com',
+            'password' => Hash::make('12345678'),
+            'role' => 'igd',
+        ]);
+
+        // User Apotek
+        User::create([
+            'name' => 'Petugas Apotek',
+            'email' => 'apotek@dhaan.com',
+            'password' => Hash::make('12345678'),
+            'role' => 'apotek',
         ]);
     }
 }
