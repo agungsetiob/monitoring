@@ -85,7 +85,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     Route::get('/resep-detil', [PelayananApolController::class, 'resepDetil']);
 
 
-    // Opsional: versi query param fallback ?nosep=...
+    // Opsional
     Route::get('/apol/pelayanan/obat/daftar', [ApolController::class, 'getDaftarPelayananObat']);
     Route::post('/apol/hapus-resep', [ApolController::class, 'hapusResep']); // alias untuk klien yg tidak support DELETE
     Route::get('/apol/debug/config', [TesApolController::class, 'debugConfig'])->name('debug.config');
@@ -94,3 +94,18 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:admin'])->group(functio
     Route::get('/apol/debug/doc-format', [TesApolController::class, 'testDocumentationFormat'])->name('debug.doc-format');
     Route::get('/apol/debug/connection', [TesApolController::class, 'testConnection'])->name('debug.connection');
 });
+
+    Route::get('/apol-simgos-plugin/d81a365fd5dab1c13886c2a4d606051c', [ApolController::class, 'simgosPlugin'])->name('apol.simgos-plugin');
+    Route::post('/apol/daftar-resep', [ApolController::class, 'daftarResep']);
+    Route::post('/apol/summary-resep', [ApolController::class, 'getSummaryResep']);
+    Route::delete('/apol/hapus-resep', [ApolController::class, 'hapusResep'])->name('apol.hapus-resep');
+    Route::post('/apol/hapus-obat', [ApolController::class, 'hapusObat']);
+    Route::get('/apol/pelayanan/obat/daftar/{nosep?}', [ApolController::class, 'getDaftarPelayananObat'])
+        ->name('apol.obat.daftar');
+    Route::post('/apol/simpan-resep', [ApolController::class, 'simpanResep'])->name('apol.simpan-resep');
+    Route::post('/apol/update-item-resep', [ApolController::class, 'updateItemResep'])->name('apol.update-item-resep');
+
+    //route from ws simgos
+    Route::get('/resep-simgos-plugin/3e44a919070f17f6022bc5550ff4be3f', [ApolController::class, 'resepSimgosPlugin']);
+    Route::get('/resep-simgos', [PelayananApolController::class, 'resepKlaimTerpisah']);
+    Route::get('/resep-detil', [PelayananApolController::class, 'resepDetil']);
