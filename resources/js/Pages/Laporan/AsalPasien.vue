@@ -70,17 +70,16 @@ document.addEventListener('inertia:finish', () => {
 
     <Head title="Laporan Kedatangan Pasien" />
 
-    <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 px-8 py-10">
-        <div class="w-full bg-white rounded-2xl shadow-xl p-8 space-y-8">
-
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-extrabold text-gray-800">
-                    🚑 Laporan Kedatangan Pasien IGD
+    <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 px-8 py-10 flex flex-col items-center">
+        <div class="w-full max-w-8xl bg-white rounded-2xl shadow-xl p-8 space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <h1 class="text-3xl font-extrabold text-gray-800 flex items-center gap-3">
+                    🏥 Laporan Asal Pasien IGD
                 </h1>
-
-                <button @click="router.visit('/laporan')" class="bg-indigo-600 text-white px-5 py-3 rounded-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button @click="router.visit('/laporan')"
+                    class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition duration-300 ease-in-out transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M19 12H5"></path>
                         <path d="M12 19l-7-7 7-7"></path>
                     </svg>
