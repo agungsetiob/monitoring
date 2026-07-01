@@ -28,6 +28,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:igd,admin'])->group(fun
     Route::get('/api/patient-igd', [PatientMonitoringController::class, 'getPatients'])
         ->name('api.patient-igd');
     Route::get('/laporan-igd-ranap', [PatientMonitoringController::class, 'laporanIgdRanapView'])->name('laporan.igd-ranap');
+    Route::get('/laporan-asal-pasien', [PatientMonitoringController::class, 'arrivalSummaryPage'])->name('laporan.asal-pasien');
     Route::get('/laporan-igd-ranap/data', [PatientMonitoringController::class, 'laporanIgdRanap'])->name('laporan.ranap.data');
     Route::get('/laporan/kepadatan-igd', [PatientMonitoringController::class, 'kepadatanIgd'])->name('laporan.kepadatan-igd');
 
@@ -47,6 +48,7 @@ Route::middleware(['web', 'auth', 'throttle:60,1', 'role:igd,admin'])->group(fun
     Route::post('/rencana-kontrol/detail', [RencanaKontrolController::class, 'getDetailByNoSuratKontrol'])->name('rencana-kontrol.detail');
     Route::post('/rencana-kontrol/jadwal-praktek-dokter', [RencanaKontrolController::class, 'getJadwalPraktekDokter'])->name('rencana-kontrol.jadwal-praktek-dokter');
     Route::post('/rencana-kontrol/update', [RencanaKontrolController::class, 'updateRencanaKontrol'])->name('rencana-kontrol.update');
+
 });
 
 Route::middleware(['throttle:60,1'])->group(function () {

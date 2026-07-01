@@ -28,6 +28,7 @@
         <ReportCard title="LOS IGD" :link="route('laporan.los')" />
         <ReportCard title="Lanjut Rawat Inap" labelColor="text-red-600" :link="route('laporan.igd-ranap')" />
         <ReportCard title="Kepadatan IGD" labelColor="text-red-600" :link="route('laporan.kepadatan-igd')" />
+        <ReportCard title="Asal Pasien" labelColor="text-red-600" :link="route('laporan.asal-pasien')" />
       </div>
     </div>
   </div>

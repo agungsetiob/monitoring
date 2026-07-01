@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Inertia\Inertia;
 
 class PatientMonitoringController extends Controller
@@ -345,5 +346,122 @@ class PatientMonitoringController extends Controller
                 'jumlah_tersibuk' => $jumlahTersibuk
             ]
         ]);
+    }
+
+    private function getPatientArrivalSummary($startDate, $endDate, $perPage = 20)
+    {
+        // Data detail pasien
+        $results = DB::connection('simgos')
+            ->table('pendaftaran.kunjungan as k')
+            ->select(
+                'k.NOMOR as KUNJUNGAN',
+                'p.NORM',
+                'pasien.NAMA',
+                DB::raw("
+                CASE 
+                    WHEN JSON_EXTRACT(t.KEDATANGAN, '$.JENIS') = 1 THEN 'Datang Sendiri'
+                    WHEN JSON_EXTRACT(t.KEDATANGAN, '$.JENIS') = 2 THEN 'Rujukan'
+                    WHEN JSON_EXTRACT(t.KEDATANGAN, '$.JENIS') = 3 THEN 'Polisi'
+                    ELSE 'Lainnya'
+                END AS JENIS_KEDATANGAN
+            "),
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(t.KEDATANGAN, '$.TANGGAL')) AS TANGGAL_KEDATANGAN"),
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(t.KEDATANGAN, '$.ALAT_TRANSPORTASI')) AS ALAT_TRANSPORTASI"),
+                'ppk.NAMA as ASAL_RUJUKAN_NAMA'
+            )
+            ->leftJoin('pendaftaran.pendaftaran as p', 'p.NOMOR', '=', 'k.NOPEN')
+            ->leftJoin('master.pasien as pasien', 'pasien.NORM', '=', 'p.NORM')
+            ->leftJoin('medicalrecord.triage as t', 't.KUNJUNGAN', '=', 'k.NOMOR')
+            ->leftJoin(
+                'master.ppk as ppk',
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(t.KEDATANGAN, '$.ASAL_RUJUKAN'))"),
+                '=',
+                'ppk.ID'
+            )
+            ->where('k.RUANGAN', $this->igd)
+            ->where('k.STATUS', 2)
+            ->whereBetween(DB::raw('DATE(k.MASUK)'), [$startDate, $endDate])
+            ->orderByDesc('k.MASUK')
+            ->paginate($perPage);
+
+        // Statistik jumlah per jenis kedatangan
+        $statsJenis = DB::connection('simgos')
+            ->table('medicalrecord.triage as t')
+            ->join('pendaftaran.kunjungan as k', 'k.NOMOR', '=', 't.KUNJUNGAN')
+            ->select(
+                DB::raw("
+                CASE 
+                    WHEN JSON_EXTRACT(t.KEDATANGAN, '$.JENIS') = 1 THEN 'Datang Sendiri'
+                    WHEN JSON_EXTRACT(t.KEDATANGAN, '$.JENIS') = 2 THEN 'Rujukan'
+                    WHEN JSON_EXTRACT(t.KEDATANGAN, '$.JENIS') = 3 THEN 'Polisi'
+                    ELSE 'Lainnya'
+                END AS JENIS_KEDATANGAN
+            "),
+                DB::raw('COUNT(*) as JUMLAH')
+            )
+            ->where('k.RUANGAN', $this->igd)
+            ->where('k.STATUS', 2)
+            ->whereBetween(DB::raw('DATE(k.MASUK)'), [$startDate, $endDate])
+            ->groupBy('JENIS_KEDATANGAN')
+            ->get();
+
+        // Statistik per asal rujukan (faskes)
+        $statsRujukan = DB::connection('simgos')
+            ->table('medicalrecord.triage as t')
+            ->join('pendaftaran.kunjungan as k', 'k.NOMOR', '=', 't.KUNJUNGAN')
+            ->leftJoin(
+                'master.ppk as ppk',
+                DB::raw("JSON_UNQUOTE(JSON_EXTRACT(t.KEDATANGAN, '$.ASAL_RUJUKAN'))"),
+                '=',
+                'ppk.ID'
+            )
+            ->select('ppk.NAMA as ASAL_RUJUKAN_NAMA', DB::raw('COUNT(*) as JUMLAH'))
+            ->where('k.RUANGAN', $this->igd)
+            ->where('k.STATUS', 2)
+            ->whereBetween(DB::raw('DATE(k.MASUK)'), [$startDate, $endDate])
+            ->groupBy('ppk.NAMA')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $results,
+            'stats' => [
+                'per_jenis' => $statsJenis,
+                'per_rujukan' => $statsRujukan
+            ]
+        ]);
+    }
+
+    public function arrivalSummaryPage(Request $request)
+    {
+        $startDate = $request->start_date
+            ?? Carbon::now()->startOfMonth()->format('Y-m-d');
+
+        $endDate = $request->end_date
+            ?? Carbon::now()->format('Y-m-d');
+
+        $response = $this->getPatientArrivalSummary(
+            $startDate,
+            $endDate,
+            20
+        );
+
+        $payload = $response->getData(true);
+
+        return Inertia::render(
+            'Laporan/AsalPasien',
+            [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'patients' => $payload['data']['data'] ?? [],
+                'pagination' => [
+                    'current_page' => $payload['data']['current_page'] ?? 1,
+                    'last_page' => $payload['data']['last_page'] ?? 1,
+                    'per_page' => $payload['data']['per_page'] ?? 20,
+                    'total' => $payload['data']['total'] ?? 0,
+                ],
+                'stats' => $payload['stats'] ?? [],
+            ]
+        );
     }
 }

@@ -1,6 +1,6 @@
 <script setup>
 import { Head, router } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import DateFilter from '@/Components/DateFilter.vue';
 import PatientPerHourChart from './Partials/PatientPerHourChart.vue';
 import PatientPerShiftChart from './Partials/PatientPerShiftChart.vue';
@@ -13,8 +13,8 @@ const props = defineProps({
     summary: Object
 });
 
-const chartRefJam = ref(null);
-const chartRefShift = ref(null);
+// const chartRefJam = ref(null);
+// const chartRefShift = ref(null);
 
 const handleFilter = (dates) => {
     router.get(route('laporan.kepadatan-igd'), dates);
