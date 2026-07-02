@@ -13,11 +13,9 @@ const props = defineProps({
     pagination: Object
 });
 
-// State untuk filter
 const startDate = ref(props.start_date);
 const endDate = ref(props.end_date);
 
-// State pagination (ambil dari props)
 const currentPage = ref(props.pagination.current_page);
 const lastPage = ref(props.pagination.last_page);
 const perPage = ref(props.pagination.per_page);
@@ -26,7 +24,6 @@ const patients = ref(props.patients);
 
 const isLoading = ref(false);
 
-// Fungsi pindah halaman
 const goToPage = (page) => {
     if (page < 1 || page > lastPage.value) return;
     router.get(route('laporan.asal-pasien'), {
@@ -37,18 +34,16 @@ const goToPage = (page) => {
     }, { preserveScroll: true });
 };
 
-// Fungsi filter (reset ke halaman 1)
 const handleFilter = (dates) => {
     startDate.value = dates.start_date;
     endDate.value = dates.end_date;
     router.get(route('laporan.asal-pasien'), {
         ...dates,
         per_page: perPage.value,
-        page: 1 // kembali ke halaman pertama
+        page: 1
     });
 };
 
-// Update state ketika props berubah (karena Inertia memperbarui komponen)
 watch(() => props.pagination, (newPagination) => {
     currentPage.value = newPagination.current_page;
     lastPage.value = newPagination.last_page;
@@ -57,7 +52,6 @@ watch(() => props.pagination, (newPagination) => {
     patients.value = props.patients;
 });
 
-// Loading indicator
 document.addEventListener('inertia:start', () => {
     isLoading.value = true;
 });

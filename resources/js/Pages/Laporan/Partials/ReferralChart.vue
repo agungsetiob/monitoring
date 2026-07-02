@@ -21,9 +21,9 @@ const renderChart = () => {
             datasets: [{
                 label: 'Jumlah Pasien',
                 data: props.data.map(item => item.JUMLAH),
-                backgroundColor: '#2563eb',
+                backgroundColor: '#e9b936',
                 borderRadius: 8,
-                hoverBackgroundColor: '#1e40af'
+                hoverBackgroundColor: '#ab800b'
             }]
         },
         options: {
