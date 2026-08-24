@@ -11,7 +11,7 @@ class SimgosService
 
     public function __construct()
     {
-        $this->baseUrl = env('SIMGOS_API_URL');
+        $this->baseUrl = config('services.simgos.base_url');
     }
 
     /**

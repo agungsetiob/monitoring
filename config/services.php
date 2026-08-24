@@ -46,7 +46,7 @@ return [
     */
 
     'rencana_kontrol' => [
-        'base_url' => env('RENCANA_KONTROL_API_URL', ),
+        'base_url' => env('RENCANA_KONTROL_API_URL',),
         'cons_id' => env('RENCANA_KONTROL_CONS_ID'),
         'secret_key' => env('RENCANA_KONTROL_SECRET_KEY'),
         'user_key' => env('RENCANA_KONTROL_USER_KEY'),
@@ -62,12 +62,16 @@ return [
     |
     */
     'apol' => [
-        'base_url' => env('APOL_BASE_URL', ),
+        'base_url' => env('APOL_BASE_URL',),
         'cons_id' => env('APOL_CONS_ID'),
         'secret_key' => env('APOL_SECRET'),
         'user_key' => env('APOL_USER_KEY'),
         'apotek_ppk' => env('APOTEK_PPK', ''),
         'timeout' => env('APOL_TIMEOUT', 30),
+    ],
+
+    'simgos' => [
+        'base_url' => env('SIMGOS_API_URL', 'http://localhost'),
     ],
 
 ];
