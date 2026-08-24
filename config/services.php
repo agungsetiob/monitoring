@@ -72,6 +72,8 @@ return [
 
     'simgos' => [
         'base_url' => env('SIMGOS_API_URL', 'http://localhost'),
+        'simgos_user' => env('SIMGOS_API_USER'),
+        'simgos_password' => env('SIMGOS_API_PASS')
     ],
 
 ];

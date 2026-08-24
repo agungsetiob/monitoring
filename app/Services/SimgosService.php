@@ -25,8 +25,8 @@ class SimgosService
         }
 
         $credentials = [
-            'LOGIN' => env('SIMGOS_API_USER'),
-            'PASSWORD' => env('SIMGOS_API_PASS'),
+            'LOGIN' => config('services.simgos.simgos_user'),
+            'PASSWORD' => config('services.simgos.simgos_password'),
         ];
 
         $loginResponse = Http::withHeaders([
