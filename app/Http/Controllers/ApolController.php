@@ -105,47 +105,6 @@ class ApolController extends Controller
         }
     }
 
-    /**
-     * Normalisasi listobat yang kadang object tunggal, kadang array.
-     * @param mixed $list
-     * @return array<int, array<string,mixed>>
-     */
-    private function normalizeListObat($list): array
-    {
-        if (empty($list))
-            return [];
-
-        // jika server kadang kirim object tunggal
-        if (
-            is_array($list) && (
-                isset($list['kodeobat']) || isset($list['kdobat']) ||
-                isset($list['KdObat']) || isset($list['KDOBAT']) ||
-                isset($list['kd_obat'])
-            )
-        ) {
-            $list = [$list];
-        }
-
-        if (!is_array($list))
-            return [];
-
-        $out = [];
-        foreach ($list as $it) {
-            if (!is_array($it))
-                continue;
-
-            $kode = $it['kodeobat'] ?? $it['kdobat'] ?? $it['KdObat'] ?? $it['KDOBAT'] ?? $it['kd_obat'] ?? null;
-            $tipe = $it['tipeobat'] ?? $it['tipeObat'] ?? $it['tipe_obat'] ?? 'N';
-
-            $it['kodeobat'] = (string) $kode;
-            $it['tipeobat'] = strtoupper((string) $tipe);
-
-            $out[] = $it;
-        }
-
-        return array_values($out);
-    }
-
 
     /**
      * Handle AJAX request untuk mendapatkan daftar resep.
